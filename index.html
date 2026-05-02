@@ -1030,11 +1030,14 @@ footer a:hover{color:var(--text)}
 <div id="pfp-overlay" class="modal-overlay">
   <div class="modal-box" style="width:400px">
     <h3>Customize Profile</h3>
-    <div class="pfp-preview" id="pfp-preview-big"></div>
-    <div class="pfp-label">Choose a color</div>
-    <div class="pfp-grid" id="pfp-color-grid"></div>
-    <div class="pfp-label" style="margin-top:4px">Choose an icon</div>
-    <div class="pfp-grid" id="pfp-icon-grid"></div>
+    <div class="pfp-preview" id="pfp-preview-big" style="overflow:hidden"></div>
+    <div style="width:100%;border:2px dashed var(--border2);border-radius:var(--r2);padding:24px;text-align:center;cursor:pointer;transition:border-color .15s" id="pfp-drop-zone" onclick="document.getElementById('pfp-file-input').click()" ondragover="event.preventDefault();this.style.borderColor='var(--accent)'" ondragleave="this.style.borderColor='var(--border2)'" ondrop="pfpHandleDrop(event)">
+      <div style="font-size:2rem;margin-bottom:8px">🖼️</div>
+      <div style="font-family:var(--mono);font-size:.72rem;color:var(--muted)">Click or drag an image here</div>
+      <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted2);margin-top:4px">JPG, PNG, GIF, WEBP · max 2MB</div>
+    </div>
+    <input type="file" id="pfp-file-input" accept="image/*" style="display:none" onchange="pfpHandleFile(this.files[0])"/>
+    <div id="pfp-upload-name" style="font-family:var(--mono);font-size:.7rem;color:var(--accent);display:none;text-align:center"></div>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="closePfpModal()">Cancel</button>
       <button class="btn-primary" style="flex:1;padding:11px" onclick="savePfp()">Save</button>
@@ -1428,8 +1431,8 @@ function doLogout() {
 }
 
 function getUserPfpStyle(pfp) {
-  if (!pfp) return { bg: 'var(--accent)', icon: null };
-  return { bg: pfp.color || 'var(--accent)', icon: pfp.icon || null };
+  if (!pfp) return { bg: 'var(--accent)', icon: null, img: null };
+  return { bg: pfp.color || 'var(--accent)', icon: pfp.icon || null, img: pfp.img || null };
 }
 
 function showUserChip() {
@@ -1438,9 +1441,18 @@ function showUserChip() {
   document.getElementById('logout-nav-btn').style.display = '';
   const pfpStyle = getUserPfpStyle(user.pfp);
   const av = document.getElementById('user-av');
-  av.style.background = pfpStyle.bg;
-  av.style.color = '#080a06';
-  av.textContent = pfpStyle.icon || user.name[0].toUpperCase();
+  if (pfpStyle.img) {
+    av.style.backgroundImage = `url(${pfpStyle.img})`;
+    av.style.backgroundSize = 'cover';
+    av.style.backgroundPosition = 'center';
+    av.style.background = 'none';
+    av.textContent = '';
+  } else {
+    av.style.backgroundImage = 'none';
+    av.style.background = pfpStyle.bg;
+    av.style.color = '#080a06';
+    av.textContent = pfpStyle.icon || user.name[0].toUpperCase();
+  }
   document.getElementById('user-name-hdr').textContent = user.name;
   document.getElementById('greeting-name').textContent = user.name;
   if (user.isAdmin) {
@@ -2028,14 +2040,22 @@ function switchLbTab(mode) {
 
 async function loadLb(mode) {
   const list = document.getElementById('lb-list');
-  list.innerHTML = '<div class="lb-empty">Loading…</div>';
+
+  // Show local scores instantly while cloud loads
+  const local = lbGetAll(mode);
+  if (local.length) renderLbEntries(local, mode);
+  else list.innerHTML = '<div class="lb-empty">Loading…</div>';
 
   const entries = await lbGetAllCloud(mode);
   if (!entries.length) {
     list.innerHTML = '<div class="lb-empty">No scores yet. Be the first!</div>';
     return;
   }
+  renderLbEntries(entries, mode);
+}
 
+function renderLbEntries(entries, mode) {
+  const list = document.getElementById('lb-list');
   const accs = getAccounts();
   list.innerHTML = '';
   entries.forEach((e, i) => {
@@ -2056,10 +2076,15 @@ async function loadLb(mode) {
     const pfp = e.pfp || (accData.pfp) || null;
     const pfpColor = pfp ? (pfp.color || 'var(--accent)') : 'var(--accent)';
     const pfpIcon = pfp ? (pfp.icon || e.name[0].toUpperCase()) : e.name[0].toUpperCase();
+    const pfpImg = pfp ? (pfp.img || null) : null;
+    const avatarStyle = pfpImg
+      ? `background-image:url(${pfpImg});background-size:cover;background-position:center;background-color:transparent`
+      : `background:${pfpColor};color:#080a06`;
+    const avatarContent = pfpImg ? '' : pfpIcon;
 
     row.innerHTML = `
       <span class="lb-rank ${rankClass}">${rankLabel}</span>
-      <div class="lb-avatar" style="background:${pfpColor};color:#080a06">${pfpIcon}</div>
+      <div class="lb-avatar" style="${avatarStyle}">${avatarContent}</div>
       <span class="lb-name">${e.name}${isAdmin ? ' <span style="color:var(--red);font-size:.6rem;font-family:var(--mono);background:var(--red-dim);border-radius:3px;padding:1px 5px">ADMIN</span>' : isReporter ? ' <span style="color:var(--blue);font-size:.6rem;font-family:var(--mono);background:rgba(79,159,255,.1);border-radius:3px;padding:1px 5px">✔ REPORTER</span>' : ''}</span>
       <span class="lb-score">${scoreLabel}</span>
     `;
@@ -2236,73 +2261,55 @@ function toast(msg, type = 'ok') {
 // ══════════════════════════════════════
 // PFP CUSTOMIZATION
 // ══════════════════════════════════════
-let pendingPfp = { color: null, icon: null };
+let pendingPfp = { img: null };
 
-function buildPfpGrids() {
-  const colorGrid = document.getElementById('pfp-color-grid');
-  const iconGrid = document.getElementById('pfp-icon-grid');
-  colorGrid.innerHTML = '';
-  iconGrid.innerHTML = '';
-
-  PFP_COLORS.forEach(c => {
-    const el = document.createElement('div');
-    el.className = 'pfp-option';
-    el.style.background = c;
-    el.title = c;
-    el.dataset.color = c;
-    el.addEventListener('click', () => {
-      pendingPfp.color = c;
-      colorGrid.querySelectorAll('.pfp-option').forEach(x => x.classList.remove('selected'));
-      el.classList.add('selected');
-      updatePfpPreview();
-    });
-    colorGrid.appendChild(el);
-  });
-
-  PFP_ICONS.forEach(ic => {
-    const el = document.createElement('div');
-    el.className = 'pfp-option';
-    el.style.background = 'var(--s2)';
-    el.style.border = '1px solid var(--border)';
-    el.style.color = 'var(--text)';
-    el.style.fontSize = '1rem';
-    el.textContent = ic;
-    el.dataset.icon = ic;
-    el.addEventListener('click', () => {
-      pendingPfp.icon = ic;
-      iconGrid.querySelectorAll('.pfp-option').forEach(x => {
-        x.style.border = '1px solid var(--border)';
-        x.classList.remove('selected');
-      });
-      el.style.border = '2px solid var(--accent)';
-      el.classList.add('selected');
-      updatePfpPreview();
-    });
-    iconGrid.appendChild(el);
-  });
+function pfpHandleDrop(e) {
+  e.preventDefault();
+  document.getElementById('pfp-drop-zone').style.borderColor = 'var(--border2)';
+  const file = e.dataTransfer.files[0];
+  if (file) pfpHandleFile(file);
 }
+
+function pfpHandleFile(file) {
+  if (!file || !file.type.startsWith('image/')) { toast('Please select an image file.', 'err'); return; }
+  if (file.size > 2 * 1024 * 1024) { toast('Image must be under 2MB.', 'err'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    pendingPfp.img = e.target.result;
+    document.getElementById('pfp-upload-name').textContent = '✓ ' + file.name;
+    document.getElementById('pfp-upload-name').style.display = 'block';
+    updatePfpPreview();
+  };
+  reader.readAsDataURL(file);
+}
+
+function buildPfpGrids() { /* no-op, presets removed */ }
 
 function updatePfpPreview() {
   const prev = document.getElementById('pfp-preview-big');
-  prev.style.background = pendingPfp.color || 'var(--accent)';
-  prev.textContent = pendingPfp.icon || (user ? user.name[0].toUpperCase() : '?');
-  prev.style.color = '#080a06';
+  if (pendingPfp.img) {
+    prev.style.backgroundImage = `url(${pendingPfp.img})`;
+    prev.style.backgroundSize = 'cover';
+    prev.style.backgroundPosition = 'center';
+    prev.style.background = 'none';
+    prev.textContent = '';
+  } else {
+    prev.style.backgroundImage = 'none';
+    prev.style.background = 'var(--accent)';
+    prev.textContent = user ? user.name[0].toUpperCase() : '?';
+    prev.style.color = '#080a06';
+  }
 }
 
 function openPfpModal() {
   if (!user) return;
-  const current = user.pfp || {};
-  pendingPfp = { color: current.color || PFP_COLORS[0], icon: current.icon || null };
-
-  // Mark current selections
-  document.querySelectorAll('#pfp-color-grid .pfp-option').forEach(el => {
-    el.classList.toggle('selected', el.dataset.color === pendingPfp.color);
-  });
-  document.querySelectorAll('#pfp-icon-grid .pfp-option').forEach(el => {
-    el.classList.toggle('selected', el.dataset.icon === pendingPfp.icon);
-    el.style.border = el.dataset.icon === pendingPfp.icon ? '2px solid var(--accent)' : '1px solid var(--border)';
-  });
-
+  pendingPfp = { img: user.pfp?.img || null };
+  if (pendingPfp.img) {
+    document.getElementById('pfp-upload-name').textContent = '✓ Custom image';
+    document.getElementById('pfp-upload-name').style.display = 'block';
+  } else {
+    document.getElementById('pfp-upload-name').style.display = 'none';
+  }
   updatePfpPreview();
   document.getElementById('pfp-overlay').classList.add('show');
 }
@@ -2313,9 +2320,8 @@ function closePfpModal() {
 
 function savePfp() {
   if (!user) return;
-  user.pfp = { color: pendingPfp.color || 'var(--accent)', icon: pendingPfp.icon };
+  user.pfp = { img: pendingPfp.img || null };
   localSet('gdlg_user', user);
-  // Also persist to accounts store
   const accs = getAccounts();
   const key = user.name.toLowerCase();
   if (accs[key]) { accs[key].pfp = user.pfp; saveAccounts(accs); }
