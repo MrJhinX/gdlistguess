@@ -38,6 +38,8 @@
   --red-dim:rgba(255,79,79,.1);
   --blue:#4f9fff;
   --blue-dim:rgba(79,159,255,.1);
+  --helper:#39e87a;
+  --helper-dim:rgba(57,232,122,.1);
   --gold:#ffc657;
   --gold-dim:rgba(255,198,87,.1);
   --sans:'Barlow',sans-serif;
@@ -670,6 +672,14 @@ footer a:hover{color:var(--text)}
   font-size:.55rem;color:var(--blue);letter-spacing:.06em;text-transform:uppercase;font-weight:600;
 }
 
+/* ── HELPER BADGE ── */
+.helper-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  background:rgba(57,232,122,.1);border:1px solid rgba(57,232,122,.25);
+  border-radius:100px;padding:2px 8px;font-family:var(--mono);
+  font-size:.55rem;color:var(--helper);letter-spacing:.06em;text-transform:uppercase;font-weight:600;
+}
+
 /* ── CHEATER REPORT MODAL ── */
 .report-reason-select{
   width:100%;background:var(--s1);border:1px solid var(--border);
@@ -693,6 +703,7 @@ footer a:hover{color:var(--text)}
   <div class="logo" onclick="goHome()">GDLIST<em>GUESS</em> <span>PAGE</span></div>
   <div class="header-right">
     <button class="nav-btn admin-nav-btn" id="admin-nav-btn" onclick="showAdmin()" style="display:none">⚙ Admin</button>
+    <button class="nav-btn" id="announce-nav-btn" onclick="showAdmin()" style="display:none;border-color:rgba(57,232,122,.4);color:var(--helper)">📢 Announce</button>
     <button class="nav-btn" id="report-nav-btn" onclick="openReportModal()" style="display:none;border-color:rgba(79,159,255,.4);color:var(--blue)">⚑ Report</button>
     <button class="nav-btn" onclick="document.getElementById('credits-modal').classList.add('show')">Credits</button>
     <button class="nav-btn" id="lb-nav-btn" onclick="showLeaderboard()">Leaderboard</button>
@@ -826,6 +837,10 @@ footer a:hover{color:var(--text)}
           <div class="credit-item" style="flex-direction:column;align-items:flex-start;gap:4px">
             <span class="credit-role reporter">Reporters</span>
             <span class="credit-names">icaka &nbsp;·&nbsp; skyght &nbsp;·&nbsp; teesen &nbsp;·&nbsp; kostya</span>
+          </div>
+          <div class="credit-item" style="flex-direction:column;align-items:flex-start;gap:4px">
+            <span class="credit-role" style="background:rgba(57,232,122,.1);color:var(--helper);border:1px solid rgba(57,232,122,.2)">Helpers</span>
+            <span class="credit-names" id="credits-helpers-list">—</span>
           </div>
         </div>
         <div class="info-panel-footer" style="margin-top:2px">
@@ -1019,9 +1034,7 @@ footer a:hover{color:var(--text)}
         <button class="admin-tab" onclick="switchAdminTab('users')">👥 Users</button>
         <button class="admin-tab" onclick="switchAdminTab('announce')">📢 Announce</button>
       </div>
-      <div>
-        <button class="admin-tab" onclick="switchAdminTab('stats')" style="background:rgba(200,255,87,.05);border-color:rgba(200,255,87,.18);color:var(--muted)">📊 Stats</button>
-      </div>
+      <button class="admin-tab" onclick="switchAdminTab('stats')" style="width:100%;background:rgba(200,255,87,.05);border-color:rgba(200,255,87,.18);color:var(--muted)">📊 Stats</button>
     </div>
     <div class="admin-list" id="admin-list"><div class="admin-empty">Loading…</div></div>
     <button class="btn-ghost" onclick="goHome()">← Back to Home</button>
@@ -1355,6 +1368,16 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target === document.getElementById('report-overlay')) closeReportModal();
   });
 
+  // Dynamically populate Helpers in credits
+  (async () => {
+    try {
+      const accs = await getAllAccountsCloud();
+      const helpers = Object.values(accs).filter(a => a.isHelper && !a.isAdmin && !a.isReporter).map(a => a.name);
+      const el = document.getElementById('credits-helpers-list');
+      if (el) el.textContent = helpers.length ? helpers.join(' · ') : '—';
+    } catch(e) {}
+  })();
+
   buildPfpGrids();
 
   (async () => {
@@ -1547,7 +1570,12 @@ function showUserChip() {
   document.getElementById('greeting-name').textContent = user.name;
   if (user.isAdmin) {
     document.getElementById('admin-nav-btn').style.display = '';
+    const ab = document.getElementById('announce-nav-btn');
+    if (ab) ab.style.display = 'none';
   }
+  // Show announce button for reporters (not admins — they use the full admin panel)
+  const announceBtn = document.getElementById('announce-nav-btn');
+  if (announceBtn) announceBtn.style.display = (user.isReporter && !user.isAdmin) ? '' : 'none';
   // Show reporter button if user has reporter tier
   const reportBtn = document.getElementById('report-nav-btn');
   if (reportBtn) reportBtn.style.display = (user.isReporter && !user.isAdmin) ? '' : 'none';
@@ -2194,6 +2222,7 @@ async function renderLbEntries(entries, mode) {
     const accData = accs[e.name.toLowerCase()] || {};
     const isAdmin = !!accData.isAdmin;
     const isReporter = !!accData.isReporter;
+    const isHelper = !!accData.isHelper;
     const pfp = accData.pfp || null;
     const pfpColor = pfp ? (pfp.color || 'var(--accent)') : 'var(--accent)';
     const pfpIcon = pfp ? (pfp.icon || e.name[0].toUpperCase()) : e.name[0].toUpperCase();
@@ -2206,7 +2235,7 @@ async function renderLbEntries(entries, mode) {
     row.innerHTML = `
       <span class="lb-rank ${rankClass}">${rankLabel}</span>
       <div class="lb-avatar" style="${avatarStyle}">${avatarContent}</div>
-      <span class="lb-name">${e.name}${isAdmin ? ' <span style="color:var(--red);font-size:.6rem;font-family:var(--mono);background:var(--red-dim);border-radius:3px;padding:1px 5px">ADMIN</span>' : isReporter ? ' <span style="color:var(--blue);font-size:.6rem;font-family:var(--mono);background:rgba(79,159,255,.1);border-radius:3px;padding:1px 5px">✔ REPORTER</span>' : ''}</span>
+      <span class="lb-name">${e.name}${isAdmin ? ' <span style="color:var(--red);font-size:.6rem;font-family:var(--mono);background:var(--red-dim);border-radius:3px;padding:1px 5px">ADMIN</span>' : isReporter ? ' <span style="color:var(--blue);font-size:.6rem;font-family:var(--mono);background:rgba(79,159,255,.1);border-radius:3px;padding:1px 5px">✔ REPORTER</span>' : isHelper ? ' <span style="color:var(--helper);font-size:.6rem;font-family:var(--mono);background:rgba(57,232,122,.1);border-radius:3px;padding:1px 5px">✦ HELPER</span>' : ''}</span>
       <span class="lb-score">${scoreLabel}</span>
     `;
     list.appendChild(row);
@@ -2462,9 +2491,22 @@ let currentAdminTab = 'classic';
 let editScoreTarget = null;
 
 function showAdmin() {
-  if (!user || !user.isAdmin) { toast('No access.', 'err'); return; }
+  if (!user || (!user.isAdmin && !user.isReporter)) { toast('No access.', 'err'); return; }
   showScreen('admin-screen');
-  switchAdminTab('classic');
+  // Reporters go straight to Announce tab; admins go to classic LB
+  if (!user.isAdmin && user.isReporter) {
+    // Hide all non-announce tabs for reporters
+    document.querySelectorAll('.admin-tab').forEach(t => {
+      const onclick = t.getAttribute('onclick') || '';
+      const m = onclick.match(/switchAdminTab\('(\w+)'\)/);
+      if (m && m[1] !== 'announce') t.style.display = 'none';
+    });
+    switchAdminTab('announce');
+  } else {
+    // Restore all tabs for admins
+    document.querySelectorAll('.admin-tab').forEach(t => { t.style.display = ''; });
+    switchAdminTab('classic');
+  }
 }
 
 function switchAdminTab(tab) {
@@ -2692,11 +2734,15 @@ async function loadAdminUsers() {
     const badges = [];
     if (acc.isAdmin) badges.push('<span style="color:var(--red);font-size:.6rem;font-family:var(--mono);background:var(--red-dim);border:1px solid rgba(255,79,79,.2);border-radius:4px;padding:1px 6px">ADMIN</span>');
     if (acc.isReporter) badges.push('<span style="color:var(--blue);font-size:.6rem;font-family:var(--mono);background:rgba(79,159,255,.1);border:1px solid rgba(79,159,255,.2);border-radius:4px;padding:1px 6px">REPORTER</span>');
+    if (acc.isHelper) badges.push('<span style="color:var(--helper);font-size:.6rem;font-family:var(--mono);background:rgba(57,232,122,.1);border:1px solid rgba(57,232,122,.2);border-radius:4px;padding:1px 6px">HELPER</span>');
     row.innerHTML = `
       <span class="lb-name-admin">${acc.name} ${badges.join(' ')}</span>
       <div class="admin-action-btns">
         ${!acc.isAdmin ? `<button class="btn-admin-edit" onclick="adminToggleReporter('${k}')">
           ${acc.isReporter ? 'Remove Reporter' : 'Make Reporter'}
+        </button>` : ''}
+        ${!acc.isAdmin ? `<button class="btn-admin-edit" onclick="adminToggleHelper('${k}')" style="background:rgba(57,232,122,.08);border-color:rgba(57,232,122,.25);color:var(--helper)">
+          ${acc.isHelper ? 'Remove Helper' : 'Make Helper'}
         </button>` : ''}
         ${!acc.isAdmin ? `<button class="btn-admin-ban" onclick="adminBan('${acc.name}')">Ban</button>` : ''}
       </div>
@@ -2739,6 +2785,32 @@ async function adminToggleReporter(key) {
     showUserChip();
   }
   toast(accData.isReporter ? `${accData.name} granted Reporter tier.` : `Reporter tier removed from ${accData.name}.`, 'ok');
+  loadAdminUsers();
+}
+
+async function adminToggleHelper(key) {
+  let accData = await getAccountCloud(key);
+  if (!accData) { toast('User not found in database.', 'err'); return; }
+  accData.isHelper = !accData.isHelper;
+  await saveAccountCloud(key, accData);
+  const accs = getAccounts();
+  accs[key] = accData;
+  saveAccounts(accs);
+  // Update LB docs
+  await Promise.all(['classic','position','versus','daily'].map(async m => {
+    try {
+      const ref = window._db.collection('leaderboard_' + m).doc(key);
+      const snap = await ref.get();
+      if (snap.exists) await ref.update({ isHelper: accData.isHelper });
+    } catch(e) {}
+  }));
+  // Update live session if it's the current user
+  if (user && user.name.toLowerCase() === key) {
+    user.isHelper = accData.isHelper;
+    localSet('gdlg_user', user);
+    showUserChip();
+  }
+  toast(accData.isHelper ? `${accData.name} granted Helper role.` : `Helper role removed from ${accData.name}.`, 'ok');
   loadAdminUsers();
 }
 
