@@ -50,6 +50,122 @@
 }
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased}
 
+/* ── LOADING SCREEN ── */
+#glitch-loader{
+  position:fixed;inset:0;z-index:99999;
+  background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:32px;
+  transition:opacity .5s ease, visibility .5s ease;
+}
+#glitch-loader.hidden{opacity:0;visibility:hidden;pointer-events:none}
+
+.gl-title{
+  font-family:var(--cond);font-size:clamp(3.8rem,12vw,7rem);font-weight:900;
+  letter-spacing:.1em;text-transform:uppercase;
+  color:var(--accent);
+  position:relative;
+  user-select:none;
+}
+.gl-title::before,
+.gl-title::after{
+  content:attr(data-text);
+  position:absolute;inset:0;
+  overflow:hidden;
+}
+.gl-title::before{
+  color:var(--accent2);
+  animation:glitch-top 2.4s infinite linear;
+  clip-path:polygon(0 0,100% 0,100% 38%,0 38%);
+}
+.gl-title::after{
+  color:#39e87a;
+  animation:glitch-bot 2.4s infinite linear;
+  clip-path:polygon(0 60%,100% 60%,100% 100%,0 100%);
+}
+
+@keyframes glitch-top{
+  0%,86%{transform:translate(0)}
+  87%{transform:translate(-4px,1px)}
+  88%{transform:translate(4px,-1px)}
+  89%{transform:translate(-2px,0)}
+  90%{transform:translate(3px,1px)}
+  91%,100%{transform:translate(0)}
+}
+@keyframes glitch-bot{
+  0%,82%{transform:translate(0)}
+  83%{transform:translate(3px,2px)}
+  84%{transform:translate(-3px,-1px)}
+  85%{transform:translate(2px,0)}
+  86%,100%{transform:translate(0)}
+}
+
+.gl-sub{
+  font-family:var(--mono);font-size:.7rem;letter-spacing:.25em;
+  text-transform:uppercase;color:var(--muted);
+}
+
+.gl-bar-wrap{
+  width:min(340px,70vw);
+  height:2px;
+  background:var(--border);
+  border-radius:2px;
+  overflow:hidden;
+  position:relative;
+}
+.gl-bar{
+  height:100%;width:0%;
+  background:var(--accent);
+  border-radius:2px;
+  box-shadow:0 0 8px var(--accent),0 0 20px rgba(200,255,87,.35);
+  transition:width .08s linear;
+}
+
+.gl-scanline{
+  position:absolute;inset:0;
+  background:repeating-linear-gradient(
+    0deg,
+    transparent,transparent 3px,
+    rgba(200,255,87,.018) 3px,rgba(200,255,87,.018) 4px
+  );
+  pointer-events:none;
+  animation:scanmove 6s linear infinite;
+}
+@keyframes scanmove{
+  0%{background-position:0 0}
+  100%{background-position:0 100vh}
+}
+
+.gl-flicker{
+  position:absolute;inset:0;pointer-events:none;
+  animation:flicker 3s infinite;
+}
+@keyframes flicker{
+  0%,94%,100%{opacity:0}
+  95%{opacity:.06}
+  96%{opacity:0}
+  97%{opacity:.04}
+  98%{opacity:0}
+}
+
+.gl-corner{
+  position:absolute;width:18px;height:18px;
+  border-color:var(--accent);border-style:solid;opacity:.5;
+}
+.gl-corner.tl{top:28px;left:28px;border-width:1px 0 0 1px}
+.gl-corner.tr{top:28px;right:28px;border-width:1px 1px 0 0}
+.gl-corner.bl{bottom:28px;left:28px;border-width:0 0 1px 1px}
+.gl-corner.br{bottom:28px;right:28px;border-width:0 1px 1px 0}
+
+.gl-status{
+  font-family:var(--mono);font-size:.62rem;color:var(--muted2);
+  letter-spacing:.1em;min-height:1em;
+  animation:blink-status 1.2s steps(1) infinite;
+}
+@keyframes blink-status{
+  0%,49%{opacity:1}50%,100%{opacity:.4}
+}
+
 ::-webkit-scrollbar{width:5px}
 ::-webkit-scrollbar-track{background:var(--bg)}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
@@ -232,6 +348,56 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;justify-conten
 }
 .badge-new{background:var(--accent-dim);color:var(--accent);border:1px solid rgba(200,255,87,.2)}
 .badge-daily{background:var(--gold-dim);color:var(--gold);border:1px solid rgba(255,198,87,.2)}
+.badge-duels{background:rgba(79,159,255,.12);color:var(--blue);border:1px solid rgba(79,159,255,.3);animation:pulse-badge 1.8s ease-in-out infinite}
+@keyframes pulse-badge{0%,100%{opacity:1}50%{opacity:.5}}
+.mode-card.duels::before{background:linear-gradient(135deg,rgba(7,8,10,.82) 0%,rgba(5,12,25,.65) 100%)}
+.mode-card.duels{border-color:rgba(79,159,255,.2)}
+.mode-card.duels::after{background:var(--blue)}
+
+/* ── DUELS SCREEN ── */
+#duels-screen{max-width:700px}
+.duels-mode-tag{font-family:var(--cond);font-size:.82rem;font-weight:700;color:var(--blue);letter-spacing:.1em;text-transform:uppercase}
+.duels-lobby{
+  width:100%;display:flex;flex-direction:column;align-items:center;gap:20px;
+  background:var(--s1);border:1px solid rgba(79,159,255,.2);border-radius:var(--r2);
+  padding:32px 28px;position:relative;overflow:hidden;
+}
+.duels-lobby::before{
+  content:'';position:absolute;top:-40px;right:-40px;width:180px;height:180px;
+  background:radial-gradient(circle,rgba(79,159,255,.07) 0%,transparent 70%);pointer-events:none;
+}
+.duels-lobby-title{font-family:var(--cond);font-size:1.6rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--text)}
+.duels-lobby-sub{font-family:var(--mono);font-size:.72rem;color:var(--muted);text-align:center;line-height:1.7}
+.duels-status-pill{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(79,159,255,.08);border:1px solid rgba(79,159,255,.2);
+  border-radius:100px;padding:7px 18px;
+  font-family:var(--mono);font-size:.72rem;color:var(--blue);letter-spacing:.06em;
+}
+.duels-dot{width:7px;height:7px;border-radius:50%;background:var(--blue);animation:duels-blink 1.1s steps(1) infinite}
+@keyframes duels-blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+.duels-vs-bar{width:100%;display:flex;align-items:center;gap:14px}
+.duels-player{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;display:flex;align-items:center;gap:10px}
+.duels-player.me{border-color:rgba(200,255,87,.25);background:rgba(200,255,87,.04)}
+.duels-player.opp{border-color:rgba(79,159,255,.25);background:rgba(79,159,255,.04)}
+.duels-avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--cond);font-weight:800;font-size:.85rem;flex-shrink:0}
+.duels-pname{font-family:var(--mono);font-size:.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.duels-pscore{font-family:var(--cond);font-size:1.1rem;font-weight:900;color:var(--accent);margin-left:auto}
+.duels-vs-sep{font-family:var(--cond);font-size:1.3rem;font-weight:900;color:var(--muted);flex-shrink:0}
+.duels-round-info{width:100%;display:flex;align-items:center;justify-content:space-between;background:rgba(79,159,255,.05);border:1px solid rgba(79,159,255,.12);border-radius:var(--r);padding:8px 16px}
+.duels-round-label{font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.duels-round-val{font-family:var(--cond);font-size:.9rem;font-weight:700;color:var(--blue)}
+.duels-end{width:100%;display:flex;flex-direction:column;align-items:center;gap:18px;background:var(--s1);border:1px solid var(--border);border-radius:var(--r2);padding:28px}
+.duels-winner-banner{font-family:var(--cond);font-size:1.8rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;text-align:center}
+.duels-winner-banner.win{color:var(--accent)}
+.duels-winner-banner.loss{color:var(--red)}
+.duels-winner-banner.draw{color:var(--gold)}
+.duels-score-row{display:flex;gap:14px;width:100%}
+.duels-score-card{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:14px;text-align:center}
+.duels-score-card .val{font-family:var(--cond);font-size:1.8rem;font-weight:900;line-height:1}
+.duels-score-card .lbl{font-family:var(--mono);font-size:.58rem;color:var(--muted);margin-top:5px;text-transform:uppercase;letter-spacing:.08em}
+.duels-score-card.me .val{color:var(--accent)}
+.duels-score-card.opp .val{color:var(--blue)}
 
 /* ── HOW TO PLAY ── */
 .how-grid{width:100%;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
@@ -432,19 +598,60 @@ input[type=range]::-webkit-slider-thumb:hover{box-shadow:0 0 0 6px var(--accent-
 .lb-side-role-label.admin{background:var(--red-dim);color:var(--red);border:1px solid rgba(255,79,79,.2)}
 .lb-side-role-label.reporter{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(79,159,255,.2)}
 .lb-side-role-label.helper{background:rgba(57,232,122,.1);color:var(--helper);border:1px solid rgba(57,232,122,.2)}
-.lb-side-user{display:flex;align-items:center;gap:9px}
+.lb-side-user{display:flex;align-items:center;gap:10px;padding:3px 0}
 .lb-side-avatar{
   width:28px;height:28px;border-radius:50%;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
   font-family:var(--cond);font-size:.78rem;font-weight:800;
 }
-.lb-side-name{font-family:var(--mono);font-size:.76rem;font-weight:600;color:var(--text);line-height:1.2}
-.lb-side-desc{font-family:var(--mono);font-size:.6rem;color:var(--muted);line-height:1.3}
+.lb-side-name{font-family:var(--mono);font-size:.76rem;font-weight:600;color:var(--text);line-height:1.3;display:block}
+.lb-side-desc{font-family:var(--mono);font-size:.6rem;color:var(--muted);line-height:1.3;display:block;margin-top:2px}
 .lb-side-empty{font-family:var(--mono);font-size:.7rem;color:var(--muted);padding:4px 0}
 @media(max-width:700px){
   .lb-main-layout{flex-direction:column}
   .lb-side-panel{width:100%;position:static}
 }
+
+/* ── SPECIAL USERS ADMIN CARDS ── */
+.su-card{
+  background:var(--s1);border:1px solid var(--border);border-radius:var(--r2);
+  padding:14px 16px;display:flex;flex-direction:column;gap:10px;
+  transition:border-color .15s;
+}
+.su-card:hover{border-color:var(--border2)}
+.su-card-top{display:flex;align-items:center;gap:12px}
+.su-avatar{
+  width:36px;height:36px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--cond);font-size:.95rem;font-weight:900;
+}
+.su-info{display:flex;flex-direction:column;gap:4px;flex:1;min-width:0}
+.su-name{font-family:var(--mono);font-size:.88rem;font-weight:700;color:var(--text)}
+.su-role-badge{
+  align-self:flex-start;font-family:var(--mono);font-size:.56rem;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:100px;
+}
+.su-toggle-btns{display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0}
+.su-btn{
+  background:var(--s2);border:1px solid var(--border2);color:var(--muted);
+  padding:5px 11px;border-radius:6px;font-family:var(--mono);font-size:.65rem;
+  font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap;
+}
+.su-btn:hover{border-color:var(--text);color:var(--text)}
+.su-btn-active-blue{background:rgba(79,159,255,.12);border-color:rgba(79,159,255,.35);color:var(--blue)}
+.su-btn-active-green{background:rgba(57,232,122,.12);border-color:rgba(57,232,122,.35);color:var(--helper)}
+.su-btn-danger{border-color:rgba(255,79,79,.2);color:var(--red)}
+.su-btn-danger:hover{background:var(--red-dim);border-color:var(--red)}
+.su-btn-save{background:var(--accent-dim);border-color:rgba(200,255,87,.25);color:var(--accent)}
+.su-btn-save:hover{background:rgba(200,255,87,.18)}
+.su-desc-row{display:flex;gap:8px;align-items:center}
+.su-desc-input{
+  flex:1;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);
+  padding:7px 12px;color:var(--text);font-family:var(--mono);font-size:.75rem;
+  outline:none;transition:border-color .15s;
+}
+.su-desc-input:focus{border-color:var(--accent)}
+.su-desc-input::placeholder{color:var(--muted2)}
 .lb-row{
   display:flex;align-items:center;gap:14px;
   background:var(--s1);border:1px solid var(--border);border-radius:var(--r);
@@ -783,6 +990,21 @@ footer a:hover{color:var(--text)}
 </style>
 </head>
 <body>
+
+<!-- ── GLITCH LOADING SCREEN ── -->
+<div id="glitch-loader">
+  <div class="gl-scanline"></div>
+  <div class="gl-flicker"></div>
+  <div class="gl-corner tl"></div>
+  <div class="gl-corner tr"></div>
+  <div class="gl-corner bl"></div>
+  <div class="gl-corner br"></div>
+  <div class="gl-sub">initializing</div>
+  <div class="gl-title" data-text="GDLISTGUESS">GDLISTGUESS</div>
+  <div class="gl-bar-wrap"><div class="gl-bar" id="gl-bar"></div></div>
+  <div class="gl-status" id="gl-status">CONNECTING TO DATABASE_</div>
+</div>
+
 <div class="loading-bar" id="loading-bar"></div>
 <div id="app">
 
@@ -828,9 +1050,9 @@ footer a:hover{color:var(--text)}
         <div class="feat-desc">Two demons — pick the harder one.</div>
       </div>
       <div class="login-feat">
-        <span class="feat-icon">Daily</span>
-        <div class="feat-name">Daily Challenge</div>
-        <div class="feat-desc">Same demon every day. One shot only.</div>
+        <span class="feat-icon" style="color:var(--blue)">Duels</span>
+        <div class="feat-name">Live 1v1 Duels</div>
+        <div class="feat-desc">Challenge a real player. Random mode, highest score wins.</div>
       </div>
     </div>
     <input class="input-field" id="username-input" placeholder="Username (3–18 chars)" maxlength="18" autocomplete="off"/>
@@ -881,10 +1103,10 @@ footer a:hover{color:var(--text)}
         <div class="mode-desc">Two demons appear side by side. Pick the one that ranks harder on the list.</div>
         <span class="mode-badge badge-new">NEW</span>
       </div>
-      <div class="mode-card daily" onclick="startMode('daily')">
-        <div class="mode-name">Daily</div>
-        <div class="mode-desc">One demon per day, same for everyone. You only get one shot — make it count.</div>
-        <span class="mode-badge badge-daily">DAILY</span>
+      <div class="mode-card duels" onclick="startMode('duels')">
+        <div class="mode-name">Duels</div>
+        <div class="mode-desc">Challenge another player live. Random mode, 5 rounds — highest score wins.</div>
+        <span class="mode-badge badge-duels">LIVE</span>
       </div>
     </div>
 
@@ -1045,6 +1267,77 @@ footer a:hover{color:var(--text)}
     </div>
   </div>
 
+  <!-- DUELS SCREEN -->
+  <div class="screen" id="duels-screen">
+    <!-- Phase: lobby (searching) -->
+    <div id="duels-lobby-phase">
+      <div class="duels-lobby">
+        <div class="duels-lobby-title">⚔ Duels</div>
+        <div class="duels-lobby-sub">Challenge a random opponent live.<br/>Both players play the same randomly chosen mode — highest score wins.</div>
+        <div class="duels-status-pill" id="duels-status-pill">
+          <div class="duels-dot"></div>
+          <span id="duels-status-txt">Press Find Match to enter the queue</span>
+        </div>
+        <button class="btn-primary" id="duels-find-btn" onclick="duelsFindMatch()" style="max-width:260px">⚔ Find Match</button>
+        <button class="btn-ghost" onclick="duelsCancel()">← Back to Home</button>
+      </div>
+    </div>
+
+    <!-- Phase: matched — game in progress -->
+    <div id="duels-game-phase" style="display:none;width:100%;display:none;flex-direction:column;gap:18px">
+      <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
+        <span class="round-tag" id="duels-round-tag">Round 1/5</span>
+        <span class="duels-mode-tag" id="duels-mode-tag">Classic</span>
+      </div>
+
+      <!-- VS bar -->
+      <div class="duels-vs-bar">
+        <div class="duels-player me">
+          <div class="duels-avatar" id="duels-me-av" style="background:var(--accent);color:#080a06">?</div>
+          <span class="duels-pname" id="duels-me-name">You</span>
+          <span class="duels-pscore" id="duels-me-score">0</span>
+        </div>
+        <div class="duels-vs-sep">VS</div>
+        <div class="duels-player opp">
+          <div class="duels-avatar" id="duels-opp-av" style="background:var(--blue);color:#080a06">?</div>
+          <span class="duels-pname" id="duels-opp-name">Opponent</span>
+          <span class="duels-pscore" id="duels-opp-score" style="color:var(--blue)">0</span>
+        </div>
+      </div>
+
+      <!-- Dynamic game area — classic, position, or versus injected here -->
+      <div id="duels-game-area"></div>
+
+      <!-- Waiting for opponent after answering -->
+      <div id="duels-waiting-opp" style="display:none;font-family:var(--mono);font-size:.72rem;color:var(--muted);text-align:center;padding:10px 0">
+        <div class="duels-dot" style="display:inline-block;margin-right:6px;vertical-align:middle"></div>
+        Waiting for opponent…
+      </div>
+    </div>
+
+    <!-- Phase: duel ended -->
+    <div id="duels-end-phase" style="display:none;width:100%;flex-direction:column;gap:18px;align-items:center">
+      <div class="duels-end">
+        <div class="duels-winner-banner" id="duels-winner-banner">Victory!</div>
+        <div class="duels-score-row">
+          <div class="duels-score-card me">
+            <div class="val" id="duels-final-me">0</div>
+            <div class="lbl" id="duels-final-me-lbl">You</div>
+          </div>
+          <div class="duels-score-card opp">
+            <div class="val" id="duels-final-opp">0</div>
+            <div class="lbl" id="duels-final-opp-lbl">Opponent</div>
+          </div>
+        </div>
+        <div id="duels-end-info" style="font-family:var(--mono);font-size:.72rem;color:var(--muted);text-align:center"></div>
+      </div>
+      <div style="display:flex;gap:10px;width:100%">
+        <button class="btn-ghost w100" onclick="duelsBackHome()">← Home</button>
+        <button class="btn-primary" style="flex:1" onclick="startMode('duels')">Rematch ⚔</button>
+      </div>
+    </div>
+  </div>
+
   <!-- END SCREEN -->
   <div class="screen" id="end-screen">
     <div class="end-title" id="end-title">Game Over</div>
@@ -1071,48 +1364,14 @@ footer a:hover{color:var(--text)}
           <button class="lb-tab" onclick="switchLbTab('position')">Rank Guess</button>
           <button class="lb-tab" onclick="switchLbTab('versus')">Versus</button>
           <button class="lb-tab" onclick="switchLbTab('daily')">Daily</button>
+          <button class="lb-tab" onclick="switchLbTab('duels')" style="color:var(--blue)">⚔ Duels</button>
         </div>
         <div class="lb-list" id="lb-list"><div class="lb-empty">Loading…</div></div>
       </div>
-      <!-- Right: special users panel -->
+      <!-- Right: special users panel — fully dynamic from Firebase -->
       <div class="lb-side-panel">
         <div class="lb-side-title">Special Users</div>
-        <div class="lb-side-section">
-          <div class="lb-side-role-label admin">🛠 Admin</div>
-          <div class="lb-side-user">
-            <div class="lb-side-avatar" style="background:var(--red-dim);color:var(--red);border:1px solid rgba(255,79,79,.25)">K</div>
-            <div>
-              <div class="lb-side-name">KyoumiEU</div>
-              <div class="lb-side-desc">Creator &amp; Developer</div>
-            </div>
-          </div>
-        </div>
-        <div class="lb-side-section">
-          <div class="lb-side-role-label reporter">✔ Reporters</div>
-          <div class="lb-side-user">
-            <div class="lb-side-avatar" style="background:var(--blue-dim);color:var(--blue);border:1px solid rgba(79,159,255,.25)">I</div>
-            <div><div class="lb-side-name">icaka</div><div class="lb-side-desc">Reporter</div></div>
-          </div>
-          <div class="lb-side-user">
-            <div class="lb-side-avatar" style="background:var(--blue-dim);color:var(--blue);border:1px solid rgba(79,159,255,.25)">S</div>
-            <div><div class="lb-side-name">Skyght</div><div class="lb-side-desc">Playtester &amp; Reporter</div></div>
-          </div>
-          <div class="lb-side-user">
-            <div class="lb-side-avatar" style="background:var(--blue-dim);color:var(--blue);border:1px solid rgba(79,159,255,.25)">T</div>
-            <div><div class="lb-side-name">teesen</div><div class="lb-side-desc">Reporter</div></div>
-          </div>
-          <div class="lb-side-user">
-            <div class="lb-side-avatar" style="background:var(--blue-dim);color:var(--blue);border:1px solid rgba(79,159,255,.25)">K</div>
-            <div><div class="lb-side-name">kostya</div><div class="lb-side-desc">Reporter</div></div>
-          </div>
-        </div>
-        <div class="lb-side-section">
-          <div class="lb-side-role-label helper">✔ Helpers</div>
-          <div id="lb-side-helpers-list">
-            <!-- populated from Firebase on load -->
-            <div class="lb-side-empty">Loading…</div>
-          </div>
-        </div>
+        <div id="lb-side-content"><div class="lb-side-empty">Loading…</div></div>
       </div>
     </div>
     <button class="btn-ghost" onclick="goHome()">← Back</button>
@@ -1133,9 +1392,11 @@ footer a:hover{color:var(--text)}
         <button class="admin-tab" onclick="switchAdminTab('position')">Rank LB</button>
         <button class="admin-tab" onclick="switchAdminTab('versus')">Versus LB</button>
         <button class="admin-tab" onclick="switchAdminTab('daily')">Daily LB</button>
+        <button class="admin-tab" onclick="switchAdminTab('duels')" style="color:var(--blue)">⚔ Duels LB</button>
         <button class="admin-tab" onclick="switchAdminTab('bans')">🚫 Bans</button>
         <button class="admin-tab" onclick="switchAdminTab('users')">👥 Users</button>
         <button class="admin-tab" onclick="switchAdminTab('announce')">📢 Announce</button>
+        <button class="admin-tab" onclick="switchAdminTab('special')" style="border-color:rgba(200,255,87,.25);color:var(--accent)">★ Special Users</button>
       </div>
       <button class="admin-tab" onclick="switchAdminTab('stats')" style="width:100%;background:rgba(200,255,87,.05);border-color:rgba(200,255,87,.18);color:var(--muted)">📊 Stats</button>
     </div>
@@ -1831,26 +2092,205 @@ function showLeaderboard() {
 }
 
 async function populateLbSideHelpers() {
-  const container = document.getElementById('lb-side-helpers-list');
+  const container = document.getElementById('lb-side-content');
   if (!container) return;
+  container.innerHTML = '<div class="lb-side-empty">Loading…</div>';
   try {
     const accs = await getAllAccountsCloud();
-    const helpers = Object.values(accs).filter(a => a.isHelper && !a.isAdmin && !a.isReporter);
-    if (!helpers.length) {
-      container.innerHTML = '<div class="lb-side-empty">None yet.</div>';
-      return;
-    }
-    container.innerHTML = helpers.map(h => `
+    const admins   = Object.values(accs).filter(a => a.isAdmin);
+    const reporters = Object.values(accs).filter(a => a.isReporter && !a.isAdmin);
+    const helpers  = Object.values(accs).filter(a => a.isHelper && !a.isAdmin && !a.isReporter);
+
+    const makeUser = (a, bg, color, border) => `
       <div class="lb-side-user">
-        <div class="lb-side-avatar" style="background:rgba(57,232,122,.1);color:var(--helper);border:1px solid rgba(57,232,122,.2)">${h.name[0].toUpperCase()}</div>
-        <div><div class="lb-side-name">${h.name}</div><div class="lb-side-desc">Helper</div></div>
-      </div>`).join('');
-    // Also update credits modal helpers list
+        <div class="lb-side-avatar" style="background:${bg};color:${color};border:1px solid ${border}">${a.name[0].toUpperCase()}</div>
+        <div>
+          <div class="lb-side-name">${a.name}</div>
+          <div class="lb-side-desc">${a.specialDesc || (a.isAdmin ? 'Creator &amp; Developer' : a.isReporter ? 'Reporter' : 'Helper')}</div>
+        </div>
+      </div>`;
+
+    let html = '';
+
+    // Admins
+    if (admins.length) {
+      html += `<div class="lb-side-section"><div class="lb-side-role-label admin">🛠 Admin</div>`;
+      html += admins.map(a => makeUser(a,'var(--red-dim)','var(--red)','rgba(255,79,79,.25)')).join('');
+      html += `</div>`;
+    }
+    // Reporters
+    if (reporters.length) {
+      html += `<div class="lb-side-section"><div class="lb-side-role-label reporter">✔ Reporters</div>`;
+      html += reporters.map(a => makeUser(a,'var(--blue-dim)','var(--blue)','rgba(79,159,255,.25)')).join('');
+      html += `</div>`;
+    }
+    // Helpers
+    html += `<div class="lb-side-section"><div class="lb-side-role-label helper">✔ Helpers</div>`;
+    if (helpers.length) {
+      html += helpers.map(a => makeUser(a,'rgba(57,232,122,.1)','var(--helper)','rgba(57,232,122,.2)')).join('');
+    } else {
+      html += `<div class="lb-side-empty">None yet.</div>`;
+    }
+    html += `</div>`;
+
+    container.innerHTML = html;
+
+    // Sync credits modal helpers list
     const credEl = document.getElementById('credits-helpers-list');
     if (credEl) credEl.textContent = helpers.map(h => h.name).join(' · ') || '—';
   } catch(e) {
-    if (container) container.innerHTML = '<div class="lb-side-empty">—</div>';
+    container.innerHTML = '<div class="lb-side-empty">—</div>';
   }
+}
+
+// ── ADMIN: SPECIAL USERS PANEL ──
+async function loadAdminSpecialUsers() {
+  const list = document.getElementById('admin-list');
+  list.innerHTML = '<div class="admin-empty">Loading…</div>';
+  const accs = await getAllAccountsCloud();
+  const specials = Object.values(accs).filter(a => a.isAdmin || a.isReporter || a.isHelper);
+
+  if (!specials.length) { list.innerHTML = '<div class="admin-empty">No special users yet.</div>'; return; }
+
+  list.innerHTML = '';
+
+  // Section header
+  const hdr = document.createElement('div');
+  hdr.style.cssText = 'width:100%;font-family:var(--mono);font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;padding:4px 0 8px;border-bottom:1px solid var(--border);margin-bottom:6px';
+  hdr.textContent = 'Manage roles & descriptions — changes sync live to the leaderboard panel';
+  list.appendChild(hdr);
+
+  const roleOrder = a => a.isAdmin ? 0 : a.isReporter ? 1 : 2;
+  specials.sort((a,b) => roleOrder(a) - roleOrder(b) || a.name.localeCompare(b.name));
+
+  specials.forEach(acc => {
+    const key = acc.name.toLowerCase();
+    const roleLabel = acc.isAdmin ? '🛠 ADMIN' : acc.isReporter ? '✔ REPORTER' : '✔ HELPER';
+    const roleColor = acc.isAdmin ? 'var(--red)' : acc.isReporter ? 'var(--blue)' : 'var(--helper)';
+    const roleBg    = acc.isAdmin ? 'var(--red-dim)' : acc.isReporter ? 'rgba(79,159,255,.1)' : 'rgba(57,232,122,.1)';
+    const roleBorder= acc.isAdmin ? 'rgba(255,79,79,.2)' : acc.isReporter ? 'rgba(79,159,255,.2)' : 'rgba(57,232,122,.2)';
+    const currentDesc = acc.specialDesc || '';
+
+    const card = document.createElement('div');
+    card.className = 'su-card';
+    card.id = 'su-card-' + key;
+    card.innerHTML = `
+      <div class="su-card-top">
+        <div class="su-avatar" style="background:${roleBg};color:${roleColor};border:1px solid ${roleBorder}">${acc.name[0].toUpperCase()}</div>
+        <div class="su-info">
+          <div class="su-name">${acc.name}</div>
+          <div class="su-role-badge" style="background:${roleBg};color:${roleColor};border:1px solid ${roleBorder}">${roleLabel}</div>
+        </div>
+        ${!acc.isAdmin ? `<div class="su-toggle-btns">
+          <button class="su-btn ${acc.isReporter ? 'su-btn-active-blue' : ''}" onclick="adminToggleReporter('${key}')" title="${acc.isReporter ? 'Remove Reporter' : 'Make Reporter'}">
+            ${acc.isReporter ? '✔ Reporter' : '+ Reporter'}
+          </button>
+          <button class="su-btn ${acc.isHelper ? 'su-btn-active-green' : ''}" onclick="adminToggleHelper('${key}')" title="${acc.isHelper ? 'Remove Helper' : 'Make Helper'}">
+            ${acc.isHelper ? '✔ Helper' : '+ Helper'}
+          </button>
+          <button class="su-btn su-btn-danger" onclick="adminRemoveSpecial('${key}','${acc.name}')" title="Remove all roles">✕</button>
+        </div>` : ''}
+      </div>
+      <div class="su-desc-row">
+        <input class="su-desc-input" id="su-desc-${key}" value="${currentDesc}" placeholder="Custom description (e.g. Playtester &amp; Reporter)…" maxlength="60"/>
+        <button class="su-btn su-btn-save" onclick="adminSaveSpecialDesc('${key}')">Save</button>
+      </div>`;
+    list.appendChild(card);
+  });
+
+  // Add new special user section
+  const addSec = document.createElement('div');
+  addSec.style.cssText = 'width:100%;margin-top:10px;display:flex;flex-direction:column;gap:8px';
+  addSec.innerHTML = `
+    <div style="font-family:var(--mono);font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;padding:6px 0 4px;border-top:1px solid var(--border)">Add User to Panel</div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <input class="input-field" id="su-new-name" placeholder="Username…" style="flex:1;min-width:120px;padding:9px 12px;font-size:.8rem"/>
+      <select id="su-new-role" style="background:var(--s1);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:var(--r);font-family:var(--mono);font-size:.78rem;cursor:pointer;outline:none">
+        <option value="reporter">Reporter</option>
+        <option value="helper">Helper</option>
+      </select>
+      <button class="btn-primary" style="padding:9px 18px;font-size:.8rem;white-space:nowrap" onclick="adminAddSpecialUser()">+ Add</button>
+    </div>`;
+  list.appendChild(addSec);
+}
+
+async function adminSaveSpecialDesc(key) {
+  const input = document.getElementById('su-desc-' + key);
+  if (!input) return;
+  const desc = input.value.trim();
+  try {
+    const accData = await getAccountCloud(key);
+    if (!accData) { toast('User not found.', 'err'); return; }
+    accData.specialDesc = desc;
+    await saveAccountCloud(key, accData);
+    // Update leaderboard docs too
+    await Promise.all(['classic','position','versus','daily','duels'].map(async m => {
+      try {
+        const ref = window._db.collection('leaderboard_' + m).doc(key);
+        const snap = await ref.get();
+        if (snap.exists) await ref.update({ specialDesc: desc });
+      } catch(e) {}
+    }));
+    toast('Description saved!', 'ok');
+    // Refresh leaderboard side panel if it's visible
+    if (document.getElementById('lb-side-content')) populateLbSideHelpers();
+  } catch(e) { toast('Error saving description.', 'err'); }
+}
+
+async function adminRemoveSpecial(key, name) {
+  if (name.toLowerCase() === ADMIN_USER.toLowerCase()) { toast('Cannot remove admin.', 'err'); return; }
+  try {
+    const accData = await getAccountCloud(key);
+    if (!accData) { toast('User not found.', 'err'); return; }
+    accData.isReporter = false;
+    accData.isHelper = false;
+    await saveAccountCloud(key, accData);
+    const accs = getAccounts(); accs[key] = accData; saveAccounts(accs);
+    await Promise.all(['classic','position','versus','daily'].map(async m => {
+      try {
+        const ref = window._db.collection('leaderboard_' + m).doc(key);
+        const snap = await ref.get();
+        if (snap.exists) await ref.update({ isReporter: false, isHelper: false });
+      } catch(e) {}
+    }));
+    toast(`${name} removed from all special roles.`, 'ok');
+    loadAdminSpecialUsers();
+    if (document.getElementById('lb-side-content')) populateLbSideHelpers();
+  } catch(e) { toast('Error removing roles.', 'err'); }
+}
+
+async function adminAddSpecialUser() {
+  const nameInput = document.getElementById('su-new-name');
+  const roleSelect = document.getElementById('su-new-role');
+  if (!nameInput || !roleSelect) return;
+  const name = nameInput.value.trim();
+  const role = roleSelect.value;
+  if (!name) { toast('Enter a username.', 'err'); return; }
+  const key = name.toLowerCase();
+  try {
+    const accData = await getAccountCloud(key);
+    if (!accData) { toast('User not found in database.', 'err'); return; }
+    if (role === 'reporter') accData.isReporter = true;
+    if (role === 'helper') accData.isHelper = true;
+    await saveAccountCloud(key, accData);
+    const accs = getAccounts(); accs[key] = accData; saveAccounts(accs);
+    await Promise.all(['classic','position','versus','daily'].map(async m => {
+      try {
+        const ref = window._db.collection('leaderboard_' + m).doc(key);
+        const snap = await ref.get();
+        if (snap.exists) {
+          const upd = {};
+          if (role === 'reporter') upd.isReporter = true;
+          if (role === 'helper') upd.isHelper = true;
+          await ref.update(upd);
+        }
+      } catch(e) {}
+    }));
+    nameInput.value = '';
+    toast(`${accData.name} added as ${role}!`, 'ok');
+    loadAdminSpecialUsers();
+    if (document.getElementById('lb-side-content')) populateLbSideHelpers();
+  } catch(e) { toast('Error adding user.', 'err'); }
 }
 
 // ══════════════════════════════════════
@@ -1864,6 +2304,7 @@ function startMode(mode) {
   else if (mode === 'position') startPosition();
   else if (mode === 'versus') startVersus();
   else if (mode === 'daily') startDaily();
+  else if (mode === 'duels') startDuels();
 }
 
 // ══════════════════════════════════════
@@ -2436,6 +2877,8 @@ async function renderLbEntries(entries, mode) {
     const rankLabel = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`;
     const scoreLabel = mode === 'daily'
       ? (e.score ? '✅ Won' : '❌ Lost')
+      : mode === 'duels'
+      ? (e.score + ' wins')
       : e.score + ' pts';
 
     const accData = accs[e.name.toLowerCase()] || {};
@@ -2778,6 +3221,7 @@ function switchAdminTab(tab) {
   if (tab === 'bans') loadAdminBans();
   else if (tab === 'users') loadAdminUsers();
   else if (tab === 'announce') loadAdminAnnounce();
+  else if (tab === 'special') loadAdminSpecialUsers();
   else if (tab === 'stats') loadAdminStats();
   else loadAdminLb(tab);
 }
@@ -2793,7 +3237,7 @@ async function loadAdminLb(mode) {
     const row = document.createElement('div');
     row.className = 'lb-row-admin';
     const rankLabel = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i+1}`;
-    const scoreLabel = mode === 'daily' ? (e.score ? '✅ Won' : '❌ Lost') : e.score + ' pts';
+    const scoreLabel = mode === 'daily' ? (e.score ? '✅ Won' : '❌ Lost') : mode === 'duels' ? e.score + ' wins' : e.score + ' pts';
     row.innerHTML = `
       <span class="lb-rank">${rankLabel}</span>
       <span class="lb-name-admin">${e.name}</span>
@@ -2844,7 +3288,7 @@ async function adminBan(name) {
   if (!bans.includes(name.toLowerCase())) bans.push(name.toLowerCase());
   await saveBansCloud(bans);
   // Remove from all cloud leaderboards
-  ['classic','position','versus','daily'].forEach(async m => {
+  ['classic','position','versus','daily','duels'].forEach(async m => {
     try {
       await window._db.collection('leaderboard_' + m).doc(name.toLowerCase()).delete();
     } catch(e) {}
@@ -3196,7 +3640,7 @@ async function loadAdminStats() {
   const [accs, bans, ...lbSnaps] = await Promise.all([
     getAllAccountsCloud(),
     getBansCloud(),
-    ...['classic','position','versus','daily'].map(m => lbGetAllCloud(m))
+    ...['classic','position','versus','daily','duels'].map(m => lbGetAllCloud(m))
   ]);
 
   const totalUsers = Object.keys(accs).length;
@@ -3205,7 +3649,7 @@ async function loadAdminStats() {
   const pendingRep = reports.filter(r => r.status === 'pending').length;
   const reporters = Object.values(accs).filter(a => a.isReporter).length;
 
-  const modes = ['classic','position','versus','daily'];
+  const modes = ['classic','position','versus','daily','duels'];
   const lbCounts = modes.map((m, i) => ({ m, c: lbSnaps[i].length }));
   const totalEntries = lbCounts.reduce((a, b) => a + b.c, 0);
 
@@ -3285,6 +3729,570 @@ async function loadModeCardBgs() {
 document.addEventListener('DOMContentLoaded', () => {
   loadModeCardBgs();
 });
+
+
+// ══════════════════════════════════════
+// DUELS MODE — Real-time 1v1 via Firebase
+// ══════════════════════════════════════
+// Firestore structure:
+//   duels_queue/{uid} = { name, joinedAt, status:'waiting' }
+//   duels_rooms/{roomId} = { p1, p2, mode, seed, rounds, p1Score, p2Score,
+//                            p1Done, p2Done, p1RoundScores[], p2RoundScores[],
+//                            round, status:'active'|'finished', createdAt }
+
+const DUEL_ROUNDS = 5;
+const DUEL_MODES = ['classic', 'position', 'versus'];
+
+let duelRoom = null;
+let duelRoomId = null;
+let duelListener = null;
+let duelQueueListener = null;
+let duelMySlot = null; // 'p1' or 'p2'
+let duelMyScore = 0;
+let duelOppScore = 0;
+let duelCurrentRound = 0;
+let duelRoundAnswered = false;
+let duelRoundScore = 0;
+let duelRoundDemons = [];
+let duelSeedRng = null;
+let duelQueueDocId = null;
+let duelCancelled = false;
+
+// Seeded RNG for deterministic demon selection
+function seededRng(seed) {
+  let s = seed >>> 0;
+  return function() {
+    s = Math.imul(48271, s) | 0;
+    return ((s >>> 0) / 4294967296);
+  };
+}
+
+function duelShuffleSeeded(arr, rng) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+async function startDuels() {
+  if (!user) { toast('Please log in first.', 'err'); return; }
+  duelCancelled = false;
+  duelCleanup();
+  showScreen('duels-screen');
+  // Show lobby phase
+  document.getElementById('duels-lobby-phase').style.display = '';
+  document.getElementById('duels-game-phase').style.display = 'none';
+  document.getElementById('duels-end-phase').style.display = 'none';
+  document.getElementById('duels-find-btn').disabled = false;
+  document.getElementById('duels-status-txt').textContent = 'Press Find Match to enter the queue';
+}
+
+async function duelsFindMatch() {
+  if (!window._fbReady) { toast('Firebase not ready.', 'err'); return; }
+  document.getElementById('duels-find-btn').disabled = true;
+  document.getElementById('duels-status-txt').textContent = 'Searching for opponent…';
+
+  const db = window._db;
+  const myName = user.name;
+  const myKey = myName.toLowerCase();
+
+  // Check if there's already someone waiting
+  try {
+    const qSnap = await db.collection('duels_queue')
+      .where('status', '==', 'waiting')
+      .limit(5)
+      .get();
+
+    // Find a waiting player that isn't us
+    const others = qSnap.docs.filter(d => d.id !== myKey);
+
+    if (others.length > 0) {
+      // Match found — take first available opponent
+      const oppDoc = others[0];
+      const oppData = oppDoc.data();
+      const oppName = oppData.name;
+
+      // Create a room
+      const roomRef = db.collection('duels_rooms').doc();
+      const mode = DUEL_MODES[Math.floor(Math.random() * DUEL_MODES.length)];
+      const seed = Math.floor(Math.random() * 999999) + 1;
+      const roomData = {
+        p1: oppName, p2: myName,
+        mode, seed,
+        p1Score: 0, p2Score: 0,
+        p1RoundScores: [], p2RoundScores: [],
+        p1Done: false, p2Done: false,
+        round: 1,
+        status: 'active',
+        createdAt: Date.now()
+      };
+      await roomRef.set(roomData);
+
+      // Remove opponent from queue
+      await oppDoc.ref.delete();
+
+      duelMySlot = 'p2';
+      duelRoomId = roomRef.id;
+      duelEnterRoom(roomData);
+
+    } else {
+      // No one waiting — join queue ourselves
+      const qRef = db.collection('duels_queue').doc(myKey);
+      await qRef.set({ name: myName, joinedAt: Date.now(), status: 'waiting' });
+      duelQueueDocId = myKey;
+      document.getElementById('duels-status-txt').textContent = 'Waiting for opponent…';
+
+      // Listen for a room to be created with us as p1
+      duelQueueListener = db.collection('duels_rooms')
+        .where('p1', '==', myName)
+        .where('status', '==', 'active')
+        .onSnapshot(snap => {
+          if (snap.empty || duelCancelled) return;
+          const doc = snap.docs[0];
+          // Remove ourselves from queue
+          db.collection('duels_queue').doc(myKey).delete().catch(() => {});
+          if (duelQueueListener) { duelQueueListener(); duelQueueListener = null; }
+          duelMySlot = 'p1';
+          duelRoomId = doc.id;
+          duelEnterRoom(doc.data());
+        });
+    }
+  } catch(e) {
+    console.error('Duels matchmaking error:', e);
+    toast('Matchmaking error — try again.', 'err');
+    document.getElementById('duels-find-btn').disabled = false;
+    document.getElementById('duels-status-txt').textContent = 'Press Find Match to enter the queue';
+  }
+}
+
+function duelEnterRoom(roomData) {
+  if (duelCancelled) return;
+  duelRoom = roomData;
+  duelMyScore = 0;
+  duelOppScore = 0;
+  duelCurrentRound = 0;
+
+  // Build seeded demon list from seed
+  duelSeedRng = seededRng(roomData.seed);
+  duelRoundDemons = duelShuffleSeeded(demons, duelSeedRng).slice(0, DUEL_ROUNDS);
+
+  const oppName = duelMySlot === 'p1' ? roomData.p2 : roomData.p1;
+
+  // Update VS bar
+  document.getElementById('duels-me-av').textContent = user.name[0].toUpperCase();
+  document.getElementById('duels-me-name').textContent = user.name;
+  document.getElementById('duels-me-score').textContent = '0';
+  document.getElementById('duels-opp-av').textContent = oppName[0].toUpperCase();
+  document.getElementById('duels-opp-name').textContent = oppName;
+  document.getElementById('duels-opp-score').textContent = '0';
+
+  // Show game phase
+  document.getElementById('duels-lobby-phase').style.display = 'none';
+  const gp = document.getElementById('duels-game-phase');
+  gp.style.display = 'flex';
+  document.getElementById('duels-end-phase').style.display = 'none';
+
+  // Listen to room updates (opponent's score)
+  duelListener = window._db.collection('duels_rooms').doc(duelRoomId)
+    .onSnapshot(snap => {
+      if (!snap.exists) return;
+      const data = snap.data();
+      duelRoom = data;
+      const oppSlot = duelMySlot === 'p1' ? 'p2' : 'p1';
+      const oppScore = data[oppSlot + 'Score'] || 0;
+      duelOppScore = oppScore;
+      document.getElementById('duels-opp-score').textContent = oppScore;
+
+      // Check if both done with current round
+      const mySlot = duelMySlot;
+      if (data[mySlot + 'Done'] && data[oppSlot + 'Done'] && data.status === 'active') {
+        // Both answered this round
+        if (data.round <= DUEL_ROUNDS) {
+          // Advance round (p1 drives advancement to avoid race)
+          if (mySlot === 'p1') {
+            const nextRound = data.round + 1;
+            if (nextRound > DUEL_ROUNDS) {
+              window._db.collection('duels_rooms').doc(duelRoomId).update({
+                status: 'finished', p1Done: false, p2Done: false
+              }).catch(() => {});
+            } else {
+              window._db.collection('duels_rooms').doc(duelRoomId).update({
+                round: nextRound, p1Done: false, p2Done: false
+              }).catch(() => {});
+            }
+          }
+        }
+      }
+
+      if (data.status === 'finished') {
+        duelShowEnd(data);
+      } else if (!data[duelMySlot + 'Done'] && data.round !== duelCurrentRound) {
+        duelNextRound(data);
+      }
+    });
+
+  duelNextRound(roomData);
+}
+
+function duelNextRound(roomData) {
+  if (duelCancelled) return;
+  const round = roomData.round;
+  if (round > DUEL_ROUNDS) return;
+  duelCurrentRound = round;
+  duelRoundAnswered = false;
+  duelRoundScore = 0;
+
+  const mode = roomData.mode;
+  const demon = duelRoundDemons[round - 1];
+
+  document.getElementById('duels-round-tag').textContent = `Round ${round}/${DUEL_ROUNDS}`;
+  document.getElementById('duels-mode-tag').textContent = mode === 'classic' ? 'Classic' : mode === 'position' ? 'Rank Guess' : 'Versus';
+  document.getElementById('duels-waiting-opp').style.display = 'none';
+
+  if (mode === 'classic') duelRenderClassic(demon);
+  else if (mode === 'position') duelRenderPosition(demon);
+  else if (mode === 'versus') duelRenderVersus(round);
+}
+
+// ── DUEL CLASSIC ──
+function duelRenderClassic(demon) {
+  let hintsUsed = new Set();
+  const area = document.getElementById('duels-game-area');
+  area.innerHTML = `
+    <div class="thumb-wrap">
+      <div class="thumb-loading" id="duel-cl-loading">Loading…</div>
+      <img id="duel-cl-img" class="blurred" alt="" style="display:none"/>
+      <div class="thumb-overlay"></div>
+    </div>
+    <div class="hints-row" id="duel-cl-hints">
+      <span class="hint-pill" data-h="pos">Rank</span>
+      <span class="hint-pill" data-h="pub">Publisher</span>
+      <span class="hint-pill" data-h="let">First Letter</span>
+      <span class="hint-pill" data-h="len">Name Length</span>
+    </div>
+    <div class="hints-display" id="duel-cl-hint-display"></div>
+    <div class="result-box" id="duel-cl-result" style="display:none"></div>
+    <div class="guess-row" id="duel-cl-row">
+      <input class="guess-input" id="duel-cl-input" placeholder="Type level name…" autocomplete="off"/>
+      <div class="ac-box" id="duel-cl-ac"></div>
+      <button class="guess-btn" id="duel-cl-btn">Guess</button>
+    </div>
+    <div class="action-row">
+      <button class="btn-ghost" id="duel-cl-skip">Skip</button>
+    </div>
+  `;
+
+  loadThumb('duel-cl-img', 'duel-cl-loading', demon.ytId, true);
+
+  area.querySelectorAll('.hint-pill').forEach(p => p.addEventListener('click', () => {
+    if (duelRoundAnswered || hintsUsed.has(p.dataset.h)) return;
+    hintsUsed.add(p.dataset.h);
+    p.classList.add('shown');
+    let text = '';
+    const h = p.dataset.h;
+    if (h === 'pos') text = `Rank: #${demon.position}`;
+    else if (h === 'pub') text = `Publisher: ${demon.publisher}`;
+    else if (h === 'let') text = `Starts with: "${demon.name[0]}"`;
+    else if (h === 'len') text = `Name has ${demon.name.length} characters`;
+    const d = document.getElementById('duel-cl-hint-display');
+    const line = document.createElement('div'); line.className = 'hint-line'; line.textContent = text; d.appendChild(line);
+  }));
+
+  const inp = document.getElementById('duel-cl-input');
+  inp.addEventListener('input', e => {
+    const q = e.target.value.toLowerCase();
+    const box = document.getElementById('duel-cl-ac');
+    if (!q) { box.style.display = 'none'; return; }
+    const matches = demons.filter(d => d.name.toLowerCase().includes(q)).slice(0, 7);
+    if (!matches.length) { box.style.display = 'none'; return; }
+    box.style.display = 'block'; box.innerHTML = '';
+    matches.forEach(dm => {
+      const it = document.createElement('div'); it.className = 'ac-item'; it.textContent = dm.name;
+      it.addEventListener('mousedown', ev => { ev.preventDefault(); inp.value = dm.name; box.style.display = 'none'; });
+      box.appendChild(it);
+    });
+  });
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') duelClassicSubmit(demon, hintsUsed); });
+  document.getElementById('duel-cl-btn').addEventListener('click', () => duelClassicSubmit(demon, hintsUsed));
+  document.getElementById('duel-cl-skip').addEventListener('click', () => duelClassicSkip(demon));
+  inp.focus();
+}
+
+function duelClassicSubmit(demon, hintsUsed) {
+  if (duelRoundAnswered) return;
+  const val = document.getElementById('duel-cl-input').value.trim();
+  if (!val) { toast('Type a level name!', 'err'); return; }
+  const correct = normalize(val) === normalize(demon.name);
+  duelRoundAnswered = true;
+  document.getElementById('duel-cl-img').className = 'clear';
+  document.getElementById('duel-cl-ac').style.display = 'none';
+  document.getElementById('duel-cl-input').disabled = true;
+  document.getElementById('duel-cl-btn').disabled = true;
+  document.getElementById('duel-cl-skip').disabled = true;
+  const rb = document.getElementById('duel-cl-result');
+  rb.style.display = 'flex';
+  let pts = 0;
+  if (correct) {
+    pts = Math.max(10, 100 - hintsUsed.size * 20);
+    rb.className = 'result-box ok';
+    rb.innerHTML = `<span class="verdict">Correct! +${pts} pts</span><span class="detail">"${demon.name}" · #${demon.position}</span>`;
+    toast(`Correct! +${pts}`, 'ok');
+  } else {
+    rb.className = 'result-box no';
+    rb.innerHTML = `<span class="verdict">Wrong!</span><span class="detail">Answer: <b>${demon.name}</b> (#${demon.position})</span>`;
+  }
+  duelSubmitRoundScore(pts);
+}
+
+function duelClassicSkip(demon) {
+  if (duelRoundAnswered) return;
+  duelRoundAnswered = true;
+  document.getElementById('duel-cl-img').className = 'clear';
+  document.getElementById('duel-cl-ac').style.display = 'none';
+  document.getElementById('duel-cl-input').disabled = true;
+  document.getElementById('duel-cl-btn').disabled = true;
+  document.getElementById('duel-cl-skip').disabled = true;
+  const rb = document.getElementById('duel-cl-result');
+  rb.style.display = 'flex'; rb.className = 'result-box no';
+  rb.innerHTML = `<span class="verdict">Skipped</span><span class="detail">Answer: <b>${demon.name}</b> (#${demon.position})</span>`;
+  duelSubmitRoundScore(0);
+}
+
+// ── DUEL POSITION ──
+function duelRenderPosition(demon) {
+  const area = document.getElementById('duels-game-area');
+  area.innerHTML = `
+    <div class="thumb-wrap"><div class="thumb-loading" id="duel-pos-loading">Loading…</div><img id="duel-pos-img" class="clear" alt="" style="display:none"/><div class="thumb-overlay"></div></div>
+    <div style="display:flex;align-items:center;gap:14px;width:100%">
+      <input type="range" class="pos-slider" id="duel-pos-slider" min="1" max="150" value="75" style="flex:1"/>
+      <span class="pos-val" id="duel-pos-val">#75</span>
+    </div>
+    <div class="result-box" id="duel-pos-result" style="display:none"></div>
+    <div class="action-row">
+      <button class="btn-ghost" id="duel-pos-skip">Skip</button>
+      <button class="guess-btn" id="duel-pos-btn">Submit Guess</button>
+    </div>
+  `;
+  loadThumb('duel-pos-img', 'duel-pos-loading', demon.ytId, false);
+  document.getElementById('duel-pos-slider').addEventListener('input', e => {
+    document.getElementById('duel-pos-val').textContent = '#' + e.target.value;
+  });
+  document.getElementById('duel-pos-btn').addEventListener('click', () => duelPositionSubmit(demon));
+  document.getElementById('duel-pos-skip').addEventListener('click', () => duelPositionSkip(demon));
+}
+
+function duelPositionSubmit(demon) {
+  if (duelRoundAnswered) return;
+  const guess = parseInt(document.getElementById('duel-pos-slider').value);
+  const diff = Math.abs(guess - demon.position);
+  duelRoundAnswered = true;
+  document.getElementById('duel-pos-slider').disabled = true;
+  document.getElementById('duel-pos-btn').disabled = true;
+  document.getElementById('duel-pos-skip').disabled = true;
+  let pts = 0;
+  let verdict = '';
+  if (diff === 0) { pts = 100; verdict = 'Exact! +100'; }
+  else if (diff <= 3) { pts = 80; verdict = `Close! Off by ${diff} · +80`; }
+  else if (diff <= 8) { pts = 60; verdict = `Not bad! Off by ${diff} · +60`; }
+  else if (diff <= 20) { pts = 30; verdict = `Off by ${diff} · +30`; }
+  else { pts = 0; verdict = `Off by ${diff} · +0`; }
+  const rb = document.getElementById('duel-pos-result');
+  rb.style.display = 'flex'; rb.className = pts > 0 ? 'result-box ok' : 'result-box no';
+  rb.innerHTML = `<span class="verdict">${verdict}</span><span class="detail">${demon.name} is #${demon.position}</span>`;
+  duelSubmitRoundScore(pts);
+}
+
+function duelPositionSkip(demon) {
+  if (duelRoundAnswered) return;
+  duelRoundAnswered = true;
+  document.getElementById('duel-pos-slider').disabled = true;
+  document.getElementById('duel-pos-btn').disabled = true;
+  document.getElementById('duel-pos-skip').disabled = true;
+  const rb = document.getElementById('duel-pos-result');
+  rb.style.display = 'flex'; rb.className = 'result-box no';
+  rb.innerHTML = `<span class="verdict">Skipped</span><span class="detail">${demon.name} is #${demon.position}</span>`;
+  duelSubmitRoundScore(0);
+}
+
+// ── DUEL VERSUS ──
+function duelRenderVersus(round) {
+  const rng = seededRng(duelRoom.seed + round * 1000);
+  const pool = duelShuffleSeeded(demons, rng);
+  const dA = pool[0], dB = pool[1];
+  const area = document.getElementById('duels-game-area');
+  area.innerHTML = `
+    <div style="font-family:var(--mono);font-size:.68rem;color:var(--muted);text-align:center;letter-spacing:.06em;text-transform:uppercase">Which ranks harder on the list?</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%">
+      <div class="thumb-wrap" id="duel-vs-a-wrap" style="cursor:pointer;transition:border-color .15s;border:2px solid transparent" onclick="duelVersusAnswer('${dA.ytId}','${dB.ytId}',${dA.position},${dB.position})">
+        <div class="thumb-loading" id="duel-vs-a-loading">Loading…</div>
+        <img id="duel-vs-a-img" class="clear" alt="" style="display:none"/>
+        <div class="thumb-overlay"></div>
+        <div style="position:absolute;bottom:8px;left:10px;right:10px;font-family:var(--cond);font-weight:700;font-size:.85rem;z-index:2">${dA.name}</div>
+      </div>
+      <div class="thumb-wrap" id="duel-vs-b-wrap" style="cursor:pointer;transition:border-color .15s;border:2px solid transparent" onclick="duelVersusAnswer('${dB.ytId}','${dA.ytId}',${dB.position},${dA.position})">
+        <div class="thumb-loading" id="duel-vs-b-loading">Loading…</div>
+        <img id="duel-vs-b-img" class="clear" alt="" style="display:none"/>
+        <div class="thumb-overlay"></div>
+        <div style="position:absolute;bottom:8px;left:10px;right:10px;font-family:var(--cond);font-weight:700;font-size:.85rem;z-index:2">${dB.name}</div>
+      </div>
+    </div>
+    <div class="result-box" id="duel-vs-result" style="display:none"></div>
+    <button class="btn-ghost" onclick="duelVersusSkip(${dA.position},${dB.position})" id="duel-vs-skip">Skip</button>
+  `;
+  loadThumb('duel-vs-a-img', 'duel-vs-a-loading', dA.ytId, false);
+  loadThumb('duel-vs-b-img', 'duel-vs-b-loading', dB.ytId, false);
+}
+
+function duelVersusAnswer(chosenYtId, otherYtId, chosenPos, otherPos) {
+  if (duelRoundAnswered) return;
+  duelRoundAnswered = true;
+  const correct = chosenPos < otherPos; // lower number = harder
+  const pts = correct ? 100 : 0;
+  document.getElementById('duel-vs-skip') && (document.getElementById('duel-vs-skip').disabled = true);
+  const rb = document.getElementById('duel-vs-result');
+  rb.style.display = 'flex'; rb.className = correct ? 'result-box ok' : 'result-box no';
+  rb.innerHTML = correct
+    ? `<span class="verdict">Correct! +100</span><span class="detail">It's ranked higher (#${chosenPos} vs #${otherPos})</span>`
+    : `<span class="verdict">Wrong! +0</span><span class="detail">The other was harder (#${otherPos} vs #${chosenPos})</span>`;
+  duelSubmitRoundScore(pts);
+}
+
+function duelVersusSkip(posA, posB) {
+  if (duelRoundAnswered) return;
+  duelRoundAnswered = true;
+  document.getElementById('duel-vs-skip').disabled = true;
+  const rb = document.getElementById('duel-vs-result');
+  rb.style.display = 'flex'; rb.className = 'result-box no';
+  rb.innerHTML = `<span class="verdict">Skipped</span><span class="detail">Harder: #${Math.min(posA,posB)}</span>`;
+  duelSubmitRoundScore(0);
+}
+
+// ── SUBMIT ROUND SCORE TO FIREBASE ──
+async function duelSubmitRoundScore(pts) {
+  duelMyScore += pts;
+  document.getElementById('duels-me-score').textContent = duelMyScore;
+  document.getElementById('duels-waiting-opp').style.display = 'block';
+
+  const mySlot = duelMySlot;
+  try {
+    await window._db.collection('duels_rooms').doc(duelRoomId).update({
+      [mySlot + 'Score']: duelMyScore,
+      [mySlot + 'Done']: true
+    });
+  } catch(e) { console.error('Duel score update failed:', e); }
+}
+
+// ── SHOW FINAL RESULT ──
+async function duelShowEnd(data) {
+  if (duelCancelled) return;
+  if (duelListener) { duelListener(); duelListener = null; }
+
+  const mySlot = duelMySlot;
+  const oppSlot = mySlot === 'p1' ? 'p2' : 'p1';
+  const myFinal = data[mySlot + 'Score'] || 0;
+  const oppFinal = data[oppSlot + 'Score'] || 0;
+  const oppName = data[oppSlot];
+
+  document.getElementById('duels-game-phase').style.display = 'none';
+  const ep = document.getElementById('duels-end-phase');
+  ep.style.display = 'flex';
+
+  document.getElementById('duels-final-me').textContent = myFinal;
+  document.getElementById('duels-final-me-lbl').textContent = user.name;
+  document.getElementById('duels-final-opp').textContent = oppFinal;
+  document.getElementById('duels-final-opp-lbl').textContent = oppName;
+
+  const banner = document.getElementById('duels-winner-banner');
+  const info = document.getElementById('duels-end-info');
+
+  if (myFinal > oppFinal) {
+    banner.textContent = '⚡ Victory!';
+    banner.className = 'duels-winner-banner win';
+    info.textContent = `You beat ${oppName} by ${myFinal - oppFinal} pts · +1 win added to leaderboard`;
+    await lbSubmit('duels', user.name, 1);
+  } else if (oppFinal > myFinal) {
+    banner.textContent = '💀 Defeat';
+    banner.className = 'duels-winner-banner loss';
+    info.textContent = `${oppName} won by ${oppFinal - myFinal} pts`;
+    await lbSubmit('duels', user.name, 0);
+  } else {
+    banner.textContent = '🤝 Draw';
+    banner.className = 'duels-winner-banner draw';
+    info.textContent = `It's a tie! No leaderboard points awarded.`;
+  }
+
+  // Increment games count
+  const gamesKey = 'gdlg_games_' + user.name;
+  localSet(gamesKey, (localGet(gamesKey) || 0) + 1);
+}
+
+async function duelsCancel() {
+  duelCancelled = true;
+  duelCleanup();
+  goHome();
+}
+
+function duelsBackHome() {
+  duelCancelled = true;
+  duelCleanup();
+  goHome();
+}
+
+function duelCleanup() {
+  if (duelListener) { duelListener(); duelListener = null; }
+  if (duelQueueListener) { duelQueueListener(); duelQueueListener = null; }
+  if (duelQueueDocId && window._fbReady) {
+    window._db.collection('duels_queue').doc(duelQueueDocId).delete().catch(() => {});
+    duelQueueDocId = null;
+  }
+  duelRoom = null; duelRoomId = null; duelMySlot = null;
+  duelMyScore = 0; duelOppScore = 0; duelCurrentRound = 0;
+}
+
+// Clean up queue doc on tab close
+window.addEventListener('beforeunload', () => {
+  if (duelQueueDocId && window._fbReady) {
+    navigator.sendBeacon && navigator.sendBeacon('/'); // no-op, just triggers beforeunload
+    window._db && window._db.collection('duels_queue').doc(duelQueueDocId).delete().catch(() => {});
+  }
+});
+
+// ── GLITCH LOADER ──
+(function(){
+  const loader  = document.getElementById('glitch-loader');
+  const bar     = document.getElementById('gl-bar');
+  const status  = document.getElementById('gl-status');
+  const DURATION = 1500; // ms
+  const steps = [
+    { at: 0,   pct: 0,   msg: 'CONNECTING TO DATABASE_' },
+    { at: 200, pct: 22,  msg: 'LOADING DEMON LIST_' },
+    { at: 450, pct: 45,  msg: 'FETCHING LEADERBOARDS_' },
+    { at: 750, pct: 68,  msg: 'CALIBRATING LEVELS_' },
+    { at: 1050,pct: 85,  msg: 'ALMOST READY_' },
+    { at: 1300,pct: 98,  msg: 'ENTERING GAME_' },
+  ];
+
+  steps.forEach(s => {
+    setTimeout(() => {
+      bar.style.width = s.pct + '%';
+      status.textContent = s.msg;
+      // random glitch flash on status text
+      if (Math.random() > .5) {
+        status.style.color = 'var(--accent)';
+        setTimeout(() => status.style.color = '', 80);
+      }
+    }, s.at);
+  });
+
+  setTimeout(() => {
+    bar.style.width = '100%';
+    status.textContent = 'READY';
+    status.style.color = 'var(--accent)';
+    setTimeout(() => loader.classList.add('hidden'), 350);
+  }, DURATION);
+})();
 </script>
 </body>
 </html>
