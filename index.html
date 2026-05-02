@@ -680,6 +680,60 @@ footer a:hover{color:var(--text)}
   font-size:.55rem;color:var(--helper);letter-spacing:.06em;text-transform:uppercase;font-weight:600;
 }
 
+
+/* ── REPORTER ANNOUNCE SCREEN ── */
+#reporter-announce-screen{max-width:600px}
+.reporter-announce-header{
+  width:100%;display:flex;align-items:center;gap:14px;
+  background:linear-gradient(135deg,rgba(57,232,122,.08),transparent);
+  border:1px solid rgba(57,232,122,.25);border-radius:var(--r2);
+  padding:16px 20px;
+}
+.reporter-announce-badge{
+  background:rgba(57,232,122,.1);border:1px solid rgba(57,232,122,.3);
+  border-radius:100px;padding:4px 12px;font-family:var(--mono);
+  font-size:.6rem;color:var(--helper);letter-spacing:.1em;text-transform:uppercase;font-weight:700;
+}
+.reporter-announce-title{font-family:var(--cond);font-size:1.4rem;font-weight:900;color:var(--helper);text-transform:uppercase;letter-spacing:.06em}
+.reporter-announce-sub{font-size:.72rem;font-family:var(--mono);color:var(--muted)}
+.reporter-announce-section{width:100%;display:flex;flex-direction:column;gap:10px}
+.reporter-announce-label{
+  font-family:var(--mono);font-size:.63rem;color:var(--helper);
+  text-transform:uppercase;letter-spacing:.12em;padding-bottom:6px;
+  border-bottom:1px solid rgba(57,232,122,.2);
+}
+.reporter-current-box{
+  width:100%;background:var(--s1);border:1px solid rgba(57,232,122,.15);
+  border-radius:var(--r);padding:14px 18px;
+  font-family:var(--mono);font-size:.78rem;line-height:1.6;
+  color:var(--helper);display:flex;align-items:flex-start;gap:10px;
+}
+.reporter-current-box.empty{color:var(--muted);border-color:var(--border)}
+.reporter-current-icon{font-size:.9rem;flex-shrink:0;margin-top:1px}
+.btn-reporter-post{
+  width:100%;background:linear-gradient(135deg,rgba(57,232,122,.2),rgba(57,232,122,.1));
+  border:1px solid rgba(57,232,122,.4);color:var(--helper);
+  padding:14px;border-radius:var(--r);font-family:var(--cond);
+  font-weight:800;font-size:1rem;cursor:pointer;transition:all .15s;
+  letter-spacing:.08em;text-transform:uppercase;
+}
+.btn-reporter-post:hover{background:linear-gradient(135deg,rgba(57,232,122,.3),rgba(57,232,122,.18));border-color:var(--helper)}
+.btn-reporter-post:active{transform:translateY(1px)}
+.btn-reporter-clear{
+  background:none;border:1px solid var(--border);color:var(--muted);
+  padding:11px 20px;border-radius:var(--r);font-family:var(--mono);
+  font-size:.76rem;font-weight:600;cursor:pointer;transition:all .15s;
+}
+.btn-reporter-clear:hover{border-color:var(--red);color:var(--red)}
+.reporter-announce-textarea{
+  width:100%;background:var(--s1);border:1px solid rgba(57,232,122,.2);
+  border-radius:var(--r);padding:14px 16px;color:var(--text);
+  font-family:var(--mono);font-size:.84rem;outline:none;
+  transition:border-color .15s;resize:vertical;min-height:90px;line-height:1.6;
+}
+.reporter-announce-textarea:focus{border-color:var(--helper)}
+.reporter-announce-textarea::placeholder{color:var(--muted)}
+
 /* ── CHEATER REPORT MODAL ── */
 .report-reason-select{
   width:100%;background:var(--s1);border:1px solid var(--border);
@@ -1037,6 +1091,39 @@ footer a:hover{color:var(--text)}
       <button class="admin-tab" onclick="switchAdminTab('stats')" style="width:100%;background:rgba(200,255,87,.05);border-color:rgba(200,255,87,.18);color:var(--muted)">📊 Stats</button>
     </div>
     <div class="admin-list" id="admin-list"><div class="admin-empty">Loading…</div></div>
+    <button class="btn-ghost" onclick="goHome()">← Back to Home</button>
+  </div>
+
+  <!-- REPORTER ANNOUNCE SCREEN -->
+  <div class="screen" id="reporter-announce-screen">
+    <div class="reporter-announce-header">
+      <div>
+        <div class="reporter-announce-title">Announcements</div>
+        <div class="reporter-announce-sub">Post a message to all players on their home screen</div>
+      </div>
+      <div style="margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+        <div class="reporter-announce-badge">✔ Reporter</div>
+      </div>
+    </div>
+
+    <div class="reporter-announce-section">
+      <div class="reporter-announce-label">Current Announcement</div>
+      <div id="reporter-current-box" class="reporter-current-box empty">
+        <span class="reporter-current-icon">📢</span>
+        <span id="reporter-current-text">No active announcement.</span>
+      </div>
+    </div>
+
+    <div class="reporter-announce-section">
+      <div class="reporter-announce-label">New Message</div>
+      <textarea class="reporter-announce-textarea" id="reporter-announce-input" placeholder="Write your announcement here… it will appear on every player's home screen."></textarea>
+    </div>
+
+    <div style="display:flex;gap:10px;width:100%">
+      <button class="btn-reporter-clear" onclick="reporterClearAnnouncement()">Clear</button>
+      <button class="btn-reporter-post" onclick="reporterPostAnnouncement()">📢 Post Announcement</button>
+    </div>
+
     <button class="btn-ghost" onclick="goHome()">← Back to Home</button>
   </div>
 </main>
@@ -2498,21 +2585,60 @@ let editScoreTarget = null;
 
 function showAdmin() {
   if (!user || (!user.isAdmin && !user.isReporter)) { toast('No access.', 'err'); return; }
-  showScreen('admin-screen');
-  // Reporters go straight to Announce tab; admins go to classic LB
   if (!user.isAdmin && user.isReporter) {
-    // Hide all non-announce tabs for reporters
-    document.querySelectorAll('.admin-tab').forEach(t => {
-      const onclick = t.getAttribute('onclick') || '';
-      const m = onclick.match(/switchAdminTab\('(\w+)'\)/);
-      if (m && m[1] !== 'announce') t.style.display = 'none';
-    });
-    switchAdminTab('announce');
+    // Reporters get their own dedicated announce screen
+    showReporterAnnounce();
   } else {
-    // Restore all tabs for admins
+    // Admins get the full admin panel — restore all tabs
     document.querySelectorAll('.admin-tab').forEach(t => { t.style.display = ''; });
+    showScreen('admin-screen');
     switchAdminTab('classic');
   }
+}
+
+async function showReporterAnnounce() {
+  showScreen('reporter-announce-screen');
+  const current = await loadAnnouncementFromCloud();
+  const box = document.getElementById('reporter-current-box');
+  const txt = document.getElementById('reporter-current-text');
+  const inp = document.getElementById('reporter-announce-input');
+  if (current) {
+    box.className = 'reporter-current-box';
+    txt.textContent = current;
+    inp.value = current;
+  } else {
+    box.className = 'reporter-current-box empty';
+    txt.textContent = 'No active announcement.';
+    inp.value = '';
+  }
+}
+
+function reporterPostAnnouncement() {
+  const msg = document.getElementById('reporter-announce-input').value.trim();
+  if (!msg) { toast('Write a message first!', 'err'); return; }
+  saveAnnouncement(msg);
+  showAnnouncementBanner();
+  // Refresh the current box
+  const box = document.getElementById('reporter-current-box');
+  const txt = document.getElementById('reporter-current-text');
+  if (box && txt) {
+    box.className = 'reporter-current-box';
+    txt.textContent = msg;
+  }
+  toast('Announcement posted!', 'ok');
+}
+
+function reporterClearAnnouncement() {
+  saveAnnouncement(null);
+  const banner = document.getElementById('announcement-banner');
+  if (banner) banner.style.display = 'none';
+  const box = document.getElementById('reporter-current-box');
+  const txt = document.getElementById('reporter-current-text');
+  const inp = document.getElementById('reporter-announce-input');
+  if (box) box.className = 'reporter-current-box empty';
+  if (txt) txt.textContent = 'No active announcement.';
+  if (inp) inp.value = '';
+  toast('Announcement cleared.', 'ok');
 }
 
 function switchAdminTab(tab) {
