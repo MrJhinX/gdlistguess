@@ -1165,7 +1165,9 @@ async function lbSubmitCloud(mode, name, score) {
 }
 
 async function lbGetAllCloud(mode) {
-  if (!window._fbReady) return lbGetAll(mode);
+  // Never fall back to localStorage — both admin panel and public LB must
+  // read the same source so they always show identical data.
+  if (!window._fbReady) return [];
   try {
     const db = window._db;
     let snap;
@@ -1175,16 +1177,16 @@ async function lbGetAllCloud(mode) {
         .limit(50)
         .get();
     } catch(e) {
-      // orderBy may fail if index not ready — fall back to unordered
+      // orderBy may fail if Firestore index not yet built — fetch unordered and sort in JS
       snap = await db.collection('leaderboard_' + mode).limit(50).get();
     }
-    if (snap.empty) return lbGetAll(mode);
+    if (snap.empty) return [];
     const results = snap.docs.map(d => d.data());
     results.sort((a, b) => b.score - a.score);
     return results;
   } catch(e) {
     console.warn('Cloud LB fetch failed:', e);
-    return lbGetAll(mode);
+    return [];
   }
 }
 
@@ -2134,23 +2136,25 @@ function switchLbTab(mode) {
 
 async function loadLb(mode) {
   const list = document.getElementById('lb-list');
-
-  // Show local scores instantly while cloud loads
-  const local = lbGetAll(mode);
-  if (local.length) renderLbEntries(local, mode);
-  else list.innerHTML = '<div class="lb-empty">Loading…</div>';
-
+  list.innerHTML = '<div class="lb-empty">Loading…</div>';
+  // Always load from Firestore — never pre-render from localStorage
+  // so admin panel and public LB always read the exact same data
   const entries = await lbGetAllCloud(mode);
   if (!entries.length) {
     list.innerHTML = '<div class="lb-empty">No scores yet. Be the first!</div>';
     return;
   }
-  renderLbEntries(entries, mode);
+  await renderLbEntries(entries, mode);
 }
 
-function renderLbEntries(entries, mode) {
+async function renderLbEntries(entries, mode) {
   const list = document.getElementById('lb-list');
-  const accs = getAccounts();
+  list.innerHTML = '<div class="lb-empty">Loading…</div>';
+
+  // Always read roles & pfp from the accounts collection — it is the source of truth.
+  // The leaderboard docs cache isReporter/isAdmin but can be stale after an admin toggle.
+  const accs = await getAllAccountsCloud();
+
   list.innerHTML = '';
   entries.forEach((e, i) => {
     const row = document.createElement('div');
@@ -2163,11 +2167,10 @@ function renderLbEntries(entries, mode) {
       ? (e.score ? '✅ Won' : '❌ Lost')
       : e.score + ' pts';
 
-    // Get PFP for this user — cloud entry has it, fall back to local
-    const accData = e.pfp !== undefined ? e : (accs[e.name.toLowerCase()] || {});
-    const isAdmin = e.isAdmin !== undefined ? e.isAdmin : (accData.isAdmin || false);
-    const isReporter = e.isReporter !== undefined ? e.isReporter : (accData.isReporter || false);
-    const pfp = e.pfp || (accData.pfp) || null;
+    const accData = accs[e.name.toLowerCase()] || {};
+    const isAdmin = !!accData.isAdmin;
+    const isReporter = !!accData.isReporter;
+    const pfp = accData.pfp || null;
     const pfpColor = pfp ? (pfp.color || 'var(--accent)') : 'var(--accent)';
     const pfpIcon = pfp ? (pfp.icon || e.name[0].toUpperCase()) : e.name[0].toUpperCase();
     const pfpImg = pfp ? (pfp.img || null) : null;
