@@ -1256,18 +1256,15 @@ async function lbSubmitCloud(mode, name, score) {
     const snap = await ref.get();
     const existing = snap.exists ? snap.data() : null;
     const cloudScore = existing ? (existing.score ?? 0) : 0;
-    // adminScore uses nullish coalescing so an admin-set 0 is respected
-    const adminFloor = existing ? (existing.adminScore ?? 0) : 0;
 
-    // True best = max of: admin-set floor, previous cloud score, new game score
-    const bestScore = Math.max(adminFloor, cloudScore, score);
+    // Best score = whichever is higher: what's already in Firestore or the new game score
+    // Admin edits score directly via confirmEditScore, so no floor logic needed here
+    const bestScore = Math.max(cloudScore, score);
 
     // Fetch fresh account data for badges
     const accData = await getAccountCloud(name.toLowerCase()) || {};
 
-    // Build the update payload — preserve adminScore exactly as stored in Firestore
-    // (never recalculate it here; only confirmEditScore may change it)
-    const payload = {
+    await ref.set({
       name: name,
       score: bestScore,
       isAdmin: !!accData.isAdmin,
@@ -1275,14 +1272,7 @@ async function lbSubmitCloud(mode, name, score) {
       isHelper: !!accData.isHelper,
       pfp: accData.pfp || null,
       updatedAt: Date.now()
-    };
-    // Only write adminScore if it doesn't already exist in Firestore,
-    // so that admin edits are never silently overwritten by a game submission
-    if (!existing || existing.adminScore === undefined) {
-      payload.adminScore = 0;
-    }
-    // Use set+merge so we never wipe admin-set fields
-    await ref.set(payload, { merge: true });
+    }, { merge: true });
 
     // Sync localStorage to match Firestore
     let entries = lbGetAll(mode);
@@ -2783,19 +2773,11 @@ async function confirmEditScore() {
     const accData = await getAccountCloud(key) || {};
     const ref = window._db.collection('leaderboard_' + mode).doc(key);
 
-    // Read existing doc so we can preserve a legitimate player best above the admin value
-    const snap = await ref.get();
-    const existing = snap.exists ? snap.data() : null;
-    // The displayed score is the admin-set value; but if the player previously held
-    // a higher legitimate score we honour it (admin can always set higher explicitly)
-    const prevScore = existing ? (existing.score ?? 0) : 0;
-    const bestScore = Math.max(newScore, prevScore);
-
-    // Write score AND adminScore (the permanent floor that survives future game submissions)
+    // Directly overwrite the score to exactly what admin set.
+    // No floor logic — admin has full control to set any value, including lower.
     await ref.set({
       name: name,
-      score: bestScore,
-      adminScore: newScore,
+      score: newScore,
       isAdmin: !!accData.isAdmin,
       isReporter: !!accData.isReporter,
       isHelper: !!accData.isHelper,
@@ -2805,7 +2787,7 @@ async function confirmEditScore() {
 
   } catch(e) { console.error('Cloud score edit failed:', e); toast('Firestore error — check console.', 'err'); return; }
 
-  // Sync localStorage LB cache
+  // Sync localStorage LB cache to match
   let entries = lbGetAll(mode);
   const idx = entries.findIndex(e => e.name === name);
   if (idx >= 0) { entries[idx].score = newScore; }
