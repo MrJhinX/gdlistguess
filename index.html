@@ -1247,7 +1247,7 @@ function lbSave(mode, entries) { localSet('lb_' + mode, entries); }
 
 // ── FIREBASE LEADERBOARD ──
 async function lbSubmitCloud(mode, name, score) {
-  if (!window._fbReady || isBanned(name)) return;
+  if (!window._fbReady || isBanned(name)) return score;
   try {
     const db = window._db;
     const ref = db.collection('leaderboard_' + mode).doc(name.toLowerCase());
@@ -1756,8 +1756,8 @@ function startClassic() {
   nextClassic();
 }
 
-function nextClassic() {
-  if (clIdx >= CL_ROUNDS) { endGame('classic'); return; }
+async function nextClassic() {
+  if (clIdx >= CL_ROUNDS) { await endGame('classic'); return; }
   clAnswered = false;
   clHints = new Set();
   const demon = clQueue[clIdx]; clIdx++;
@@ -1878,8 +1878,8 @@ function startPosition() {
   nextPosition();
 }
 
-function nextPosition() {
-  if (posIdx >= POS_ROUNDS) { endGame('position'); return; }
+async function nextPosition() {
+  if (posIdx >= POS_ROUNDS) { await endGame('position'); return; }
   posAnswered = false;
   const demon = posQueue[posIdx]; posIdx++;
 
@@ -1982,8 +1982,8 @@ function startVersus() {
   nextVersus();
 }
 
-function nextVersus() {
-  if (vsIdx >= vsQueue.length) { endGame('versus'); return; }
+async function nextVersus() {
+  if (vsIdx >= vsQueue.length) { await endGame('versus'); return; }
   vsAnswered = false;
 
   const [a, b] = vsQueue[vsIdx]; vsIdx++;
