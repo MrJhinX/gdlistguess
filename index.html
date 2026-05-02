@@ -1202,20 +1202,61 @@ function lbSubmit(mode, name, score) {
   lbSubmitCloud(mode, name, score);
 }
 
-// ── ACCOUNTS ──
+// ── ACCOUNTS (Firebase) ──
+async function getAccountCloud(key) {
+  try {
+    const snap = await window._db.collection('accounts').doc(key).get();
+    return snap.exists ? snap.data() : null;
+  } catch(e) { return null; }
+}
+
+async function saveAccountCloud(key, data) {
+  try {
+    await window._db.collection('accounts').doc(key).set(data);
+  } catch(e) { console.warn('Save account failed:', e); }
+}
+
+async function getAllAccountsCloud() {
+  try {
+    const snap = await window._db.collection('accounts').get();
+    const result = {};
+    snap.docs.forEach(d => { result[d.id] = d.data(); });
+    return result;
+  } catch(e) { return {}; }
+}
+
+// Keep local as cache
 function getAccounts() { return localGet('gdlg_accounts') || {}; }
 function saveAccounts(accs) { localSet('gdlg_accounts', accs); }
 
 function hashPass(pass) {
-  // Simple hash — for local-only storage
   let h = 5381;
   for (let i = 0; i < pass.length; i++) h = ((h << 5) + h) ^ pass.charCodeAt(i);
   return (h >>> 0).toString(36);
 }
 
-// ── BANS ──
+// ── BANS (Firebase) ──
+async function getBansCloud() {
+  try {
+    const snap = await window._db.collection('bans').doc('list').get();
+    return snap.exists ? (snap.data().names || []) : [];
+  } catch(e) { return localGet('gdlg_bans') || []; }
+}
+
+async function saveBansCloud(bans) {
+  try {
+    await window._db.collection('bans').doc('list').set({ names: bans });
+    localSet('gdlg_bans', bans);
+  } catch(e) { console.warn('Save bans failed:', e); }
+}
+
 function getBans() { return localGet('gdlg_bans') || []; }
-function saveBans(bans) { localSet('gdlg_bans', bans); }
+function saveBans(bans) { localSet('gdlg_bans', bans); saveBansCloud(bans); }
+async function isBannedCloud(name) {
+  const bans = await getBansCloud();
+  localSet('gdlg_bans', bans); // cache locally
+  return bans.includes(name.toLowerCase());
+}
 function isBanned(name) { return getBans().includes(name.toLowerCase()); }
 
 // ── PFP PRESETS ──
@@ -1252,12 +1293,16 @@ function setLoadingBar(pct) {
 // BOOT
 // ══════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
-  // Ensure admin account exists
-  const accs = getAccounts();
-  if (!accs[ADMIN_USER.toLowerCase()]) {
-    accs[ADMIN_USER.toLowerCase()] = { name: ADMIN_USER, passHash: ADMIN_PASS, isAdmin: true, pfp: { color: '#ff4f4f', icon: '⚡' } };
-    saveAccounts(accs);
-  }
+  // Ensure admin account exists in Firebase
+  (async () => {
+    const adminKey = ADMIN_USER.toLowerCase();
+    const existing = await getAccountCloud(adminKey);
+    if (!existing) {
+      await saveAccountCloud(adminKey, { name: ADMIN_USER, passHash: ADMIN_PASS, isAdmin: true, isReporter: false, pfp: null });
+    }
+    const accs = getAccounts();
+    if (!accs[adminKey]) { accs[adminKey] = existing || { name: ADMIN_USER, passHash: ADMIN_PASS, isAdmin: true }; saveAccounts(accs); }
+  })();
 
   document.getElementById('login-btn').addEventListener('click', doLogin);
   document.getElementById('username-input').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('password-input').focus(); });
@@ -1382,10 +1427,11 @@ function extractYtId(url) {
 // ══════════════════════════════════════
 // LOGIN / LOGOUT
 // ══════════════════════════════════════
-function doLogin() {
+async function doLogin() {
   const raw = document.getElementById('username-input').value.trim();
   const pass = document.getElementById('password-input').value;
   const err = document.getElementById('login-err');
+  const btn = document.getElementById('login-btn');
   err.style.display = 'none';
 
   if (raw.length < 3) { err.textContent = 'Username must be at least 3 characters.'; err.style.display = 'block'; return; }
@@ -1394,25 +1440,35 @@ function doLogin() {
   if (pass.length < 4) { err.textContent = 'Password must be at least 4 characters.'; err.style.display = 'block'; return; }
 
   const key = raw.toLowerCase();
-  if (isBanned(key)) { err.textContent = 'This account has been banned.'; err.style.display = 'block'; return; }
+  btn.disabled = true; btn.textContent = 'Signing in…';
 
-  const accs = getAccounts();
+  // Check bans from cloud
+  const banned = await isBannedCloud(key);
+  if (banned) { err.textContent = 'This account has been banned.'; err.style.display = 'block'; btn.disabled = false; btn.textContent = 'Sign In / Register →'; return; }
+
   const ph = hashPass(pass);
+  let accData = await getAccountCloud(key);
 
-  if (accs[key]) {
+  if (accData) {
     // Existing account — verify password
-    if (accs[key].passHash !== ph) {
-      err.textContent = 'Incorrect password.'; err.style.display = 'block'; return;
+    if (accData.passHash !== ph) {
+      err.textContent = 'Incorrect password.'; err.style.display = 'block'; btn.disabled = false; btn.textContent = 'Sign In / Register →'; return;
     }
-    user = { name: accs[key].name, isAdmin: !!accs[key].isAdmin, isReporter: !!accs[key].isReporter, pfp: accs[key].pfp || null, stats: localGet('gdlg_stats_' + accs[key].name) || { classic: 0, position: 0, versus: 0 } };
+    user = { name: accData.name, isAdmin: !!accData.isAdmin, isReporter: !!accData.isReporter, pfp: accData.pfp || null, stats: localGet('gdlg_stats_' + accData.name) || { classic: 0, position: 0, versus: 0 } };
   } else {
     // New account — register
-    accs[key] = { name: raw, passHash: ph, isAdmin: false, pfp: null };
-    saveAccounts(accs);
+    accData = { name: raw, passHash: ph, isAdmin: false, isReporter: false, pfp: null };
+    await saveAccountCloud(key, accData);
+    // Also cache locally
+    const accs = getAccounts(); accs[key] = accData; saveAccounts(accs);
     user = { name: raw, isAdmin: false, pfp: null, stats: { classic: 0, position: 0, versus: 0 } };
     toast('Account created! Welcome, ' + raw, 'ok');
   }
 
+  // Cache locally
+  const accs = getAccounts(); accs[key] = accData; saveAccounts(accs);
+
+  btn.disabled = false; btn.textContent = 'Sign In / Register →';
   localSet('gdlg_user', user);
   showUserChip();
   showScreen('home-screen');
@@ -2330,13 +2386,16 @@ function closePfpModal() {
   document.getElementById('pfp-overlay').classList.remove('show');
 }
 
-function savePfp() {
+async function savePfp() {
   if (!user) return;
   user.pfp = { img: pendingPfp.img || null };
   localSet('gdlg_user', user);
-  const accs = getAccounts();
   const key = user.name.toLowerCase();
+  const accs = getAccounts();
   if (accs[key]) { accs[key].pfp = user.pfp; saveAccounts(accs); }
+  // Sync to cloud
+  const accData = await getAccountCloud(key);
+  if (accData) { accData.pfp = user.pfp; await saveAccountCloud(key, accData); }
   showUserChip();
   closePfpModal();
   toast('Profile updated!', 'ok');
@@ -2391,9 +2450,10 @@ function loadAdminLb(mode) {
   });
 }
 
-function loadAdminBans() {
+async function loadAdminBans() {
   const list = document.getElementById('admin-list');
-  const bans = getBans();
+  list.innerHTML = '<div class="admin-empty">Loading…</div>';
+  const bans = await getBansCloud();
   if (!bans.length) { list.innerHTML = '<div class="admin-empty">No banned users.</div>'; return; }
   list.innerHTML = '';
   bans.forEach(name => {
@@ -2415,13 +2475,16 @@ function adminRemove(mode, name) {
   loadAdminLb(mode);
 }
 
-function adminBan(name) {
+async function adminBan(name) {
   if (name.toLowerCase() === ADMIN_USER.toLowerCase()) { toast('Cannot ban admin.', 'err'); return; }
-  const bans = getBans();
+  const bans = await getBansCloud();
   if (!bans.includes(name.toLowerCase())) bans.push(name.toLowerCase());
-  saveBans(bans);
-  // Remove from all leaderboards
-  ['classic','position','versus','daily'].forEach(m => {
+  await saveBansCloud(bans);
+  // Remove from all cloud leaderboards
+  ['classic','position','versus','daily'].forEach(async m => {
+    try {
+      await window._db.collection('leaderboard_' + m).doc(name.toLowerCase()).delete();
+    } catch(e) {}
     let entries = lbGetAll(m);
     entries = entries.filter(e => e.name.toLowerCase() !== name.toLowerCase());
     lbSave(m, entries);
@@ -2431,10 +2494,10 @@ function adminBan(name) {
   else loadAdminLb(currentAdminTab);
 }
 
-function adminUnban(name) {
-  let bans = getBans();
+async function adminUnban(name) {
+  let bans = await getBansCloud();
   bans = bans.filter(b => b !== name.toLowerCase());
-  saveBans(bans);
+  await saveBansCloud(bans);
   toast(`${name} has been unbanned.`, 'ok');
   loadAdminBans();
 }
@@ -2505,9 +2568,12 @@ function submitReport() {
 }
 
 // Admin: load users tab
-function loadAdminUsers() {
+async function loadAdminUsers() {
   const list = document.getElementById('admin-list');
-  const accs = getAccounts();
+  list.innerHTML = '<div class="admin-empty">Loading users…</div>';
+  const accs = await getAllAccountsCloud();
+  // Also update local cache
+  saveAccounts(accs);
   const reports = getReports();
   const keys = Object.keys(accs);
   if (!keys.length) { list.innerHTML = '<div class="admin-empty">No accounts registered.</div>'; return; }
@@ -2564,18 +2630,19 @@ function resolveReport(id, status) {
   loadAdminUsers();
 }
 
-function adminToggleReporter(key) {
+async function adminToggleReporter(key) {
   const accs = getAccounts();
-  if (!accs[key]) return;
-  accs[key].isReporter = !accs[key].isReporter;
-  saveAccounts(accs);
-  // Update current user session if it's them
+  let accData = accs[key] || await getAccountCloud(key);
+  if (!accData) return;
+  accData.isReporter = !accData.isReporter;
+  await saveAccountCloud(key, accData);
+  accs[key] = accData; saveAccounts(accs);
   if (user && user.name.toLowerCase() === key) {
-    user.isReporter = accs[key].isReporter;
+    user.isReporter = accData.isReporter;
     localSet('gdlg_user', user);
     showUserChip();
   }
-  toast(accs[key].isReporter ? `${accs[key].name} granted Reporter tier.` : `Reporter tier removed from ${accs[key].name}.`, 'ok');
+  toast(accData.isReporter ? `${accData.name} granted Reporter tier.` : `Reporter tier removed from ${accData.name}.`, 'ok');
   loadAdminUsers();
 }
 
