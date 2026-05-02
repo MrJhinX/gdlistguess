@@ -1252,20 +1252,32 @@ async function lbSubmitCloud(mode, name, score) {
     const db = window._db;
     const ref = db.collection('leaderboard_' + mode).doc(name.toLowerCase());
     const snap = await ref.get();
-    const existing = snap.exists ? snap.data().score : -1;
-    if (score > existing) {
-      // Always fetch fresh account data from Firestore so isReporter/isAdmin are accurate
-      const accData = await getAccountCloud(name.toLowerCase()) || {};
-      await ref.set({
-        name: name,
-        score: score,
-        isAdmin: !!accData.isAdmin,
-        isReporter: !!accData.isReporter,
-        pfp: accData.pfp || null,
-        updatedAt: Date.now()
-      });
-    }
+    const cloudScore = snap.exists ? snap.data().score : -1;
+    // Always use the highest score between what Firestore has (admin-set or previous best)
+    // and what the player just earned
+    const bestScore = Math.max(cloudScore, score);
+    // Always fetch fresh account data so badges (isReporter/isAdmin/pfp) stay accurate
+    const accData = await getAccountCloud(name.toLowerCase()) || {};
+    await ref.set({
+      name: name,
+      score: bestScore,
+      isAdmin: !!accData.isAdmin,
+      isReporter: !!accData.isReporter,
+      isHelper: !!accData.isHelper,
+      pfp: accData.pfp || null,
+      updatedAt: Date.now()
+    });
+    // Sync localStorage LB cache to match Firestore exactly
+    let entries = lbGetAll(mode);
+    const idx = entries.findIndex(e => e.name === name);
+    if (idx >= 0) { entries[idx].score = bestScore; }
+    else { entries.push({ name, score: bestScore }); }
+    entries.sort((a, b) => b.score - a.score);
+    if (entries.length > 50) entries = entries.slice(0, 50);
+    lbSave(mode, entries);
+    return bestScore;
   } catch(e) { console.warn('Cloud LB submit failed:', e); }
+  return score;
 }
 
 async function lbGetAllCloud(mode) {
@@ -1294,18 +1306,11 @@ async function lbGetAllCloud(mode) {
   }
 }
 
-function lbSubmit(mode, name, score) {
-  if (isBanned(name)) return;
-  // Keep local copy too
-  let entries = lbGetAll(mode);
-  const idx = entries.findIndex(e => e.name === name);
-  if (idx >= 0) { if (score > entries[idx].score) entries[idx].score = score; }
-  else entries.push({ name, score });
-  entries.sort((a, b) => b.score - a.score);
-  if (entries.length > 50) entries = entries.slice(0, 50);
-  lbSave(mode, entries);
-  // Submit to cloud
-  lbSubmitCloud(mode, name, score);
+async function lbSubmit(mode, name, score) {
+  if (isBanned(name)) return score;
+  // Submit to cloud — lbSubmitCloud handles the max logic and syncs localStorage
+  const trueBest = await lbSubmitCloud(mode, name, score);
+  return trueBest || score;
 }
 
 // ── ACCOUNTS (Firebase) ──
@@ -2156,7 +2161,7 @@ function dailyHintClick(h) {
   d.appendChild(line);
 }
 
-function dailySubmit() {
+async function dailySubmit() {
   if (dailyAnswered) return;
   const val = document.getElementById('daily-input').value.trim();
   if (!val) { toast('Type a level name first!', 'err'); return; }
@@ -2181,7 +2186,7 @@ function dailySubmit() {
   }
 
   localSet('gdlg_daily_' + user.name, { date: todayStr(), won: correct });
-  lbSubmit('daily', user.name, correct ? 1 : 0);
+  await lbSubmit('daily', user.name, correct ? 1 : 0);
 
   document.getElementById('daily-input').disabled = true;
   document.getElementById('daily-submit').disabled = true;
@@ -2189,7 +2194,7 @@ function dailySubmit() {
   document.getElementById('daily-next').style.display = 'block';
 }
 
-function dailySkip() {
+async function dailySkip() {
   if (dailyAnswered) return;
   dailyAnswered = true;
   dailyWon = false;
@@ -2203,7 +2208,7 @@ function dailySkip() {
   setTxt('daily-detail', `The answer was: <b>${dailyDemon.name}</b> (#${dailyDemon.position})`);
 
   localSet('gdlg_daily_' + user.name, { date: todayStr(), won: false });
-  lbSubmit('daily', user.name, 0);
+  await lbSubmit('daily', user.name, 0);
 
   document.getElementById('daily-input').disabled = true;
   document.getElementById('daily-submit').disabled = true;
@@ -2217,7 +2222,7 @@ function dailyEnd() {
 
 
 
-function endGame(mode) {
+async function endGame(mode) {
   let score = 0, correct = 0, streak = 0, history = [];
 
   if (mode === 'classic') {
@@ -2228,16 +2233,6 @@ function endGame(mode) {
     score = vsScore; correct = vsCorrect; streak = vsBestStreak; history = vsHistory;
   }
 
-  if (!user.stats) user.stats = {};
-  // Sync best score from localStorage LB cache (which admin edits keep up-to-date)
-  // so we never overwrite an admin-set score with a lower in-game result
-  const lbEntries = lbGetAll(mode);
-  const myLbEntry = lbEntries.find(e => e.name === user.name);
-  const lbBest = myLbEntry ? myLbEntry.score : 0;
-  const trueBest = Math.max(lbBest, user.stats[mode] || 0, score);
-  user.stats[mode] = trueBest;
-  saveStats();
-
   const gamesKey = 'gdlg_games_' + user.name;
   localSet(gamesKey, (localGet(gamesKey) || 0) + 1);
 
@@ -2245,7 +2240,14 @@ function endGame(mode) {
   const prevStreak = localGet(streakKey) || 0;
   if (streak > prevStreak) localSet(streakKey, streak);
 
-  lbSubmit(mode, user.name, score);
+  // Submit to cloud — returns the true best (max of Firestore admin-set + game score)
+  const trueBest = await lbSubmit(mode, user.name, score);
+
+  // Update user.stats with the authoritative value from Firestore
+  if (!user.stats) user.stats = {};
+  user.stats[mode] = trueBest;
+  saveStats();
+  localSet('gdlg_user', user);
 
   const titles = { classic: 'Classic Done', position: 'Rank Guess Done', versus: 'Versus Done' };
   setTxt('end-title', titles[mode] || 'Game Over');
