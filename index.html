@@ -350,8 +350,8 @@ main{flex:1;display:flex;flex-direction:column;align-items:center;justify-conten
 .badge-daily{background:var(--gold-dim);color:var(--gold);border:1px solid rgba(255,198,87,.2)}
 .badge-duels{background:rgba(79,159,255,.12);color:var(--blue);border:1px solid rgba(79,159,255,.3);animation:pulse-badge 1.8s ease-in-out infinite}
 @keyframes pulse-badge{0%,100%{opacity:1}50%{opacity:.5}}
-.mode-card.duels::before{background:linear-gradient(135deg,rgba(7,8,10,.82) 0%,rgba(5,12,25,.65) 100%)}
-.mode-card.duels{border-color:rgba(79,159,255,.2)}
+.mode-card.duels::before{background:linear-gradient(135deg,rgba(7,8,10,.82) 0%,rgba(7,8,10,.65) 100%)}
+.mode-card.duels{border-color:var(--border)}.mode-card.duels:hover{border-color:rgba(79,159,255,.4)}
 .mode-card.duels::after{background:var(--blue)}
 
 /* ── DUELS SCREEN ── */
@@ -974,6 +974,124 @@ footer a:hover{color:var(--text)}
 .reporter-announce-textarea:focus{border-color:var(--helper)}
 .reporter-announce-textarea::placeholder{color:var(--muted)}
 
+/* ── CREDITS EDITOR MEMBER ROWS ── */
+.cr-member-row{
+  display:flex;align-items:center;gap:8px;
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:var(--r);padding:8px 10px;
+  transition:border-color .15s;
+}
+.cr-member-row:hover{border-color:var(--border2)}
+.cr-member-left{display:flex;align-items:center;gap:6px;flex:1;flex-wrap:wrap}
+.cr-role-select{
+  font-family:var(--mono);font-size:.62rem;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;
+  border-radius:4px;border:1px solid;padding:3px 7px;
+  cursor:pointer;outline:none;
+  min-width:108px;
+}
+.cr-name-input{
+  background:var(--bg);border:1px solid var(--border);border-radius:5px;
+  padding:5px 9px;color:var(--text);font-family:var(--mono);font-size:.77rem;
+  outline:none;transition:border-color .15s;width:120px;
+}
+.cr-name-input:focus{border-color:var(--accent)}
+.cr-rolelabel-input{
+  background:var(--bg);border:1px solid var(--border);border-radius:5px;
+  padding:5px 9px;color:var(--muted);font-family:var(--mono);font-size:.72rem;
+  outline:none;transition:border-color .15s;flex:1;min-width:130px;
+}
+.cr-rolelabel-input:focus{border-color:var(--accent);color:var(--text)}
+.cr-remove-btn{
+  background:none;border:1px solid var(--border);color:var(--muted);
+  width:24px;height:24px;border-radius:5px;cursor:pointer;
+  font-size:.7rem;flex-shrink:0;transition:all .15s;
+  display:flex;align-items:center;justify-content:center;
+}
+.cr-remove-btn:hover{border-color:var(--red);color:var(--red);background:var(--red-dim)}
+.cr-add-btn{
+  align-self:flex-start;
+  background:none;border:1px dashed var(--border2);color:var(--muted);
+  padding:7px 16px;border-radius:var(--r);font-family:var(--mono);
+  font-size:.73rem;cursor:pointer;transition:all .15s;letter-spacing:.04em;
+}
+.cr-add-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(200,255,87,.04)}
+
+/* ── DEBUG PANEL ── */
+#debug-panel{
+  position:fixed;bottom:24px;right:24px;z-index:9990;
+  width:320px;
+  background:#08090a;
+  border:1.5px solid rgba(200,255,87,.5);
+  border-radius:12px;
+  box-shadow:0 0 28px rgba(200,255,87,.12),0 8px 32px rgba(0,0,0,.6);
+  font-family:var(--mono);
+  overflow:hidden;
+}
+#debug-panel.collapsed #debug-body{display:none}
+#debug-panel-header{
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(200,255,87,.07);
+  border-bottom:1px solid rgba(200,255,87,.18);
+  padding:9px 14px;cursor:pointer;
+  user-select:none;
+}
+#debug-panel-header:hover{background:rgba(200,255,87,.12)}
+.dbg-title{
+  font-size:.65rem;font-weight:700;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--accent);
+  display:flex;align-items:center;gap:7px;
+}
+.dbg-dot{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--accent);
+  box-shadow:0 0 6px var(--accent);
+  animation:dbg-pulse 1.8s ease-in-out infinite;
+}
+@keyframes dbg-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.75)}}
+.dbg-toggle-icon{color:var(--accent);font-size:.8rem;transition:transform .22s}
+#debug-panel.collapsed .dbg-toggle-icon{transform:rotate(180deg)}
+#debug-body{padding:12px 14px;display:flex;flex-direction:column;gap:9px}
+.dbg-section{
+  font-size:.56rem;color:rgba(200,255,87,.55);text-transform:uppercase;letter-spacing:.14em;
+  padding-bottom:4px;border-bottom:1px solid rgba(200,255,87,.1);
+}
+.dbg-row{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.dbg-btn{
+  font-family:var(--mono);font-size:.62rem;font-weight:600;
+  padding:4px 10px;border-radius:5px;cursor:pointer;
+  border:1px solid rgba(200,255,87,.28);
+  background:rgba(200,255,87,.06);color:var(--accent);
+  transition:all .15s;letter-spacing:.04em;white-space:nowrap;
+}
+.dbg-btn:hover{background:rgba(200,255,87,.16);border-color:var(--accent)}
+.dbg-btn.red{border-color:rgba(255,79,79,.28);background:rgba(255,79,79,.06);color:var(--red)}
+.dbg-btn.red:hover{background:rgba(255,79,79,.18);border-color:var(--red)}
+.dbg-btn.blue{border-color:rgba(79,159,255,.28);background:rgba(79,159,255,.06);color:var(--blue)}
+.dbg-btn.blue:hover{background:rgba(79,159,255,.18);border-color:var(--blue)}
+.dbg-log{
+  background:var(--bg);border:1px solid var(--border);border-radius:6px;
+  padding:6px 9px;font-size:.6rem;color:var(--muted);
+  max-height:90px;overflow-y:auto;line-height:1.7;
+  white-space:pre-wrap;word-break:break-all;
+}
+.dbg-log .lg-ok{color:var(--accent)}
+.dbg-log .lg-err{color:var(--red)}
+.dbg-log .lg-info{color:var(--blue)}
+.dbg-input-row{display:flex;gap:5px;align-items:center}
+.dbg-input{
+  flex:1;background:var(--bg);border:1px solid var(--border);border-radius:5px;
+  padding:4px 8px;color:var(--text);font-family:var(--mono);font-size:.7rem;
+  outline:none;transition:border-color .15s;min-width:0;
+}
+.dbg-input:focus{border-color:var(--accent)}
+.dbg-stat-row{
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:.63rem;
+}
+.dbg-stat-k{color:var(--muted)}
+.dbg-stat-v{color:var(--accent);font-weight:600}
+
 /* ── CHEATER REPORT MODAL ── */
 .report-reason-select{
   width:100%;background:var(--s1);border:1px solid var(--border);
@@ -993,6 +1111,7 @@ footer a:hover{color:var(--text)}
 
 <!-- ── GLITCH LOADING SCREEN ── -->
 <div id="glitch-loader">
+  <canvas id="gl-canvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0"></canvas>
   <div class="gl-scanline"></div>
   <div class="gl-flicker"></div>
   <div class="gl-corner tl"></div>
@@ -1364,7 +1483,7 @@ footer a:hover{color:var(--text)}
           <button class="lb-tab" onclick="switchLbTab('position')">Rank Guess</button>
           <button class="lb-tab" onclick="switchLbTab('versus')">Versus</button>
           <button class="lb-tab" onclick="switchLbTab('daily')">Daily</button>
-          <button class="lb-tab" onclick="switchLbTab('duels')" style="color:var(--blue)">⚔ Duels</button>
+          <button class="lb-tab" onclick="switchLbTab('duels')">⚔ Duels</button>
         </div>
         <div class="lb-list" id="lb-list"><div class="lb-empty">Loading…</div></div>
       </div>
@@ -1397,6 +1516,7 @@ footer a:hover{color:var(--text)}
         <button class="admin-tab" onclick="switchAdminTab('users')">👥 Users</button>
         <button class="admin-tab" onclick="switchAdminTab('announce')">📢 Announce</button>
         <button class="admin-tab" onclick="switchAdminTab('special')" style="border-color:rgba(200,255,87,.25);color:var(--accent)">★ Special Users</button>
+        <button class="admin-tab" onclick="switchAdminTab('credits')" style="border-color:rgba(200,255,87,.2);color:var(--muted)">✏ Credits</button>
       </div>
       <button class="admin-tab" onclick="switchAdminTab('stats')" style="width:100%;background:rgba(200,255,87,.05);border-color:rgba(200,255,87,.18);color:var(--muted)">📊 Stats</button>
     </div>
@@ -1444,15 +1564,17 @@ footer a:hover{color:var(--text)}
         <span style="font-family:var(--cond);font-size:1.1rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase">Credits</span>
         <button onclick="document.getElementById('credits-modal').classList.remove('show')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;line-height:1;padding:2px 6px;border-radius:4px;transition:color .15s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">✕</button>
       </div>
-      <div class="credits-row">
-        <div class="credit-item">
+      <div class="credits-row" id="credits-dynamic-rows">
+        <!-- Admin row -->
+        <div class="credit-item" id="credits-admin-row">
           <span class="credit-role admin">🛠 Admin</span>
-          <span class="credit-name">KyoumiEU</span>
-          <span class="credit-names" style="margin-left:auto">Creator &amp; Developer</span>
+          <span class="credit-name" id="credits-admin-name">KyoumiEU</span>
+          <span class="credit-names" id="credits-admin-label" style="margin-left:auto">Creator &amp; Developer</span>
         </div>
-        <div class="credit-item" style="flex-direction:column;align-items:flex-start;gap:6px">
+        <!-- Reporters row -->
+        <div class="credit-item" style="flex-direction:column;align-items:flex-start;gap:6px" id="credits-reporters-row">
           <span class="credit-role reporter">✔ Reporters</span>
-          <div style="display:flex;flex-direction:column;gap:4px;width:100%;padding-left:4px">
+          <div id="credits-reporters-container" style="display:flex;flex-direction:column;gap:4px;width:100%;padding-left:4px">
             <div style="display:flex;justify-content:space-between;align-items:center">
               <span class="credit-name">icaka</span><span class="credit-names">Reporter</span>
             </div>
@@ -1467,13 +1589,21 @@ footer a:hover{color:var(--text)}
             </div>
           </div>
         </div>
-        <div class="credit-item" style="flex-direction:column;align-items:flex-start;gap:6px">
+        <!-- Devs row (hidden until populated) -->
+        <div class="credit-item" style="flex-direction:column;align-items:flex-start;gap:6px;display:none" id="credits-devs-row">
+          <span class="credit-role dev">⚙ Devs</span>
+          <div id="credits-devs-container" style="display:flex;flex-direction:column;gap:4px;width:100%;padding-left:4px"></div>
+        </div>
+        <!-- Helpers row -->
+        <div class="credit-item" style="flex-direction:column;align-items:flex-start;gap:6px" id="credits-helpers-row">
           <span class="credit-role" style="background:rgba(57,232,122,.1);color:var(--helper);border:1px solid rgba(57,232,122,.2)">✔ Helpers</span>
-          <span class="credit-names" id="credits-helpers-list" style="padding-left:4px;line-height:1.8">—</span>
+          <div id="credits-helpers-container" style="display:flex;flex-direction:column;gap:4px;width:100%;padding-left:4px">
+            <span class="credit-names" id="credits-helpers-list">—</span>
+          </div>
         </div>
       </div>
       <div class="info-panel-footer" style="margin-top:6px">
-        for any further information... well you don't need it.
+        <span id="credits-footer-text">for any further information... well you don't need it.</span>
       </div>
     </div>
   </div>
@@ -1566,6 +1696,83 @@ footer a:hover{color:var(--text)}
 </div>
 
 </div>
+
+<!-- ── DEBUG PANEL ── -->
+<div id="debug-panel" class="collapsed" style="display:none">
+  <div id="debug-panel-header" onclick="dbgToggle()">
+    <div class="dbg-title">
+      <div class="dbg-dot"></div>
+      ⚙ Debug Console
+    </div>
+    <span class="dbg-toggle-icon">▲</span>
+  </div>
+  <div id="debug-body">
+
+    <div class="dbg-section">Quick Nav</div>
+    <div class="dbg-row">
+      <button class="dbg-btn" onclick="dbgGo('login-screen')">Login</button>
+      <button class="dbg-btn" onclick="dbgGo('home-screen')">Home</button>
+      <button class="dbg-btn" onclick="dbgGo('classic-screen')">Classic</button>
+      <button class="dbg-btn" onclick="dbgGo('admin-screen');switchAdminTab('credits')">Credits</button>
+      <button class="dbg-btn" onclick="dbgGo('admin-screen');switchAdminTab('users')">Users</button>
+    </div>
+
+    <div class="dbg-section">Session</div>
+    <div class="dbg-row">
+      <button class="dbg-btn" onclick="dbgShowUser()">Inspect User</button>
+      <button class="dbg-btn blue" onclick="dbgSetRole('reporter')">+ Reporter</button>
+      <button class="dbg-btn blue" onclick="dbgSetRole('helper')">+ Helper</button>
+      <button class="dbg-btn red" onclick="dbgSetRole('none')">Clear Roles</button>
+    </div>
+
+    <div class="dbg-section">Firestore</div>
+    <div class="dbg-row">
+      <button class="dbg-btn" onclick="dbgCheckFb()">Check FB</button>
+      <button class="dbg-btn" onclick="dbgLoadCredits()">Load Credits</button>
+      <button class="dbg-btn red" onclick="dbgClearLocal()">Clear LocalStorage</button>
+    </div>
+
+    <div class="dbg-section">Toast / Announce</div>
+    <div class="dbg-row">
+      <button class="dbg-btn" onclick="toast('Test OK ✓','ok')">Toast OK</button>
+      <button class="dbg-btn red" onclick="toast('Test Error ✗','err')">Toast Err</button>
+      <button class="dbg-btn blue" onclick="dbgShowBanner()">Show Banner</button>
+      <button class="dbg-btn red" onclick="document.getElementById('announcement-banner').style.display='none'">Hide Banner</button>
+    </div>
+
+    <div class="dbg-section">Go To Screen</div>
+    <div class="dbg-input-row">
+      <input class="dbg-input" id="dbg-screen-input" placeholder="screen id" list="dbg-screens-list"/>
+      <datalist id="dbg-screens-list">
+        <option value="login-screen"/><option value="home-screen"/>
+        <option value="classic-screen"/><option value="position-screen"/>
+        <option value="versus-screen"/><option value="daily-screen"/>
+        <option value="duels-screen"/><option value="admin-screen"/>
+        <option value="end-screen"/><option value="reporter-announce-screen"/>
+      </datalist>
+      <button class="dbg-btn" onclick="showScreen(document.getElementById('dbg-screen-input').value)">Go</button>
+    </div>
+
+    <div class="dbg-section">Status</div>
+    <div class="dbg-stat-row"><span class="dbg-stat-k">Firebase</span><span class="dbg-stat-v" id="dbg-fb-badge">—</span></div>
+    <div class="dbg-stat-row"><span class="dbg-stat-k">User</span><span class="dbg-stat-v" id="dbg-user-badge">—</span></div>
+    <div class="dbg-stat-row"><span class="dbg-stat-k">Demons Loaded</span><span class="dbg-stat-v" id="dbg-demons-badge">—</span></div>
+
+    <div class="dbg-section">Enter As Account</div>
+    <div class="dbg-input-row">
+      <input class="dbg-input" id="dbg-impersonate-input" placeholder="Username…" autocomplete="off"/>
+      <button class="dbg-btn" onclick="dbgEnterAs()">Enter</button>
+    </div>
+    <div style="font-family:var(--mono);font-size:.58rem;color:var(--muted2);line-height:1.5;margin-top:2px">
+      Loads account from Firestore and signs in locally. No password needed.
+    </div>
+
+    <div class="dbg-section">Log</div>
+    <div class="dbg-log" id="dbg-log">Panel ready.</div>
+
+  </div>
+</div>
+
 
 <!-- Firebase SDK (compat) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -1984,6 +2191,7 @@ function doLogout() {
   document.getElementById('user-chip').style.display = 'none';
   document.getElementById('logout-nav-btn').style.display = 'none';
   document.getElementById('admin-nav-btn').style.display = 'none';
+  document.getElementById('debug-panel').style.display = 'none';
   document.getElementById('username-input').value = '';
   document.getElementById('password-input').value = '';
   document.getElementById('login-err').style.display = 'none';
@@ -2024,6 +2232,9 @@ function showUserChip() {
     document.getElementById('admin-nav-btn').style.display = '';
     const ab = document.getElementById('announce-nav-btn');
     if (ab) ab.style.display = 'none';
+    document.getElementById('debug-panel').style.display = '';
+  } else {
+    document.getElementById('debug-panel').style.display = 'none';
   }
   // Show announce button for reporters (not admins — they use the full admin panel)
   const announceBtn = document.getElementById('announce-nav-btn');
@@ -2840,7 +3051,7 @@ let currentLbTab = 'classic';
 function switchLbTab(mode) {
   currentLbTab = mode;
   document.querySelectorAll('.lb-tab').forEach((t, i) => {
-    const modes = ['classic', 'position', 'versus', 'daily'];
+    const modes = ['classic', 'position', 'versus', 'daily', 'duels'];
     t.classList.toggle('active', modes[i] === mode);
   });
   loadLb(mode);
@@ -3223,6 +3434,7 @@ function switchAdminTab(tab) {
   else if (tab === 'announce') loadAdminAnnounce();
   else if (tab === 'special') loadAdminSpecialUsers();
   else if (tab === 'stats') loadAdminStats();
+  else if (tab === 'credits') loadAdminCredits();
   else loadAdminLb(tab);
 }
 
@@ -4259,29 +4471,458 @@ window.addEventListener('beforeunload', () => {
   }
 });
 
+
+// ══════════════════════════════════════
+// ADMIN CREDITS EDITOR (Enhanced)
+// ══════════════════════════════════════
+
+// In-memory state for the credits editor
+// ══════════════════════════════════════
+// ADMIN CREDITS EDITOR — DOM-first, no in-memory sync bugs
+// ══════════════════════════════════════
+
+// roleColors used by both render and role-change handler
+const CR_ROLE_COLORS = {
+  admin:    { bg:'var(--red-dim)',     border:'rgba(255,79,79,.3)',     color:'var(--red)',     label:'🛠 Admin' },
+  reporter: { bg:'var(--blue-dim)',    border:'rgba(79,159,255,.3)',    color:'var(--blue)',    label:'✔ Reporter' },
+  helper:   { bg:'var(--helper-dim)', border:'rgba(57,232,122,.3)',    color:'var(--helper)',  label:'✔ Helper' },
+  dev:      { bg:'var(--accent-dim)', border:'rgba(200,255,87,.3)',    color:'var(--accent)',  label:'⚙ Dev' },
+};
+
+// Reads ALL current DOM values into a clean members array — the single source of truth on save
+function crReadFromDOM() {
+  const members = [];
+  document.querySelectorAll('#cr-members-list .cr-member-row').forEach(row => {
+    const roleEl  = row.querySelector('.cr-role-select');
+    const nameEl  = row.querySelector('.cr-name-input');
+    const labelEl = row.querySelector('.cr-rolelabel-input');
+    members.push({
+      role:      roleEl  ? roleEl.value           : 'reporter',
+      name:      nameEl  ? nameEl.value.trim()    : '',
+      roleLabel: labelEl ? labelEl.value.trim()   : '',
+    });
+  });
+  return members;
+}
+
+function crMakeRow(m) {
+  const row = document.createElement('div');
+  row.className = 'cr-member-row';
+
+  const rc = CR_ROLE_COLORS[m.role] || CR_ROLE_COLORS.helper;
+
+  const left = document.createElement('div');
+  left.className = 'cr-member-left';
+
+  // Role select
+  const sel = document.createElement('select');
+  sel.className = 'cr-role-select';
+  sel.style.cssText = `background:${rc.bg};border-color:${rc.border};color:${rc.color}`;
+  Object.entries(CR_ROLE_COLORS).forEach(([val, cfg]) => {
+    const opt = document.createElement('option');
+    opt.value = val;
+    opt.textContent = cfg.label;
+    if (val === m.role) opt.selected = true;
+    sel.appendChild(opt);
+  });
+  sel.addEventListener('change', function() {
+    const chosen = CR_ROLE_COLORS[this.value] || CR_ROLE_COLORS.helper;
+    this.style.background   = chosen.bg;
+    this.style.borderColor  = chosen.border;
+    this.style.color        = chosen.color;
+  });
+
+  // Name input
+  const nameInp = document.createElement('input');
+  nameInp.className = 'cr-name-input';
+  nameInp.value = m.name || '';
+  nameInp.placeholder = 'Username';
+
+  // Role label input
+  const labelInp = document.createElement('input');
+  labelInp.className = 'cr-rolelabel-input';
+  labelInp.value = m.roleLabel || '';
+  labelInp.placeholder = 'Role label (e.g. Playtester)';
+
+  left.appendChild(sel);
+  left.appendChild(nameInp);
+  left.appendChild(labelInp);
+
+  // Remove button
+  const rmBtn = document.createElement('button');
+  rmBtn.className = 'cr-remove-btn';
+  rmBtn.title = 'Remove';
+  rmBtn.textContent = '✕';
+  rmBtn.addEventListener('click', () => row.remove());
+
+  row.appendChild(left);
+  row.appendChild(rmBtn);
+  return row;
+}
+
+async function loadAdminCredits() {
+  const list = document.getElementById('admin-list');
+  list.innerHTML = '<div class="admin-empty">Loading…</div>';
+
+  const defaultMembers = [
+    { name: 'KyoumiEU', role: 'admin',    roleLabel: 'Creator & Developer' },
+    { name: 'icaka',    role: 'reporter',  roleLabel: 'Reporter' },
+    { name: 'Skyght',   role: 'reporter',  roleLabel: 'Playtester & Reporter' },
+    { name: 'teesen',   role: 'reporter',  roleLabel: 'Reporter' },
+    { name: 'kostya',   role: 'reporter',  roleLabel: 'Reporter' },
+  ];
+  let members = defaultMembers;
+  let footer = "for any further information... well you don't need it.";
+
+  try {
+    const snap = await window._db.collection('config').doc('credits').get();
+    if (snap.exists) {
+      const saved = snap.data();
+      if (saved.members && Array.isArray(saved.members) && saved.members.length) {
+        members = saved.members;
+      } else if (saved.reporters) {
+        // Migrate old plain-text format
+        const names = saved.reporters.split('·').map(n => n.trim()).filter(Boolean);
+        members = [
+          { name: 'KyoumiEU', role: 'admin', roleLabel: 'Creator & Developer' },
+          ...names.map(n => ({ name: n, role: 'reporter', roleLabel: 'Reporter' }))
+        ];
+      }
+      if (saved.footer) footer = saved.footer;
+    }
+  } catch(e) { console.warn('loadAdminCredits:', e); }
+
+  renderCreditsEditor(members, footer);
+}
+
+function renderCreditsEditor(members, footer) {
+  const list = document.getElementById('admin-list');
+
+  // ── Wrapper
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'display:flex;flex-direction:column;gap:0;width:100%';
+
+  // ── Header
+  const hdr = document.createElement('div');
+  hdr.style.cssText = 'font-family:var(--mono);font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:16px';
+  hdr.textContent = 'Credits Editor — changes reflect live in the Credits modal';
+  wrap.appendChild(hdr);
+
+  // ── Team Members label
+  const teamLbl = document.createElement('div');
+  teamLbl.style.cssText = 'font-family:var(--mono);font-size:.65rem;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px';
+  teamLbl.textContent = 'Team Members';
+  wrap.appendChild(teamLbl);
+
+  // ── Members list container
+  const membersList = document.createElement('div');
+  membersList.id = 'cr-members-list';
+  membersList.style.cssText = 'display:flex;flex-direction:column;gap:6px;margin-bottom:12px';
+  members.forEach(m => membersList.appendChild(crMakeRow(m)));
+  wrap.appendChild(membersList);
+
+  // ── Add Member button
+  const addBtn = document.createElement('button');
+  addBtn.className = 'cr-add-btn';
+  addBtn.textContent = '+ Add Member';
+  addBtn.addEventListener('click', () => {
+    membersList.appendChild(crMakeRow({ name: '', role: 'reporter', roleLabel: 'Reporter' }));
+    // Focus the new name input
+    const inputs = membersList.querySelectorAll('.cr-name-input');
+    if (inputs.length) inputs[inputs.length - 1].focus();
+  });
+  wrap.appendChild(addBtn);
+
+  // ── Divider
+  const div = document.createElement('div');
+  div.style.cssText = 'height:1px;background:var(--border);margin:16px 0';
+  wrap.appendChild(div);
+
+  // ── Footer text
+  const footerWrap = document.createElement('div');
+  footerWrap.style.cssText = 'display:flex;flex-direction:column;gap:6px;margin-bottom:16px';
+  const footerLbl = document.createElement('label');
+  footerLbl.style.cssText = 'font-family:var(--mono);font-size:.65rem;color:var(--accent);text-transform:uppercase;letter-spacing:.08em';
+  footerLbl.textContent = 'Footer Text';
+  const footerInp = document.createElement('input');
+  footerInp.className = 'input-field';
+  footerInp.id = 'cr-footer';
+  footerInp.value = footer || '';
+  footerInp.placeholder = 'Footer note in credits…';
+  footerInp.style.fontSize = '.82rem';
+  footerWrap.appendChild(footerLbl);
+  footerWrap.appendChild(footerInp);
+  wrap.appendChild(footerWrap);
+
+  // ── Save button
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'btn-primary';
+  saveBtn.style.padding = '11px';
+  saveBtn.textContent = '💾 Save Credits';
+  saveBtn.addEventListener('click', adminSaveCredits);
+  wrap.appendChild(saveBtn);
+
+  // ── Tip
+  const tip = document.createElement('div');
+  tip.style.cssText = 'font-family:var(--mono);font-size:.6rem;color:var(--muted2);border-top:1px solid var(--border);padding-top:10px;margin-top:8px;line-height:1.6';
+  tip.innerHTML = 'Roles: <span style="color:var(--red)">Admin</span> · <span style="color:var(--blue)">Reporter</span> · <span style="color:var(--helper)">Helper</span> · <span style="color:var(--accent)">Dev</span>. Changes only go live after clicking Save.';
+  wrap.appendChild(tip);
+
+  list.innerHTML = '';
+  list.appendChild(wrap);
+}
+
+async function adminSaveCredits() {
+  // Read everything straight from the DOM — no stale in-memory state
+  const members = crReadFromDOM();
+  const footer  = (document.getElementById('cr-footer')?.value || '').trim();
+
+  const payload = {
+    members,
+    footer,
+    // Legacy reporters string for backward compat with old applyCreditsToModal callers
+    reporters: members.filter(m => m.role === 'reporter').map(m => m.name).join(' · '),
+  };
+
+  try {
+    await window._db.collection('config').doc('credits').set(payload);
+    applyCreditsToModal(payload);
+    toast('Credits saved!', 'ok');
+  } catch(e) {
+    console.error('Save credits failed:', e);
+    toast('Failed to save credits.', 'err');
+  }
+}
+
+function applyCreditsToModal(data) {
+  const members = (data.members && Array.isArray(data.members)) ? data.members : [];
+
+  function makeNameRow(m) {
+    return `<div style="display:flex;justify-content:space-between;align-items:center">
+      <span class="credit-name">${m.name}</span><span class="credit-names">${m.roleLabel || ''}</span>
+    </div>`;
+  }
+
+  // ── Admin
+  const adminMember = members.find(m => m.role === 'admin');
+  if (adminMember) {
+    const nameEl  = document.getElementById('credits-admin-name');
+    const labelEl = document.getElementById('credits-admin-label');
+    if (nameEl)  nameEl.textContent  = adminMember.name;
+    if (labelEl) labelEl.textContent = adminMember.roleLabel || 'Creator & Developer';
+  }
+
+  // ── Reporters
+  const repContainer = document.getElementById('credits-reporters-container');
+  const repRow = document.getElementById('credits-reporters-row');
+  if (repContainer) {
+    if (members.length) {
+      const reporters = members.filter(m => m.role === 'reporter');
+      repContainer.innerHTML = reporters.length
+        ? reporters.map(makeNameRow).join('')
+        : '<span class="credit-names">—</span>';
+      if (repRow) repRow.style.display = reporters.length ? '' : 'none';
+    } else if (data.reporters) {
+      // Legacy plain-text fallback
+      const names = data.reporters.split('·').map(n => n.trim()).filter(Boolean);
+      repContainer.innerHTML = names.map(n =>
+        `<div style="display:flex;justify-content:space-between;align-items:center">
+          <span class="credit-name">${n}</span><span class="credit-names">Reporter</span>
+        </div>`).join('');
+    }
+  }
+
+  // ── Devs
+  const devContainer = document.getElementById('credits-devs-container');
+  const devRow = document.getElementById('credits-devs-row');
+  if (devContainer && members.length) {
+    const devs = members.filter(m => m.role === 'dev');
+    if (devs.length) {
+      devContainer.innerHTML = devs.map(makeNameRow).join('');
+      if (devRow) devRow.style.display = '';
+    } else {
+      if (devRow) devRow.style.display = 'none';
+    }
+  }
+
+  // ── Helpers
+  const helpersContainer = document.getElementById('credits-helpers-container');
+  const helpersRow = document.getElementById('credits-helpers-row');
+  if (helpersContainer && members.length) {
+    const helpers = members.filter(m => m.role === 'helper');
+    if (helpers.length) {
+      helpersContainer.innerHTML = helpers.map(makeNameRow).join('');
+      if (helpersRow) helpersRow.style.display = '';
+    } else {
+      // No helpers in the credits members list — try auto-populated account-based helpers
+      // (populated separately by the boot sequence). Hide row if truly empty.
+      const legacyList = document.getElementById('credits-helpers-list');
+      const hasLegacy = legacyList && legacyList.textContent.trim() && legacyList.textContent.trim() !== '—';
+      if (helpersRow) helpersRow.style.display = hasLegacy ? '' : 'none';
+    }
+  }
+
+  // ── Footer
+  const footerEl = document.getElementById('credits-footer-text');
+  if (footerEl && data.footer !== undefined) footerEl.textContent = data.footer;
+}
+
+async function loadCreditsFromCloud() {
+  try {
+    const snap = await window._db.collection('config').doc('credits').get();
+    if (snap.exists) applyCreditsToModal(snap.data());
+  } catch(e) {}
+}
+
+
+// ══════════════════════════════════════
+// DEBUG PANEL
+// ══════════════════════════════════════
+function dbgLog(msg, type='') {
+  const el = document.getElementById('dbg-log');
+  if (!el) return;
+  const ts = new Date().toLocaleTimeString('en-GB',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const cls = type === 'ok' ? 'lg-ok' : type === 'err' ? 'lg-err' : type === 'info' ? 'lg-info' : '';
+  el.innerHTML += `\n<span class="${cls}">[${ts}] ${msg}</span>`;
+  el.scrollTop = el.scrollHeight;
+}
+
+function dbgToggle() {
+  document.getElementById('debug-panel').classList.toggle('collapsed');
+  dbgRefreshStats();
+}
+
+function dbgGo(screen) {
+  showScreen(screen);
+  dbgLog('Navigated to: ' + screen, 'info');
+}
+
+function dbgRefreshStats() {
+  const fbEl = document.getElementById('dbg-fb-badge');
+  const userEl = document.getElementById('dbg-user-badge');
+  const demonsEl = document.getElementById('dbg-demons-badge');
+  if (fbEl) fbEl.textContent = window._fbReady ? '✓ Connected' : '✗ Offline';
+  if (userEl) userEl.textContent = user ? (user.name + (user.isAdmin?' [ADMIN]':user.isReporter?' [REPORTER]':user.isHelper?' [HELPER]':'')) : 'None';
+  if (demonsEl) demonsEl.textContent = demons ? demons.length : '0';
+}
+
+function dbgShowUser() {
+  if (!user) { dbgLog('No user logged in.', 'err'); return; }
+  dbgLog('User: ' + JSON.stringify({name:user.name,isAdmin:user.isAdmin,isReporter:user.isReporter,isHelper:user.isHelper}), 'info');
+}
+
+function dbgSetRole(role) {
+  if (!user) { dbgLog('No user logged in.', 'err'); return; }
+  user.isAdmin = false;
+  user.isReporter = role === 'reporter';
+  user.isHelper = role === 'helper';
+  localSet('gdlg_user', user);
+  showUserChip();
+  dbgRefreshStats();
+  dbgLog('Role set to: ' + role, 'ok');
+  toast('Role set to: ' + role, 'ok');
+}
+
+function dbgCheckFb() {
+  if (!window._fbReady) { dbgLog('Firebase NOT ready.', 'err'); return; }
+  window._db.collection('config').doc('credits').get()
+    .then(s => dbgLog('Firestore OK — credits doc ' + (s.exists ? 'exists' : 'missing'), 'ok'))
+    .catch(e => dbgLog('Firestore error: ' + e.message, 'err'));
+}
+
+async function dbgLoadCredits() {
+  try {
+    const snap = await window._db.collection('config').doc('credits').get();
+    if (!snap.exists) { dbgLog('Credits doc not found.', 'err'); return; }
+    dbgLog('Credits: ' + JSON.stringify(snap.data()).slice(0,120) + '…', 'info');
+  } catch(e) { dbgLog('Error: ' + e.message, 'err'); }
+}
+
+function dbgClearLocal() {
+  if (!confirm('Clear ALL localStorage? This will log you out.')) return;
+  localStorage.clear();
+  dbgLog('localStorage cleared.', 'ok');
+  toast('LocalStorage cleared.', 'ok');
+}
+
+function dbgShowBanner() {
+  const b = document.getElementById('announcement-banner');
+  const t = document.getElementById('announcement-text');
+  if (b) { b.style.display = 'flex'; if (t) t.textContent = '[DEBUG] Test announcement banner'; }
+  dbgLog('Announcement banner shown.', 'ok');
+}
+
+async function dbgEnterAs() {
+  const raw = document.getElementById('dbg-impersonate-input').value.trim();
+  if (!raw) { dbgLog('Enter a username first.', 'err'); return; }
+  const key = raw.toLowerCase();
+
+  dbgLog('Looking up account: ' + raw + '…', 'info');
+
+  let accData = null;
+  try {
+    accData = await getAccountCloud(key);
+  } catch(e) {
+    dbgLog('Firestore error: ' + e.message, 'err'); return;
+  }
+
+  if (!accData) {
+    dbgLog('Account "' + raw + '" not found in database.', 'err');
+    toast('Account not found.', 'err');
+    return;
+  }
+
+  // Build a local session from the cloud account data — no password check
+  user = {
+    name:       accData.name || raw,
+    isAdmin:    !!accData.isAdmin,
+    isReporter: !!accData.isReporter,
+    isHelper:   !!accData.isHelper,
+    pfp:        accData.pfp || null,
+    stats:      localGet('gdlg_stats_' + (accData.name || raw)) || { classic:0, position:0, versus:0 },
+  };
+  localSet('gdlg_user', user);
+
+  showUserChip();
+  showScreen('home-screen');
+  refreshHomeStats();
+  dbgRefreshStats();
+
+  const roleTag = user.isAdmin ? ' [ADMIN]' : user.isReporter ? ' [REPORTER]' : user.isHelper ? ' [HELPER]' : '';
+  dbgLog('Entered as: ' + user.name + roleTag, 'ok');
+  toast('Entered as ' + user.name, 'ok');
+  document.getElementById('dbg-impersonate-input').value = '';
+}
+
+// Auto-refresh stats every 3s when panel is open
+setInterval(() => {
+  if (!document.getElementById('debug-panel').classList.contains('collapsed')) {
+    dbgRefreshStats();
+  }
+}, 3000);
+
 // ── GLITCH LOADER ──
 (function(){
   const loader  = document.getElementById('glitch-loader');
   const bar     = document.getElementById('gl-bar');
   const status  = document.getElementById('gl-status');
-  const DURATION = 1500; // ms
+  const DURATION = 1000; // ms
+
   const steps = [
     { at: 0,   pct: 0,   msg: 'CONNECTING TO DATABASE_' },
-    { at: 200, pct: 22,  msg: 'LOADING DEMON LIST_' },
-    { at: 450, pct: 45,  msg: 'FETCHING LEADERBOARDS_' },
-    { at: 750, pct: 68,  msg: 'CALIBRATING LEVELS_' },
-    { at: 1050,pct: 85,  msg: 'ALMOST READY_' },
-    { at: 1300,pct: 98,  msg: 'ENTERING GAME_' },
+    { at: 150, pct: 22,  msg: 'LOADING DEMON LIST_' },
+    { at: 330, pct: 48,  msg: 'FETCHING LEADERBOARDS_' },
+    { at: 560, pct: 72,  msg: 'CALIBRATING LEVELS_' },
+    { at: 780, pct: 92,  msg: 'ENTERING GAME_' },
   ];
 
   steps.forEach(s => {
     setTimeout(() => {
       bar.style.width = s.pct + '%';
       status.textContent = s.msg;
-      // random glitch flash on status text
       if (Math.random() > .5) {
         status.style.color = 'var(--accent)';
-        setTimeout(() => status.style.color = '', 80);
+        setTimeout(() => status.style.color = '', 60);
       }
     }, s.at);
   });
@@ -4290,8 +4931,112 @@ window.addEventListener('beforeunload', () => {
     bar.style.width = '100%';
     status.textContent = 'READY';
     status.style.color = 'var(--accent)';
-    setTimeout(() => loader.classList.add('hidden'), 350);
+    setTimeout(() => loader.classList.add('hidden'), 250);
   }, DURATION);
+
+  // ── FLOATING CODE WORDS CANVAS ──
+  (function(){
+    const canvas = document.getElementById('gl-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    const WORDS = [
+      'demon.position','fetch()','leaderboard','pointercrate',
+      'firestore','null','undefined','async','await','score++',
+      'auth.user','querySelector','classList','firebase',
+      'JSON.parse','localStorage','normalize()','shuffle()',
+      'lbSubmit','collection','snapshot','getDoc','setDoc',
+      '0x00FF41','#c8ff57','top150','ranked','hash',
+      'gdlistguess','classic','versus','duels','daily',
+      'true','false','return','const','let','=>',
+      '{}','[]','import','export','promise',
+      'db.collection','orderBy','limit(50)','doc.data()',
+      'try{','catch(e)','console.log','window._db',
+      'DOMContentLoaded','addEventListener','innerHTML',
+      'Math.random()','Date.now()','parseInt','toString',
+      '.filter()','map()','reduce()','forEach()',
+      'leaderboard_classic','leaderboard_duels','accounts',
+      'isAdmin','isReporter','isHelper','passHash',
+      'position<=150','ytId','publisher','demon.name',
+      'blur(24px)','opacity:.35','z-index:99999',
+      'clScore','vsScore','posScore','duelMyScore',
+      'SHA256','base64','token','session','cookie',
+      '200 OK','404','500','cors','headers',
+      'pointercrate.com','api/v2','demons/listed',
+      'firebase.initializeApp','onSnapshot','merge:true',
+      'requestAnimationFrame','MutationObserver','ResizeObserver',
+      'flex-direction','border-radius','var(--accent)',
+      'font-family:mono','letter-spacing','text-transform',
+      '>>>0','toString(36)','charCodeAt','Math.imul',
+    ];
+
+    let particles = [];
+    let raf;
+
+    function resize() {
+      canvas.width  = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    }
+
+    function spawn() {
+      const word = WORDS[Math.floor(Math.random() * WORDS.length)];
+      const size = 9 + Math.random() * 5;
+      particles.push({
+        word,
+        x: Math.random() * canvas.width,
+        y: canvas.height + 10,
+        speed: 0.28 + Math.random() * 0.55,
+        opacity: 0.04 + Math.random() * 0.09,
+        size,
+      });
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fontFamily = 'JetBrains Mono, monospace';
+
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.y -= p.speed;
+        if (p.y < -20) { particles.splice(i, 1); continue; }
+        ctx.globalAlpha = p.opacity;
+        ctx.fillStyle = '#7a7d85';
+        ctx.font = `${p.size}px "JetBrains Mono", monospace`;
+        ctx.fillText(p.word, p.x, p.y);
+      }
+      ctx.globalAlpha = 1;
+      raf = requestAnimationFrame(draw);
+    }
+
+    resize();
+    window.addEventListener('resize', resize);
+
+    // Spawn words at intervals
+    const spawnInterval = setInterval(spawn, 60);
+    // Pre-seed a few
+    for (let i = 0; i < 35; i++) {
+      const word = WORDS[Math.floor(Math.random() * WORDS.length)];
+      const size = 9 + Math.random() * 5;
+      particles.push({
+        word, x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        speed: 0.28 + Math.random() * 0.55,
+        opacity: 0.04 + Math.random() * 0.09, size,
+      });
+    }
+
+    draw();
+
+    // Stop when loader hides
+    const obs = new MutationObserver(() => {
+      if (loader.classList.contains('hidden')) {
+        cancelAnimationFrame(raf);
+        clearInterval(spawnInterval);
+        obs.disconnect();
+      }
+    });
+    obs.observe(loader, { attributes: true, attributeFilter: ['class'] });
+  })();
 })();
 </script>
 </body>
