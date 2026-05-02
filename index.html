@@ -1097,6 +1097,29 @@ footer a:hover{color:var(--text)}
 
 </div>
 
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, doc, setDoc, getDoc, collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAMxit5pG6NhRp3ifkAlQxPUH6C2d6zyaE",
+    authDomain: "gdguess.firebaseapp.com",
+    projectId: "gdguess",
+    storageBucket: "gdguess.firebasestorage.app",
+    messagingSenderId: "1083098835881",
+    appId: "1:1083098835881:web:31b24e1ad4478ae654b2b8",
+    measurementId: "G-SXR1Q7W5C7"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  window._db = db;
+  window._fbReady = true;
+  window._fbImports = { doc, setDoc, getDoc, collection, getDocs, query, orderBy, limit };
+  console.log('Firebase ready');
+</script>
+
 <script>
 // ══════════════════════════════════════
 // STORAGE
@@ -1108,9 +1131,47 @@ function localDel(k) { try { localStorage.removeItem(k); } catch {} }
 function lbGetAll(mode) { return localGet('lb_' + mode) || []; }
 function lbSave(mode, entries) { localSet('lb_' + mode, entries); }
 
+// ── FIREBASE LEADERBOARD ──
+async function lbSubmitCloud(mode, name, score) {
+  if (!window._fbReady || isBanned(name)) return;
+  try {
+    const { doc, setDoc, getDoc } = window._fbImports;
+    const db = window._db;
+    const ref = doc(db, 'leaderboard_' + mode, name.toLowerCase());
+    const snap = await getDoc(ref);
+    const existing = snap.exists() ? snap.data().score : -1;
+    if (score > existing) {
+      const accs = getAccounts();
+      const accData = accs[name.toLowerCase()] || {};
+      await setDoc(ref, {
+        name: name,
+        score: score,
+        isAdmin: !!accData.isAdmin,
+        isReporter: !!accData.isReporter,
+        pfp: accData.pfp || null,
+        updatedAt: Date.now()
+      });
+    }
+  } catch(e) { console.warn('Cloud LB submit failed:', e); }
+}
+
+async function lbGetAllCloud(mode) {
+  if (!window._fbReady) return lbGetAll(mode);
+  try {
+    const { collection, getDocs, query, orderBy, limit } = window._fbImports;
+    const db = window._db;
+    const q = query(collection(db, 'leaderboard_' + mode), orderBy('score', 'desc'), limit(50));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => d.data());
+  } catch(e) {
+    console.warn('Cloud LB fetch failed:', e);
+    return lbGetAll(mode);
+  }
+}
+
 function lbSubmit(mode, name, score) {
-  // Don't submit scores for banned users
   if (isBanned(name)) return;
+  // Keep local copy too
   let entries = lbGetAll(mode);
   const idx = entries.findIndex(e => e.name === name);
   if (idx >= 0) { if (score > entries[idx].score) entries[idx].score = score; }
@@ -1118,6 +1179,8 @@ function lbSubmit(mode, name, score) {
   entries.sort((a, b) => b.score - a.score);
   if (entries.length > 50) entries = entries.slice(0, 50);
   lbSave(mode, entries);
+  // Submit to cloud
+  lbSubmitCloud(mode, name, score);
 }
 
 // ── ACCOUNTS ──
@@ -1959,11 +2022,11 @@ function switchLbTab(mode) {
   loadLb(mode);
 }
 
-function loadLb(mode) {
+async function loadLb(mode) {
   const list = document.getElementById('lb-list');
   list.innerHTML = '<div class="lb-empty">Loading…</div>';
 
-  const entries = lbGetAll(mode);
+  const entries = await lbGetAllCloud(mode);
   if (!entries.length) {
     list.innerHTML = '<div class="lb-empty">No scores yet. Be the first!</div>';
     return;
@@ -1982,16 +2045,18 @@ function loadLb(mode) {
       ? (e.score ? '✅ Won' : '❌ Lost')
       : e.score + ' pts';
 
-    // Get PFP for this user
-    const accData = accs[e.name.toLowerCase()];
-    const pfp = accData ? accData.pfp : null;
+    // Get PFP for this user — cloud entry has it, fall back to local
+    const accData = e.pfp !== undefined ? e : (accs[e.name.toLowerCase()] || {});
+    const isAdmin = e.isAdmin !== undefined ? e.isAdmin : (accData.isAdmin || false);
+    const isReporter = e.isReporter !== undefined ? e.isReporter : (accData.isReporter || false);
+    const pfp = e.pfp || (accData.pfp) || null;
     const pfpColor = pfp ? (pfp.color || 'var(--accent)') : 'var(--accent)';
     const pfpIcon = pfp ? (pfp.icon || e.name[0].toUpperCase()) : e.name[0].toUpperCase();
 
     row.innerHTML = `
       <span class="lb-rank ${rankClass}">${rankLabel}</span>
       <div class="lb-avatar" style="background:${pfpColor};color:#080a06">${pfpIcon}</div>
-      <span class="lb-name">${e.name}${accData && accData.isAdmin ? ' <span style="color:var(--red);font-size:.6rem;font-family:var(--mono);background:var(--red-dim);border-radius:3px;padding:1px 5px">ADMIN</span>' : accData && accData.isReporter ? ' <span style="color:var(--blue);font-size:.6rem;font-family:var(--mono);background:rgba(79,159,255,.1);border-radius:3px;padding:1px 5px">✔ REPORTER</span>' : ''}</span>
+      <span class="lb-name">${e.name}${isAdmin ? ' <span style="color:var(--red);font-size:.6rem;font-family:var(--mono);background:var(--red-dim);border-radius:3px;padding:1px 5px">ADMIN</span>' : isReporter ? ' <span style="color:var(--blue);font-size:.6rem;font-family:var(--mono);background:rgba(79,159,255,.1);border-radius:3px;padding:1px 5px">✔ REPORTER</span>' : ''}</span>
       <span class="lb-score">${scoreLabel}</span>
     `;
     list.appendChild(row);
