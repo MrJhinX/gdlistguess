@@ -1474,7 +1474,7 @@ async function doLogin() {
     await saveAccountCloud(key, accData);
     // Also cache locally
     const accs = getAccounts(); accs[key] = accData; saveAccounts(accs);
-    user = { name: raw, isAdmin: false, pfp: null, stats: { classic: 0, position: 0, versus: 0 } };
+    user = { name: raw, isAdmin: false, isReporter: false, pfp: null, stats: { classic: 0, position: 0, versus: 0 } };
     toast('Account created! Welcome, ' + raw, 'ok');
   }
 
@@ -1569,9 +1569,22 @@ function refreshHomeStats() {
 // ══════════════════════════════════════
 // HOME / NAV
 // ══════════════════════════════════════
-function goHome() {
+async function goHome() {
   closeAllAc();
   if (!user) { showScreen('login-screen'); return; }
+  // Re-sync roles from Firebase so reporter/admin badges are always up-to-date
+  // without requiring a full page reload
+  try {
+    const freshData = await getAccountCloud(user.name.toLowerCase());
+    if (freshData) {
+      const rolesChanged = user.isAdmin !== !!freshData.isAdmin || user.isReporter !== !!freshData.isReporter;
+      user.isAdmin = !!freshData.isAdmin;
+      user.isReporter = !!freshData.isReporter;
+      if (freshData.pfp !== undefined) user.pfp = freshData.pfp;
+      localSet('gdlg_user', user);
+      if (rolesChanged) showUserChip();
+    }
+  } catch(e) { /* silent — use cached roles if Firebase unreachable */ }
   showScreen('home-screen');
   refreshHomeStats();
 }
@@ -2306,6 +2319,7 @@ function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   const el = document.getElementById(id);
   if (el) el.classList.add('active');
+  if (id === 'home-screen') loadModeCardBgs();
 }
 
 function setTxt(id, html) {
@@ -2644,12 +2658,16 @@ function resolveReport(id, status) {
 }
 
 async function adminToggleReporter(key) {
-  const accs = getAccounts();
-  let accData = accs[key] || await getAccountCloud(key);
-  if (!accData) return;
+  // Always fetch fresh from Firestore — never trust stale local cache
+  let accData = await getAccountCloud(key);
+  if (!accData) { toast('User not found in database.', 'err'); return; }
   accData.isReporter = !accData.isReporter;
   await saveAccountCloud(key, accData);
-  accs[key] = accData; saveAccounts(accs);
+  // Update local cache to match
+  const accs = getAccounts();
+  accs[key] = accData;
+  saveAccounts(accs);
+  // If this is the currently logged-in user, update their live session
   if (user && user.name.toLowerCase() === key) {
     user.isReporter = accData.isReporter;
     localSet('gdlg_user', user);
@@ -2821,14 +2839,6 @@ async function loadModeCardBgs() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Patch showScreen so bgs refresh on every home visit
-  const _orig = window.showScreen;
-  if (typeof _orig === 'function') {
-    window.showScreen = function(id) {
-      _orig(id);
-      if (id === 'home') loadModeCardBgs();
-    };
-  }
   loadModeCardBgs();
 });
 </script>
