@@ -1097,26 +1097,21 @@ footer a:hover{color:var(--text)}
 
 </div>
 
-<!-- Firebase SDK -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, doc, setDoc, getDoc, collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
+<!-- Firebase SDK (compat) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
   const firebaseConfig = {
     apiKey: "AIzaSyAMxit5pG6NhRp3ifkAlQxPUH6C2d6zyaE",
     authDomain: "gdguess.firebaseapp.com",
     projectId: "gdguess",
     storageBucket: "gdguess.firebasestorage.app",
     messagingSenderId: "1083098835881",
-    appId: "1:1083098835881:web:31b24e1ad4478ae654b2b8",
-    measurementId: "G-SXR1Q7W5C7"
+    appId: "1:1083098835881:web:31b24e1ad4478ae654b2b8"
   };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  window._db = db;
+  firebase.initializeApp(firebaseConfig);
+  window._db = firebase.firestore();
   window._fbReady = true;
-  window._fbImports = { doc, setDoc, getDoc, collection, getDocs, query, orderBy, limit };
   console.log('Firebase ready');
 </script>
 
@@ -1135,15 +1130,14 @@ function lbSave(mode, entries) { localSet('lb_' + mode, entries); }
 async function lbSubmitCloud(mode, name, score) {
   if (!window._fbReady || isBanned(name)) return;
   try {
-    const { doc, setDoc, getDoc } = window._fbImports;
     const db = window._db;
-    const ref = doc(db, 'leaderboard_' + mode, name.toLowerCase());
-    const snap = await getDoc(ref);
-    const existing = snap.exists() ? snap.data().score : -1;
+    const ref = db.collection('leaderboard_' + mode).doc(name.toLowerCase());
+    const snap = await ref.get();
+    const existing = snap.exists ? snap.data().score : -1;
     if (score > existing) {
       const accs = getAccounts();
       const accData = accs[name.toLowerCase()] || {};
-      await setDoc(ref, {
+      await ref.set({
         name: name,
         score: score,
         isAdmin: !!accData.isAdmin,
@@ -1158,10 +1152,11 @@ async function lbSubmitCloud(mode, name, score) {
 async function lbGetAllCloud(mode) {
   if (!window._fbReady) return lbGetAll(mode);
   try {
-    const { collection, getDocs, query, orderBy, limit } = window._fbImports;
     const db = window._db;
-    const q = query(collection(db, 'leaderboard_' + mode), orderBy('score', 'desc'), limit(50));
-    const snap = await getDocs(q);
+    const snap = await db.collection('leaderboard_' + mode)
+      .orderBy('score', 'desc')
+      .limit(50)
+      .get();
     return snap.docs.map(d => d.data());
   } catch(e) {
     console.warn('Cloud LB fetch failed:', e);
