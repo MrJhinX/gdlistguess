@@ -1364,7 +1364,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (user) {
-      if (isBanned(user.name)) {
+      // Always refresh roles from Firebase on page load
+      const freshData = await getAccountCloud(user.name.toLowerCase());
+      if (freshData) {
+        user.isAdmin = !!freshData.isAdmin;
+        user.isReporter = !!freshData.isReporter;
+        user.pfp = freshData.pfp || user.pfp;
+        localSet('gdlg_user', user);
+      }
+      const banned = await isBannedCloud(user.name);
+      if (banned) {
         user = null;
         localDel('gdlg_user');
         showScreen('login-screen');
@@ -1454,7 +1463,11 @@ async function doLogin() {
     if (accData.passHash !== ph) {
       err.textContent = 'Incorrect password.'; err.style.display = 'block'; btn.disabled = false; btn.textContent = 'Sign In / Register →'; return;
     }
+    // Always use fresh cloud data for roles
     user = { name: accData.name, isAdmin: !!accData.isAdmin, isReporter: !!accData.isReporter, pfp: accData.pfp || null, stats: localGet('gdlg_stats_' + accData.name) || { classic: 0, position: 0, versus: 0 } };
+    // Update local cache with fresh cloud data
+    const accs2 = getAccounts(); accs2[key] = accData; saveAccounts(accs2);
+    localSet('gdlg_user', user);
   } else {
     // New account — register
     accData = { name: raw, passHash: ph, isAdmin: false, isReporter: false, pfp: null };
