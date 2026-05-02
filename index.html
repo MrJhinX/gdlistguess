@@ -1153,11 +1153,20 @@ async function lbGetAllCloud(mode) {
   if (!window._fbReady) return lbGetAll(mode);
   try {
     const db = window._db;
-    const snap = await db.collection('leaderboard_' + mode)
-      .orderBy('score', 'desc')
-      .limit(50)
-      .get();
-    return snap.docs.map(d => d.data());
+    let snap;
+    try {
+      snap = await db.collection('leaderboard_' + mode)
+        .orderBy('score', 'desc')
+        .limit(50)
+        .get();
+    } catch(e) {
+      // orderBy may fail if index not ready — fall back to unordered
+      snap = await db.collection('leaderboard_' + mode).limit(50).get();
+    }
+    if (snap.empty) return lbGetAll(mode);
+    const results = snap.docs.map(d => d.data());
+    results.sort((a, b) => b.score - a.score);
+    return results;
   } catch(e) {
     console.warn('Cloud LB fetch failed:', e);
     return lbGetAll(mode);
