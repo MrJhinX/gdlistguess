@@ -402,7 +402,7 @@ input[type=range]::-webkit-slider-thumb:hover{box-shadow:0 0 0 6px var(--accent-
 .history-row .h-pos{font-family:var(--mono);font-size:.68rem;color:var(--muted)}
 
 /* ── LEADERBOARD ── */
-#lb-screen{max-width:600px}
+#lb-screen{max-width:900px}
 .lb-title{font-family:var(--cond);font-size:1.8rem;font-weight:900;letter-spacing:.04em;text-transform:uppercase;align-self:flex-start}
 .lb-tabs{display:flex;gap:6px;width:100%;flex-wrap:wrap}
 .lb-tab{
@@ -412,6 +412,39 @@ input[type=range]::-webkit-slider-thumb:hover{box-shadow:0 0 0 6px var(--accent-
 }
 .lb-tab.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
 .lb-list{width:100%;display:flex;flex-direction:column;gap:6px}
+.lb-main-layout{width:100%;display:flex;gap:18px;align-items:flex-start}
+.lb-left{flex:1;min-width:0;display:flex;flex-direction:column;gap:10px}
+.lb-side-panel{
+  width:220px;flex-shrink:0;background:var(--s1);border:1px solid var(--border);
+  border-radius:var(--r2);padding:16px 14px;display:flex;flex-direction:column;gap:14px;
+  position:sticky;top:72px;
+}
+.lb-side-title{
+  font-family:var(--cond);font-size:.95rem;font-weight:800;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--text);border-bottom:1px solid var(--border);
+  padding-bottom:10px;
+}
+.lb-side-section{display:flex;flex-direction:column;gap:7px}
+.lb-side-role-label{
+  font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;
+  font-weight:700;padding:2px 8px;border-radius:100px;align-self:flex-start;
+}
+.lb-side-role-label.admin{background:var(--red-dim);color:var(--red);border:1px solid rgba(255,79,79,.2)}
+.lb-side-role-label.reporter{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(79,159,255,.2)}
+.lb-side-role-label.helper{background:rgba(57,232,122,.1);color:var(--helper);border:1px solid rgba(57,232,122,.2)}
+.lb-side-user{display:flex;align-items:center;gap:9px}
+.lb-side-avatar{
+  width:28px;height:28px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--cond);font-size:.78rem;font-weight:800;
+}
+.lb-side-name{font-family:var(--mono);font-size:.76rem;font-weight:600;color:var(--text);line-height:1.2}
+.lb-side-desc{font-family:var(--mono);font-size:.6rem;color:var(--muted);line-height:1.3}
+.lb-side-empty{font-family:var(--mono);font-size:.7rem;color:var(--muted);padding:4px 0}
+@media(max-width:700px){
+  .lb-main-layout{flex-direction:column}
+  .lb-side-panel{width:100%;position:static}
+}
 .lb-row{
   display:flex;align-items:center;gap:14px;
   background:var(--s1);border:1px solid var(--border);border-radius:var(--r);
@@ -874,35 +907,6 @@ footer a:hover{color:var(--text)}
       </div>
     </div>
 
-    <!-- CREDITS MODAL -->
-    <div class="modal-overlay" id="credits-modal" onclick="if(event.target===this)this.classList.remove('show')">
-      <div class="modal-box" style="width:340px">
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <div style="display:flex;align-items:center;gap:8px">
-            <span class="info-panel-icon credits" style="font-family:var(--cond);font-size:1.1rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase">Credits</span>
-          </div>
-          <button onclick="document.getElementById('credits-modal').classList.remove('show')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;line-height:1;padding:2px 6px;border-radius:4px;transition:color .15s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">✕</button>
-        </div>
-        <div class="credits-row">
-          <div class="credit-item">
-            <span class="credit-role admin">Admin</span>
-            <span class="credit-name">kyoumi</span>
-          </div>
-          <div class="credit-item" style="flex-direction:column;align-items:flex-start;gap:4px">
-            <span class="credit-role reporter">Reporters</span>
-            <span class="credit-names">icaka &nbsp;·&nbsp; skyght &nbsp;·&nbsp; teesen &nbsp;·&nbsp; kostya</span>
-          </div>
-          <div class="credit-item" style="flex-direction:column;align-items:flex-start;gap:4px">
-            <span class="credit-role" style="background:rgba(57,232,122,.1);color:var(--helper);border:1px solid rgba(57,232,122,.2)">Helpers</span>
-            <span class="credit-names" id="credits-helpers-list">—</span>
-          </div>
-        </div>
-        <div class="info-panel-footer" style="margin-top:2px">
-          for any further information... well you don't need it.
-        </div>
-      </div>
-    </div>
-
     <div class="err-box" id="home-err" style="display:none">Could not load the Demonlist. Check your connection.</div>
   </div>
 
@@ -1059,13 +1063,58 @@ footer a:hover{color:var(--text)}
   <!-- LEADERBOARD -->
   <div class="screen" id="lb-screen">
     <div class="lb-title">Leaderboard</div>
-    <div class="lb-tabs">
-      <button class="lb-tab active" onclick="switchLbTab('classic')">Classic</button>
-      <button class="lb-tab" onclick="switchLbTab('position')">Rank Guess</button>
-      <button class="lb-tab" onclick="switchLbTab('versus')">Versus</button>
-      <button class="lb-tab" onclick="switchLbTab('daily')">Daily</button>
+    <div class="lb-main-layout">
+      <!-- Left: tabs + list -->
+      <div class="lb-left">
+        <div class="lb-tabs">
+          <button class="lb-tab active" onclick="switchLbTab('classic')">Classic</button>
+          <button class="lb-tab" onclick="switchLbTab('position')">Rank Guess</button>
+          <button class="lb-tab" onclick="switchLbTab('versus')">Versus</button>
+          <button class="lb-tab" onclick="switchLbTab('daily')">Daily</button>
+        </div>
+        <div class="lb-list" id="lb-list"><div class="lb-empty">Loading…</div></div>
+      </div>
+      <!-- Right: special users panel -->
+      <div class="lb-side-panel">
+        <div class="lb-side-title">Special Users</div>
+        <div class="lb-side-section">
+          <div class="lb-side-role-label admin">🛠 Admin</div>
+          <div class="lb-side-user">
+            <div class="lb-side-avatar" style="background:var(--red-dim);color:var(--red);border:1px solid rgba(255,79,79,.25)">K</div>
+            <div>
+              <div class="lb-side-name">KyoumiEU</div>
+              <div class="lb-side-desc">Creator &amp; Developer</div>
+            </div>
+          </div>
+        </div>
+        <div class="lb-side-section">
+          <div class="lb-side-role-label reporter">✔ Reporters</div>
+          <div class="lb-side-user">
+            <div class="lb-side-avatar" style="background:var(--blue-dim);color:var(--blue);border:1px solid rgba(79,159,255,.25)">I</div>
+            <div><div class="lb-side-name">icaka</div><div class="lb-side-desc">Reporter</div></div>
+          </div>
+          <div class="lb-side-user">
+            <div class="lb-side-avatar" style="background:var(--blue-dim);color:var(--blue);border:1px solid rgba(79,159,255,.25)">S</div>
+            <div><div class="lb-side-name">Skyght</div><div class="lb-side-desc">Playtester &amp; Reporter</div></div>
+          </div>
+          <div class="lb-side-user">
+            <div class="lb-side-avatar" style="background:var(--blue-dim);color:var(--blue);border:1px solid rgba(79,159,255,.25)">T</div>
+            <div><div class="lb-side-name">teesen</div><div class="lb-side-desc">Reporter</div></div>
+          </div>
+          <div class="lb-side-user">
+            <div class="lb-side-avatar" style="background:var(--blue-dim);color:var(--blue);border:1px solid rgba(79,159,255,.25)">K</div>
+            <div><div class="lb-side-name">kostya</div><div class="lb-side-desc">Reporter</div></div>
+          </div>
+        </div>
+        <div class="lb-side-section">
+          <div class="lb-side-role-label helper">✔ Helpers</div>
+          <div id="lb-side-helpers-list">
+            <!-- populated from Firebase on load -->
+            <div class="lb-side-empty">Loading…</div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="lb-list" id="lb-list"><div class="lb-empty">Loading…</div></div>
     <button class="btn-ghost" onclick="goHome()">← Back</button>
   </div>
 
@@ -1125,6 +1174,47 @@ footer a:hover{color:var(--text)}
     </div>
 
     <button class="btn-ghost" onclick="goHome()">← Back to Home</button>
+  </div>
+
+  <!-- CREDITS MODAL — lives outside any .screen so it shows from any tab -->
+  <div class="modal-overlay" id="credits-modal" onclick="if(event.target===this)this.classList.remove('show')">
+    <div class="modal-box" style="width:360px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <span style="font-family:var(--cond);font-size:1.1rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase">Credits</span>
+        <button onclick="document.getElementById('credits-modal').classList.remove('show')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;line-height:1;padding:2px 6px;border-radius:4px;transition:color .15s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">✕</button>
+      </div>
+      <div class="credits-row">
+        <div class="credit-item">
+          <span class="credit-role admin">🛠 Admin</span>
+          <span class="credit-name">KyoumiEU</span>
+          <span class="credit-names" style="margin-left:auto">Creator &amp; Developer</span>
+        </div>
+        <div class="credit-item" style="flex-direction:column;align-items:flex-start;gap:6px">
+          <span class="credit-role reporter">✔ Reporters</span>
+          <div style="display:flex;flex-direction:column;gap:4px;width:100%;padding-left:4px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span class="credit-name">icaka</span><span class="credit-names">Reporter</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span class="credit-name">Skyght</span><span class="credit-names">Playtester &amp; Reporter</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span class="credit-name">teesen</span><span class="credit-names">Reporter</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span class="credit-name">kostya</span><span class="credit-names">Reporter</span>
+            </div>
+          </div>
+        </div>
+        <div class="credit-item" style="flex-direction:column;align-items:flex-start;gap:6px">
+          <span class="credit-role" style="background:rgba(57,232,122,.1);color:var(--helper);border:1px solid rgba(57,232,122,.2)">✔ Helpers</span>
+          <span class="credit-names" id="credits-helpers-list" style="padding-left:4px;line-height:1.8">—</span>
+        </div>
+      </div>
+      <div class="info-panel-footer" style="margin-top:6px">
+        for any further information... well you don't need it.
+      </div>
+    </div>
   </div>
 </main>
 
@@ -1736,6 +1826,31 @@ function showLeaderboard() {
     t.classList.toggle('active', i === 0);
   });
   currentLbTab = 'classic';
+  // Populate side panel helpers list from Firebase
+  populateLbSideHelpers();
+}
+
+async function populateLbSideHelpers() {
+  const container = document.getElementById('lb-side-helpers-list');
+  if (!container) return;
+  try {
+    const accs = await getAllAccountsCloud();
+    const helpers = Object.values(accs).filter(a => a.isHelper && !a.isAdmin && !a.isReporter);
+    if (!helpers.length) {
+      container.innerHTML = '<div class="lb-side-empty">None yet.</div>';
+      return;
+    }
+    container.innerHTML = helpers.map(h => `
+      <div class="lb-side-user">
+        <div class="lb-side-avatar" style="background:rgba(57,232,122,.1);color:var(--helper);border:1px solid rgba(57,232,122,.2)">${h.name[0].toUpperCase()}</div>
+        <div><div class="lb-side-name">${h.name}</div><div class="lb-side-desc">Helper</div></div>
+      </div>`).join('');
+    // Also update credits modal helpers list
+    const credEl = document.getElementById('credits-helpers-list');
+    if (credEl) credEl.textContent = helpers.map(h => h.name).join(' · ') || '—';
+  } catch(e) {
+    if (container) container.innerHTML = '<div class="lb-side-empty">—</div>';
+  }
 }
 
 // ══════════════════════════════════════
