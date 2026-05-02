@@ -22,9 +22,9 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#07080a;
-  --s1:#0d0f12;
-  --s2:#131518;
+  --bg:rgba(7,8,10,0.78);
+  --s1:rgba(13,15,18,0.82);
+  --s2:rgba(19,21,24,0.88);
   --border:#1e2024;
   --border2:#2a2d32;
   --text:#f0f0ee;
@@ -48,12 +48,46 @@
   --r:8px;
   --r2:12px;
 }
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+html,body{height:100%;background:transparent;color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+
+/* ── VIDEO BACKGROUND ── */
+#video-bg-wrap{
+  position:fixed;inset:0;z-index:0;
+  overflow:hidden;pointer-events:none;
+  background:#07080a;
+}
+#video-bg-wrap #yt-player-div{
+  position:absolute;
+  top:50%;left:50%;
+  /* Keep 16:9 ratio and always cover the viewport */
+  width:calc(max(100vw, 100vh * 16 / 9));
+  height:calc(max(100vh, 100vw * 9 / 16));
+  transform:translate(-50%,-50%);
+  opacity:0;
+  filter:blur(3px) saturate(0.5);
+  pointer-events:none;
+  transition:opacity 1.5s ease;
+}
+#video-bg-wrap #yt-player-div.playing{
+  opacity:0.35;
+}
+/* iframe injected by YT API inherits parent size */
+#video-bg-wrap #yt-player-div iframe{
+  width:100% !important;
+  height:100% !important;
+  border:none;
+}
+/* Dark overlay so text stays readable */
+#video-bg-wrap::after{
+  content:'';position:absolute;inset:0;
+  background:rgba(7,8,10,.55);
+}
+#app{position:relative;z-index:1}
 
 /* ── LOADING SCREEN ── */
 #glitch-loader{
   position:fixed;inset:0;z-index:99999;
-  background:var(--bg);
+  background:#07080a;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:32px;
   transition:opacity .5s ease, visibility .5s ease;
@@ -894,39 +928,6 @@ footer a:hover{color:var(--text)}
   cursor:pointer;transition:all .15s;
 }
 .btn-unban:hover{background:rgba(200,255,87,.15)}
-.btn-admin-make-admin{
-  background:rgba(255,79,79,.08);border:1px solid rgba(255,79,79,.25);color:var(--red);
-  padding:5px 10px;border-radius:6px;font-family:var(--mono);font-size:.65rem;
-  cursor:pointer;transition:all .15s;font-weight:600;
-}
-.btn-admin-make-admin:hover{background:rgba(255,79,79,.18)}
-.btn-admin-ip-ban{
-  background:rgba(255,100,0,.08);border:1px solid rgba(255,100,0,.25);color:#ff6400;
-  padding:5px 10px;border-radius:6px;font-family:var(--mono);font-size:.65rem;
-  cursor:pointer;transition:all .15s;font-weight:600;
-}
-.btn-admin-ip-ban:hover{background:rgba(255,100,0,.2)}
-.users-search-wrap{
-  width:100%;position:relative;margin-bottom:2px;
-}
-.users-search-input{
-  width:100%;background:var(--s2);border:1px solid var(--border2);
-  border-radius:var(--r);padding:9px 14px 9px 36px;color:var(--text);
-  font-family:var(--mono);font-size:.8rem;outline:none;transition:border-color .15s;
-}
-.users-search-input:focus{border-color:rgba(255,79,79,.4)}
-.users-search-input::placeholder{color:var(--muted2)}
-.users-search-icon{
-  position:absolute;left:12px;top:50%;transform:translateY(-50%);
-  color:var(--muted);font-size:.75rem;pointer-events:none;
-}
-.ip-ban-row{
-  display:flex;align-items:center;gap:12px;
-  background:rgba(255,100,0,.04);border:1px solid rgba(255,100,0,.18);border-radius:var(--r);
-  padding:10px 14px;
-}
-.ip-ban-name{flex:1;font-family:var(--mono);font-size:.82rem;color:#ff6400}
-.ip-ban-ip{font-family:var(--mono);font-size:.7rem;color:var(--muted)}
 .admin-nav-btn{
   background:none;border:1px solid rgba(255,79,79,.3);color:var(--red);
   padding:6px 14px;border-radius:100px;font-family:var(--sans);
@@ -1142,6 +1143,11 @@ footer a:hover{color:var(--text)}
 </head>
 <body>
 
+<!-- ── VIDEO BACKGROUND ── -->
+<div id="video-bg-wrap">
+  <div id="yt-player-div"></div>
+</div>
+
 <!-- ── GLITCH LOADING SCREEN ── -->
 <div id="glitch-loader">
   <canvas id="gl-canvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0"></canvas>
@@ -1166,7 +1172,7 @@ footer a:hover{color:var(--text)}
     <button class="nav-btn admin-nav-btn" id="admin-nav-btn" onclick="showAdmin()" style="display:none">⚙ Admin</button>
     <button class="nav-btn" id="announce-nav-btn" onclick="showAdmin()" style="display:none;border-color:rgba(57,232,122,.4);color:var(--helper)">📢 Announce</button>
     <button class="nav-btn" id="report-nav-btn" onclick="openReportModal()" style="display:none;border-color:rgba(79,159,255,.4);color:var(--blue)">⚑ Report</button>
-    <button class="nav-btn" onclick="document.getElementById('credits-modal').classList.add('show')">Credits</button>
+    <button class="nav-btn" onclick="openCreditsModal()">Credits</button>
     <button class="nav-btn" id="lb-nav-btn" onclick="showLeaderboard()">Leaderboard</button>
     <div class="user-chip" id="user-chip" onclick="openPfpModal()" style="display:none" title="Customize profile">
       <div class="user-avatar-lg" id="user-av"></div>
@@ -2071,6 +2077,8 @@ document.addEventListener('DOMContentLoaded', () => {
   })();
 
   buildPfpGrids();
+  // Load credits from Firestore on boot so the modal reflects the latest saved data
+  loadCreditsFromCloud();
 
   (async () => {
     user = localGet('gdlg_user');
@@ -3500,57 +3508,18 @@ async function loadAdminLb(mode) {
 async function loadAdminBans() {
   const list = document.getElementById('admin-list');
   list.innerHTML = '<div class="admin-empty">Loading…</div>';
-  const [bans, ipBansDoc] = await Promise.all([
-    getBansCloud(),
-    window._db.collection('config').doc('ip_bans').get().catch(() => null)
-  ]);
-  const ipBans = (ipBansDoc && ipBansDoc.exists) ? (ipBansDoc.data().items || []) : [];
-  if (!bans.length && !ipBans.length) { list.innerHTML = '<div class="admin-empty">No banned users.</div>'; return; }
+  const bans = await getBansCloud();
+  if (!bans.length) { list.innerHTML = '<div class="admin-empty">No banned users.</div>'; return; }
   list.innerHTML = '';
-
-  if (bans.length) {
-    const sec = document.createElement('div');
-    sec.style.cssText = 'width:100%;font-family:var(--mono);font-size:.62rem;color:var(--red);text-transform:uppercase;letter-spacing:.1em;padding:4px 0 6px;border-bottom:1px solid rgba(255,79,79,.2);margin-bottom:4px';
-    sec.textContent = `🚫 Profile Bans (${bans.length})`;
-    list.appendChild(sec);
-    bans.forEach(name => {
-      const row = document.createElement('div');
-      row.className = 'banned-row';
-      row.innerHTML = `
-        <span class="banned-name">🚫 ${name}</span>
-        <button class="btn-unban" onclick="adminUnban('${name}')">Unban</button>
-      `;
-      list.appendChild(row);
-    });
-  }
-
-  if (ipBans.length) {
-    const sec = document.createElement('div');
-    sec.style.cssText = 'width:100%;font-family:var(--mono);font-size:.62rem;color:#ff6400;text-transform:uppercase;letter-spacing:.1em;padding:8px 0 6px;border-bottom:1px solid rgba(255,100,0,.2);margin-bottom:4px;margin-top:8px';
-    sec.textContent = `🛑 IP Bans (${ipBans.length})`;
-    list.appendChild(sec);
-    ipBans.forEach(b => {
-      const row = document.createElement('div');
-      row.className = 'ip-ban-row';
-      row.innerHTML = `
-        <span class="ip-ban-name">🛑 ${b.displayName || b.name}</span>
-        <span class="ip-ban-ip">${b.ip || 'unknown'}${b.date ? ' · ' + b.date : ''}</span>
-        <button class="btn-unban" style="background:rgba(255,100,0,.08);border-color:rgba(255,100,0,.25);color:#ff6400" onclick="adminRemoveIpBan('${b.name}')">Remove</button>
-      `;
-      list.appendChild(row);
-    });
-  }
-}
-
-async function adminRemoveIpBan(name) {
-  try {
-    const doc = await window._db.collection('config').doc('ip_bans').get();
-    let ipBans = doc.exists ? (doc.data().items || []) : [];
-    ipBans = ipBans.filter(b => b.name !== name.toLowerCase());
-    await window._db.collection('config').doc('ip_bans').set({ items: ipBans });
-    toast(`IP ban removed for ${name}.`, 'ok');
-    loadAdminBans();
-  } catch(e) { toast('Error: ' + e.message, 'err'); }
+  bans.forEach(name => {
+    const row = document.createElement('div');
+    row.className = 'banned-row';
+    row.innerHTML = `
+      <span class="banned-name">🚫 ${name}</span>
+      <button class="btn-unban" onclick="adminUnban('${name}')">Unban</button>
+    `;
+    list.appendChild(row);
+  });
 }
 
 async function adminRemove(mode, name) {
@@ -3703,83 +3672,41 @@ function submitReport() {
 }
 
 // Admin: load users tab
-let _adminUsersCache = null;
-let _adminReportsCache = null;
-
 async function loadAdminUsers() {
   const list = document.getElementById('admin-list');
   list.innerHTML = '<div class="admin-empty">Loading users…</div>';
   const accs = await getAllAccountsCloud();
+  // Also update local cache
   saveAccounts(accs);
   const reports = await getReportsCloud();
-  _adminUsersCache = accs;
-  _adminReportsCache = reports;
-  renderAdminUsers('');
-}
-
-function renderAdminUsers(query) {
-  const list = document.getElementById('admin-list');
-  const accs = _adminUsersCache;
-  const reports = _adminReportsCache;
-  if (!accs) return;
   const keys = Object.keys(accs);
-  if (!keys.length) { list.innerHTML = '<div class="users-search-wrap"><span class="users-search-icon">🔍</span><input class="users-search-input" placeholder="Search users…" oninput="renderAdminUsers(this.value)" value="'+query+'"/></div><div class="admin-empty">No accounts registered.</div>'; return; }
-
+  if (!keys.length) { list.innerHTML = '<div class="admin-empty">No accounts registered.</div>'; return; }
   list.innerHTML = '';
 
-  // Search bar always at top
-  const searchWrap = document.createElement('div');
-  searchWrap.className = 'users-search-wrap';
-  searchWrap.innerHTML = `<span class="users-search-icon">🔍</span><input class="users-search-input" placeholder="Search users…" oninput="renderAdminUsers(this.value)" value="${query.replace(/"/g,'&quot;')}"/>`;
-  list.appendChild(searchWrap);
-  // Focus preserved if user was typing
-  if (query) { setTimeout(() => { const inp = list.querySelector('.users-search-input'); if(inp){inp.focus();inp.setSelectionRange(inp.value.length,inp.value.length);} }, 0); }
-
-  const q = query.toLowerCase().trim();
-
-  // Pending reports section (only show when not searching)
-  if (!q && reports) {
-    const pending = reports.filter(r => r.status === 'pending');
-    if (pending.length) {
-      const sec = document.createElement('div');
-      sec.style.cssText = 'width:100%;font-family:var(--mono);font-size:.62rem;color:var(--blue);text-transform:uppercase;letter-spacing:.1em;padding:6px 0 4px;border-bottom:1px solid rgba(79,159,255,.2);margin-bottom:4px';
-      sec.textContent = `⚑ Pending Reports (${pending.length})`;
-      list.appendChild(sec);
-      pending.forEach(r => {
-        const row = document.createElement('div');
-        row.style.cssText = 'display:flex;align-items:center;gap:10px;background:rgba(79,159,255,.06);border:1px solid rgba(79,159,255,.18);border-radius:8px;padding:9px 12px;margin-bottom:5px;';
-        row.innerHTML = `
-          <span style="font-family:var(--mono);font-size:.73rem;flex:1;color:var(--text)"><b>${r.target}</b> — <span style="color:var(--muted)">${r.reason.replace(/_/g,' ')}</span><br/><span style="color:var(--muted);font-size:.63rem">by ${r.reporter} on ${r.date}${r.details ? ' · '+r.details : ''}</span></span>
-          <button class="btn-admin-ban" onclick="adminBan('${r.target}');resolveReport(${r.id},'banned')">Ban</button>
-          <button class="btn-admin-edit" style="background:rgba(200,255,87,.06);border-color:rgba(200,255,87,.2);color:var(--accent)" onclick="resolveReport(${r.id},'dismissed')">Dismiss</button>
-        `;
-        list.appendChild(row);
-      });
-      const sep = document.createElement('div');
-      sep.style.cssText = 'width:100%;font-family:var(--mono);font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;padding:8px 0 4px;border-bottom:1px solid var(--border);margin-bottom:4px';
-      sep.textContent = 'All Accounts';
-      list.appendChild(sep);
-    }
+  // Pending reports section
+  const pending = reports.filter(r => r.status === 'pending');
+  if (pending.length) {
+    const sec = document.createElement('div');
+    sec.style.cssText = 'width:100%;font-family:var(--mono);font-size:.62rem;color:var(--blue);text-transform:uppercase;letter-spacing:.1em;padding:6px 0 4px;border-bottom:1px solid rgba(79,159,255,.2);margin-bottom:4px';
+    sec.textContent = `⚑ Pending Reports (${pending.length})`;
+    list.appendChild(sec);
+    pending.forEach(r => {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:10px;background:rgba(79,159,255,.06);border:1px solid rgba(79,159,255,.18);border-radius:8px;padding:9px 12px;margin-bottom:5px;';
+      row.innerHTML = `
+        <span style="font-family:var(--mono);font-size:.73rem;flex:1;color:var(--text)"><b>${r.target}</b> — <span style="color:var(--muted)">${r.reason.replace(/_/g,' ')}</span><br/><span style="color:var(--muted);font-size:.63rem">by ${r.reporter} on ${r.date}${r.details ? ' · '+r.details : ''}</span></span>
+        <button class="btn-admin-ban" onclick="adminBan('${r.target}');resolveReport(${r.id},'banned')">Ban</button>
+        <button class="btn-admin-edit" style="background:rgba(200,255,87,.06);border-color:rgba(200,255,87,.2);color:var(--accent)" onclick="resolveReport(${r.id},'dismissed')">Dismiss</button>
+      `;
+      list.appendChild(row);
+    });
+    const sep = document.createElement('div');
+    sep.style.cssText = 'width:100%;font-family:var(--mono);font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;padding:8px 0 4px;border-bottom:1px solid var(--border);margin-bottom:4px';
+    sep.textContent = 'All Accounts';
+    list.appendChild(sep);
   }
 
-  const filtered = keys.filter(k => !q || accs[k].name.toLowerCase().includes(q) || k.includes(q));
-
-  if (!filtered.length) {
-    const empty = document.createElement('div');
-    empty.className = 'admin-empty';
-    empty.textContent = 'No users match "' + query + '"';
-    list.appendChild(empty);
-    return;
-  }
-
-  if (q) {
-    const countEl = document.createElement('div');
-    countEl.style.cssText = 'font-family:var(--mono);font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;padding:4px 0 6px';
-    countEl.textContent = `${filtered.length} result${filtered.length !== 1 ? 's' : ''} for "${query}"`;
-    list.appendChild(countEl);
-  }
-
-  filtered.forEach(k => {
+  keys.forEach(k => {
     const acc = accs[k];
     const row = document.createElement('div');
     row.className = 'lb-row-admin';
@@ -3787,14 +3714,15 @@ function renderAdminUsers(query) {
     if (acc.isAdmin) badges.push('<span style="color:var(--red);font-size:.6rem;font-family:var(--mono);background:var(--red-dim);border:1px solid rgba(255,79,79,.2);border-radius:4px;padding:1px 6px">🛠 ADMIN</span>');
     if (acc.isReporter) badges.push('<span style="color:var(--blue);font-size:.6rem;font-family:var(--mono);background:rgba(79,159,255,.1);border:1px solid rgba(79,159,255,.2);border-radius:4px;padding:1px 6px">✔ REPORTER</span>');
     if (acc.isHelper) badges.push('<span style="color:var(--helper);font-size:.6rem;font-family:var(--mono);background:rgba(57,232,122,.1);border:1px solid rgba(57,232,122,.2);border-radius:4px;padding:1px 6px">✔ HELPER</span>');
-    const isSelf = user && user.name.toLowerCase() === k;
     row.innerHTML = `
-      <span class="lb-name-admin">${acc.name} ${badges.join(' ')}${isSelf ? '<span style="font-family:var(--mono);font-size:.55rem;color:var(--muted);margin-left:4px">(you)</span>' : ''}</span>
+      <span class="lb-name-admin">${acc.name} ${badges.join(' ')}</span>
       <div class="admin-action-btns">
-        ${!acc.isAdmin ? `<button class="btn-admin-make-admin" onclick="adminToggleAdmin('${k}')" title="Promote to Admin">Make Admin</button>` : `<button class="btn-admin-make-admin" onclick="adminToggleAdmin('${k}')" title="Remove Admin">Remove Admin</button>`}
-        ${!acc.isAdmin ? `<button class="btn-admin-edit" onclick="adminToggleReporter('${k}')">${acc.isReporter ? 'Remove Reporter' : 'Make Reporter'}</button>` : ''}
-        ${!acc.isAdmin ? `<button class="btn-admin-edit" onclick="adminToggleHelper('${k}')" style="background:rgba(57,232,122,.08);border-color:rgba(57,232,122,.25);color:var(--helper)">${acc.isHelper ? 'Remove Helper' : 'Make Helper'}</button>` : ''}
-        ${!acc.isAdmin ? `<button class="btn-admin-ip-ban" onclick="adminIpBan('${acc.name}')" title="IP Ban">IP Ban</button>` : ''}
+        ${!acc.isAdmin ? `<button class="btn-admin-edit" onclick="adminToggleReporter('${k}')">
+          ${acc.isReporter ? 'Remove Reporter' : 'Make Reporter'}
+        </button>` : ''}
+        ${!acc.isAdmin ? `<button class="btn-admin-edit" onclick="adminToggleHelper('${k}')" style="background:rgba(57,232,122,.08);border-color:rgba(57,232,122,.25);color:var(--helper)">
+          ${acc.isHelper ? 'Remove Helper' : 'Make Helper'}
+        </button>` : ''}
         ${!acc.isAdmin ? `<button class="btn-admin-ban" onclick="adminBan('${acc.name}')">Ban</button>` : ''}
       </div>
     `;
@@ -3863,68 +3791,6 @@ async function adminToggleHelper(key) {
   }
   toast(accData.isHelper ? `${accData.name} granted Helper role.` : `Helper role removed from ${accData.name}.`, 'ok');
   loadAdminUsers();
-}
-
-async function adminToggleAdmin(key) {
-  const accData = await getAccountCloud(key);
-  if (!accData) { toast('User not found in database.', 'err'); return; }
-  // Prevent self-demotion
-  if (user && user.name.toLowerCase() === key && accData.isAdmin) {
-    if (!confirm('Are you sure you want to remove your own Admin role? You will lose access to the admin panel.')) return;
-  }
-  if (!accData.isAdmin) {
-    if (!confirm(`Grant ADMIN role to "${accData.name}"? They will have full admin panel access.`)) return;
-  }
-  accData.isAdmin = !accData.isAdmin;
-  // Admin can't simultaneously be reporter/helper
-  if (accData.isAdmin) { accData.isReporter = false; accData.isHelper = false; }
-  await saveAccountCloud(key, accData);
-  const accs = getAccounts();
-  accs[key] = accData;
-  saveAccounts(accs);
-  // Update LB docs
-  await Promise.all(['classic','position','versus','daily','duels'].map(async m => {
-    try {
-      const ref = window._db.collection('leaderboard_' + m).doc(key);
-      const snap = await ref.get();
-      if (snap.exists) await ref.update({ isAdmin: accData.isAdmin, isReporter: false, isHelper: false });
-    } catch(e) {}
-  }));
-  if (user && user.name.toLowerCase() === key) {
-    user.isAdmin = accData.isAdmin;
-    user.isReporter = accData.isReporter;
-    user.isHelper = accData.isHelper;
-    localSet('gdlg_user', user);
-    showUserChip();
-  }
-  toast(accData.isAdmin ? `${accData.name} is now an Admin! 🛠` : `Admin role removed from ${accData.name}.`, 'ok');
-  // Refresh cache
-  _adminUsersCache = await getAllAccountsCloud();
-  renderAdminUsers('');
-}
-
-async function adminIpBan(name) {
-  if (name.toLowerCase() === ADMIN_USER.toLowerCase()) { toast('Cannot IP ban admin.', 'err'); return; }
-  const ip = prompt(`Enter IP address to ban for user "${name}":\n(Leave blank to auto-log "unknown" — you can update it later)`);
-  if (ip === null) return; // cancelled
-  const ipEntry = ip.trim() || 'unknown';
-  try {
-    const doc = await window._db.collection('config').doc('ip_bans').get();
-    const ipBans = doc.exists ? (doc.data().items || []) : [];
-    const existing = ipBans.find(b => b.name.toLowerCase() === name.toLowerCase());
-    if (existing) {
-      existing.ip = ipEntry;
-      existing.date = todayStr();
-    } else {
-      ipBans.push({ name: name.toLowerCase(), displayName: name, ip: ipEntry, date: todayStr() });
-    }
-    await window._db.collection('config').doc('ip_bans').set({ items: ipBans });
-    toast(`IP ban applied to ${name} (${ipEntry}).`, 'ok');
-    // Also apply a regular ban so they can't log in by username either
-    await adminBan(name);
-  } catch(e) {
-    toast('Error saving IP ban: ' + e.message, 'err');
-  }
 }
 
 // ══════════════════════════════════════
@@ -4920,20 +4786,22 @@ function applyCreditsToModal(data) {
     }
   }
 
-  // ── Helpers
+  // ── Helpers — write into the container div, replacing the legacy plain-text span
   const helpersContainer = document.getElementById('credits-helpers-container');
   const helpersRow = document.getElementById('credits-helpers-row');
-  if (helpersContainer && members.length) {
+  if (helpersContainer) {
     const helpers = members.filter(m => m.role === 'helper');
     if (helpers.length) {
       helpersContainer.innerHTML = helpers.map(makeNameRow).join('');
       if (helpersRow) helpersRow.style.display = '';
-    } else {
-      // No helpers in the credits members list — try auto-populated account-based helpers
-      // (populated separately by the boot sequence). Hide row if truly empty.
+    } else if (!members.length) {
+      // No members array at all — keep whatever was auto-populated from accounts
       const legacyList = document.getElementById('credits-helpers-list');
       const hasLegacy = legacyList && legacyList.textContent.trim() && legacyList.textContent.trim() !== '—';
       if (helpersRow) helpersRow.style.display = hasLegacy ? '' : 'none';
+    } else {
+      // Members array exists but no helpers in it — hide the row
+      if (helpersRow) helpersRow.style.display = 'none';
     }
   }
 
@@ -4947,6 +4815,12 @@ async function loadCreditsFromCloud() {
     const snap = await window._db.collection('config').doc('credits').get();
     if (snap.exists) applyCreditsToModal(snap.data());
   } catch(e) {}
+}
+
+async function openCreditsModal() {
+  // Always pull fresh data from Firestore before showing so edits are visible immediately
+  await loadCreditsFromCloud();
+  document.getElementById('credits-modal').classList.add('show');
 }
 
 
@@ -5214,5 +5088,55 @@ setInterval(() => {
   })();
 })();
 </script>
+<!-- ── YOUTUBE BACKGROUND PLAYER ── -->
+<script>
+  var _ytBgPlayer = null;
+
+  function onYouTubeIframeAPIReady() {
+    _ytBgPlayer = new YT.Player('yt-player-div', {
+      videoId: '-nWE1tOM2KE',
+      playerVars: {
+        autoplay: 1,
+        mute: 1,
+        controls: 0,
+        showinfo: 0,
+        rel: 0,
+        modestbranding: 1,
+        iv_load_policy: 3,
+        disablekb: 1,
+        playsinline: 1,
+        start: 7,
+        origin: window.location.origin,
+      },
+      events: {
+        onReady: function(e) {
+          // Force dark background on the iframe itself to kill white flash
+          try {
+            var iframe = document.querySelector('#yt-player-div iframe');
+            if (iframe) {
+              iframe.style.background = '#07080a';
+              iframe.style.backgroundColor = '#07080a';
+            }
+          } catch(err) {}
+          e.target.mute();
+          e.target.seekTo(7);
+          e.target.playVideo();
+        },
+        onStateChange: function(e) {
+          if (e.data === YT.PlayerState.PLAYING) {
+            // Fade in only once video is actually rendering frames
+            var div = document.getElementById('yt-player-div');
+            if (div) div.classList.add('playing');
+          }
+          if (e.data === YT.PlayerState.ENDED) {
+            e.target.seekTo(7, true);
+            e.target.playVideo();
+          }
+        }
+      }
+    });
+  }
+</script>
+<script src="https://www.youtube.com/iframe_api" async></script>
 </body>
 </html>
