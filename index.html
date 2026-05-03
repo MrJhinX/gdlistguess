@@ -56,26 +56,17 @@ html,body{height:100%;background:transparent;color:var(--text);font-family:var(-
   overflow:hidden;pointer-events:none;
   background:#07080a;
 }
-#video-bg-wrap #yt-player-div{
+#yt-bg-iframe{
   position:absolute;
   top:50%;left:50%;
-  /* Keep 16:9 ratio and always cover the viewport */
   width:calc(max(100vw, 100vh * 16 / 9));
   height:calc(max(100vh, 100vw * 9 / 16));
   transform:translate(-50%,-50%);
-  opacity:0;
-  filter:blur(3px) saturate(0.5);
-  pointer-events:none;
-  transition:opacity 1.5s ease;
-}
-#video-bg-wrap #yt-player-div.playing{
   opacity:0.35;
-}
-/* iframe injected by YT API inherits parent size */
-#video-bg-wrap #yt-player-div iframe{
-  width:100% !important;
-  height:100% !important;
+  filter:blur(4px) saturate(0.5);
+  pointer-events:none;
   border:none;
+  object-fit:cover;
 }
 /* Dark overlay so text stays readable */
 #video-bg-wrap::after{
@@ -701,6 +692,142 @@ input[type=range]::-webkit-slider-thumb:hover{box-shadow:0 0 0 6px var(--accent-
 .lb-score{font-family:var(--mono);font-size:.8rem;color:var(--accent)}
 .lb-empty{font-family:var(--mono);font-size:.78rem;color:var(--muted);text-align:center;padding:32px}
 
+/* ── ONLINE INDICATOR ── */
+.online-dot{
+  display:inline-block;width:7px;height:7px;border-radius:50%;
+  background:#39e87a;box-shadow:0 0 5px #39e87a;
+  margin-left:5px;vertical-align:middle;flex-shrink:0;
+  animation:online-pulse 2s ease-in-out infinite;
+}
+@keyframes online-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+.lb-online-count{
+  font-family:var(--mono);font-size:.6rem;color:var(--helper);
+  display:flex;align-items:center;gap:5px;
+  padding:4px 10px;border-radius:100px;
+  background:rgba(57,232,122,.07);border:1px solid rgba(57,232,122,.18);
+}
+
+/* ── KYOUMI SELF-CREDIT CARD ── */
+.kyoumi-card{
+  border-top:1px solid var(--border);
+  padding-top:12px;
+  display:flex;flex-direction:column;gap:8px;
+}
+.kyoumi-header{
+  display:flex;align-items:center;gap:10px;
+  padding:3px 0;
+}
+.kyoumi-avatar{
+  width:28px;height:28px;border-radius:50%;flex-shrink:0;
+  background:var(--accent);color:#080a06;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--cond);font-size:.78rem;font-weight:900;
+}
+.kyoumi-info{flex:1}
+.kyoumi-name{font-family:var(--mono);font-size:.76rem;font-weight:600;color:var(--text);line-height:1.3;display:block}
+.kyoumi-roles{display:flex;gap:4px;flex-wrap:wrap;margin-top:3px}
+.kyoumi-role-tag{
+  font-family:var(--mono);font-size:.54rem;font-weight:700;
+  letter-spacing:.07em;text-transform:uppercase;
+  padding:2px 6px;border-radius:100px;
+}
+.kyoumi-links{display:flex;gap:6px}
+.kyoumi-link{
+  display:flex;align-items:center;justify-content:center;
+  background:var(--bg);border:1px solid var(--border2);
+  border-radius:var(--r);padding:6px 10px;
+  text-decoration:none;color:var(--muted);
+  font-family:var(--mono);font-size:.64rem;font-weight:600;
+  transition:all .15s;flex:1;
+}
+.kyoumi-link:hover{border-color:var(--border2);color:var(--text)}
+.kyoumi-link.yt:hover{border-color:rgba(255,69,69,.4);color:#ff4545;background:rgba(255,69,69,.06)}
+.kyoumi-link.dc:hover{border-color:rgba(114,137,218,.4);color:#7289da;background:rgba(114,137,218,.06)}
+
+/* ── OWNER PANEL ── */
+#owner-panel{
+  position:fixed;bottom:24px;left:24px;z-index:9991;
+  width:380px;
+  background:#07080a;
+  border:1.5px solid rgba(200,255,87,.45);
+  border-radius:12px;
+  box-shadow:0 0 32px rgba(200,255,87,.1),0 8px 32px rgba(0,0,0,.7);
+  font-family:var(--mono);
+  overflow:hidden;
+  display:none;
+}
+#owner-panel-header{
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(200,255,87,.07);
+  border-bottom:1px solid rgba(200,255,87,.18);
+  padding:9px 14px;cursor:pointer;user-select:none;
+}
+#owner-panel-header:hover{background:rgba(200,255,87,.12)}
+#owner-panel.collapsed #owner-panel-body{display:none}
+.op-title{
+  font-size:.62rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--accent);display:flex;align-items:center;gap:7px;
+}
+.op-dot{
+  width:7px;height:7px;border-radius:50%;background:var(--accent);
+  box-shadow:0 0 6px var(--accent);animation:dbg-pulse 1.8s ease-in-out infinite;
+}
+.op-toggle{color:var(--accent);font-size:.8rem;transition:transform .22s}
+#owner-panel.collapsed .op-toggle{transform:rotate(180deg)}
+#owner-panel-body{padding:12px 14px;display:flex;flex-direction:column;gap:11px}
+
+/* Cheat section */
+.op-section{
+  font-size:.56rem;color:rgba(200,255,87,.55);text-transform:uppercase;
+  letter-spacing:.14em;padding-bottom:4px;border-bottom:1px solid rgba(200,255,87,.1);
+}
+.op-row{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.op-btn{
+  font-family:var(--mono);font-size:.62rem;font-weight:600;
+  padding:4px 10px;border-radius:5px;cursor:pointer;
+  border:1px solid rgba(200,255,87,.28);
+  background:rgba(200,255,87,.06);color:var(--accent);
+  transition:all .15s;letter-spacing:.04em;white-space:nowrap;
+}
+.op-btn:hover{background:rgba(200,255,87,.16);border-color:var(--accent)}
+.op-btn.red{border-color:rgba(255,79,79,.28);background:rgba(255,79,79,.06);color:var(--red)}
+.op-btn.red:hover{background:rgba(255,79,79,.18);border-color:var(--red)}
+.op-btn.blue{border-color:rgba(79,159,255,.28);background:rgba(79,159,255,.06);color:var(--blue)}
+.op-btn.blue:hover{background:rgba(79,159,255,.18);border-color:var(--blue)}
+.op-score-row{display:flex;gap:5px;align-items:center}
+.op-score-inp{
+  width:70px;background:var(--bg);border:1px solid var(--border2);border-radius:5px;
+  padding:4px 8px;color:var(--text);font-family:var(--mono);font-size:.7rem;
+  outline:none;transition:border-color .15s;
+}
+.op-score-inp:focus{border-color:var(--accent)}
+.op-mode-sel{
+  background:var(--bg);border:1px solid var(--border2);border-radius:5px;
+  padding:4px 7px;color:var(--text);font-family:var(--mono);font-size:.62rem;
+  outline:none;cursor:pointer;
+}
+
+/* Console */
+.op-console{
+  background:var(--bg);border:1px solid var(--border2);border-radius:6px;
+  padding:6px 9px;font-size:.6rem;color:var(--muted);
+  height:100px;overflow-y:auto;line-height:1.7;
+  white-space:pre-wrap;word-break:break-all;
+  scroll-behavior:smooth;
+}
+.op-console .con-ok{color:var(--accent)}
+.op-console .con-err{color:var(--red)}
+.op-console .con-info{color:var(--blue)}
+.op-console .con-sys{color:var(--muted2)}
+.op-input-row{display:flex;gap:5px;align-items:center}
+.op-inp{
+  flex:1;background:var(--bg);border:1px solid rgba(200,255,87,.25);border-radius:5px;
+  padding:5px 8px;color:var(--accent);font-family:var(--mono);font-size:.68rem;
+  outline:none;transition:border-color .15s;min-width:0;
+}
+.op-inp::placeholder{color:var(--muted2)}
+.op-inp:focus{border-color:var(--accent)}
+
 /* ── LOGOUT CONFIRM ── */
 #logout-overlay{
   position:fixed;inset:0;background:rgba(7,8,10,.85);
@@ -1054,15 +1181,18 @@ footer a:hover{color:var(--text)}
 /* ── DEBUG PANEL ── */
 #debug-panel{
   position:fixed;bottom:24px;right:24px;z-index:9990;
-  width:320px;
+  width:370px;
+  max-height:92vh;
   background:#08090a;
   border:1.5px solid rgba(200,255,87,.5);
   border-radius:12px;
   box-shadow:0 0 28px rgba(200,255,87,.12),0 8px 32px rgba(0,0,0,.6);
   font-family:var(--mono);
   overflow:hidden;
+  display:flex;flex-direction:column;
 }
 #debug-panel.collapsed #debug-body{display:none}
+#debug-body{padding:12px 14px;display:flex;flex-direction:column;gap:9px;overflow-y:auto;max-height:85vh}
 #debug-panel-header{
   display:flex;align-items:center;justify-content:space-between;
   background:rgba(200,255,87,.07);
@@ -1085,7 +1215,6 @@ footer a:hover{color:var(--text)}
 @keyframes dbg-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.75)}}
 .dbg-toggle-icon{color:var(--accent);font-size:.8rem;transition:transform .22s}
 #debug-panel.collapsed .dbg-toggle-icon{transform:rotate(180deg)}
-#debug-body{padding:12px 14px;display:flex;flex-direction:column;gap:9px}
 .dbg-section{
   font-size:.56rem;color:rgba(200,255,87,.55);text-transform:uppercase;letter-spacing:.14em;
   padding-bottom:4px;border-bottom:1px solid rgba(200,255,87,.1);
@@ -1145,7 +1274,9 @@ footer a:hover{color:var(--text)}
 
 <!-- ── VIDEO BACKGROUND ── -->
 <div id="video-bg-wrap">
-  <div id="yt-player-div"></div>
+  <video id="yt-bg-iframe" autoplay muted loop playsinline>
+    <source src="videoplayback.mp4" type="video/mp4">
+  </video>
 </div>
 
 <!-- ── GLITCH LOADING SCREEN ── -->
@@ -1524,12 +1655,36 @@ footer a:hover{color:var(--text)}
           <button class="lb-tab" onclick="switchLbTab('daily')">Daily</button>
           <button class="lb-tab" onclick="switchLbTab('duels')">⚔ Duels</button>
         </div>
+        <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:6px">
+          <div class="lb-online-count" id="lb-online-count" style="display:none">
+            <div class="online-dot" style="animation:none;margin:0"></div>
+            <span id="lb-online-num">0</span> online
+          </div>
+        </div>
         <div class="lb-list" id="lb-list"><div class="lb-empty">Loading…</div></div>
       </div>
       <!-- Right: special users panel — fully dynamic from Firebase -->
       <div class="lb-side-panel">
         <div class="lb-side-title">Special Users</div>
         <div id="lb-side-content"><div class="lb-side-empty">Loading…</div></div>
+        <!-- KyoumiEU self-credit -->
+        <div class="kyoumi-card">
+          <div class="lb-side-role-label" style="background:var(--accent-dim);color:var(--accent);border:1px solid rgba(200,255,87,.2)">Site Owner</div>
+          <div class="kyoumi-header">
+            <div class="kyoumi-avatar">K</div>
+            <div class="kyoumi-info">
+              <span class="kyoumi-name">KyoumiEU</span>
+              <div class="kyoumi-roles">
+                <span class="kyoumi-role-tag" style="background:var(--red-dim);color:var(--red);border:1px solid rgba(255,79,79,.2)">Admin</span>
+                <span class="kyoumi-role-tag" style="background:var(--accent-dim);color:var(--accent);border:1px solid rgba(200,255,87,.2)">Dev</span>
+              </div>
+            </div>
+          </div>
+          <div class="kyoumi-links">
+            <a href="https://www.youtube.com/@KyoumiEU" target="_blank" rel="noopener" class="kyoumi-link yt">YouTube</a>
+            <a href="#" onclick="navigator.clipboard&&navigator.clipboard.writeText('kyoumiv');window.event&&window.event.preventDefault();var t=this;var orig=t.textContent;t.textContent='Copied!';setTimeout(()=>{t.textContent=orig;},1500);return false;" class="kyoumi-link dc">Discord</a>
+          </div>
+        </div>
       </div>
     </div>
     <button class="btn-ghost" onclick="goHome()">← Back</button>
@@ -1644,6 +1799,24 @@ footer a:hover{color:var(--text)}
       <div class="info-panel-footer" style="margin-top:6px">
         <span id="credits-footer-text">for any further information... well you don't need it.</span>
       </div>
+      <!-- KyoumiEU self-credit in credits modal -->
+      <div class="kyoumi-card" style="margin-top:2px">
+        <div class="lb-side-role-label" style="background:var(--accent-dim);color:var(--accent);border:1px solid rgba(200,255,87,.2)">Site Owner</div>
+        <div class="kyoumi-header">
+          <div class="kyoumi-avatar">K</div>
+          <div class="kyoumi-info">
+            <span class="kyoumi-name">KyoumiEU</span>
+            <div class="kyoumi-roles">
+              <span class="kyoumi-role-tag" style="background:var(--red-dim);color:var(--red);border:1px solid rgba(255,79,79,.2)">Admin</span>
+              <span class="kyoumi-role-tag" style="background:var(--accent-dim);color:var(--accent);border:1px solid rgba(200,255,87,.2)">Dev</span>
+            </div>
+          </div>
+        </div>
+        <div class="kyoumi-links">
+          <a href="https://www.youtube.com/@KyoumiEU" target="_blank" rel="noopener" class="kyoumi-link yt">YouTube</a>
+          <a href="#" onclick="navigator.clipboard&&navigator.clipboard.writeText('kyoumiv');window.event&&window.event.preventDefault();var btn=this;var orig=btn.textContent;btn.textContent='Copied!';setTimeout(()=>{btn.textContent=orig;},1500);return false;" class="kyoumi-link dc">Discord</a>
+        </div>
+      </div>
     </div>
   </div>
 </main>
@@ -1736,6 +1909,10 @@ footer a:hover{color:var(--text)}
 
 </div>
 
+<!-- ── OWNER PANEL — retired, cheats moved into Debug Console ── -->
+<div id="owner-panel" style="display:none"></div>
+
+
 <!-- ── DEBUG PANEL ── -->
 <div id="debug-panel" class="collapsed" style="display:none">
   <div id="debug-panel-header" onclick="dbgToggle()">
@@ -1806,6 +1983,48 @@ footer a:hover{color:var(--text)}
       Loads account from Firestore and signs in locally. No password needed.
     </div>
 
+    <div class="dbg-section" style="color:var(--accent);border-color:rgba(200,255,87,.2)">⚡ Cheats — Classic</div>
+    <div class="dbg-row">
+      <button class="dbg-btn" onclick="cheatReveal()" title="Fill correct answer into input">Fill Answer</button>
+      <button class="dbg-btn" onclick="cheatCorrect()" title="Force submit correct answer">Force Correct</button>
+      <button class="dbg-btn blue" onclick="cheatAutoWinClassic()" title="Auto-win all remaining rounds">Auto-Win All</button>
+      <button class="dbg-btn red" onclick="cheatSkipAll()">Skip All</button>
+    </div>
+
+    <div class="dbg-section" style="color:var(--accent);border-color:rgba(200,255,87,.2)">📍 Position &nbsp;|&nbsp; ⚔ Versus &nbsp;|&nbsp; 📅 Daily</div>
+    <div class="dbg-row">
+      <button class="dbg-btn" onclick="cheatPosPerfect()">Pos Perfect</button>
+      <button class="dbg-btn" onclick="cheatVsCorrect()">VS Correct</button>
+      <button class="dbg-btn" onclick="cheatDailyReveal()">Daily Reveal</button>
+      <button class="dbg-btn" onclick="cheatDailyWin()">Daily Win</button>
+    </div>
+
+    <div class="dbg-section" style="color:var(--accent);border-color:rgba(200,255,87,.2)">💰 Score Inject</div>
+    <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">
+      <select class="dbg-input" id="op-mode-sel" style="width:90px;padding:4px 6px">
+        <option value="classic">Classic</option>
+        <option value="position">Position</option>
+        <option value="versus">Versus</option>
+        <option value="duels">Duels</option>
+      </select>
+      <input class="dbg-input" id="op-score-inp" type="number" min="0" placeholder="Score" style="width:70px"/>
+      <button class="dbg-btn" onclick="cheatInjectScore()">Inject</button>
+      <button class="dbg-btn blue" onclick="cheatMaxScoreAll()">Max All</button>
+    </div>
+    <div class="dbg-row" style="margin-top:3px">
+      <button class="dbg-btn" onclick="cheatListQueue()">List Queue</button>
+      <button class="dbg-btn red" onclick="cheatEndGame()">End Game</button>
+      <button class="dbg-btn red" onclick="cheatNukeMyScore(document.getElementById('op-mode-sel').value)">Nuke Score</button>
+    </div>
+
+    <div class="dbg-section" style="color:var(--accent);border-color:rgba(200,255,87,.2)">🖥 Admin Console</div>
+    <div class="op-console" id="op-console" style="height:90px">ADMIN CONSOLE v2.0 — type <span class="con-info">help</span> for commands
+</div>
+    <div style="display:flex;gap:5px">
+      <input class="dbg-input" id="op-inp" placeholder="> command..." autocomplete="off" style="flex:1;font-family:var(--mono);color:var(--accent)" onkeydown="if(event.key==='Enter')opExec()"/>
+      <button class="dbg-btn" onclick="opExec()">Run</button>
+    </div>
+
     <div class="dbg-section">Log</div>
     <div class="dbg-log" id="dbg-log">Panel ready.</div>
 
@@ -1829,6 +2048,53 @@ footer a:hover{color:var(--text)}
   window._db = firebase.firestore();
   window._fbReady = true;
   console.log('Firebase ready');
+</script>
+
+<script>
+// ══════════════════════════════════════
+// ONLINE PRESENCE
+// ══════════════════════════════════════
+let _presenceInterval = null;
+
+async function presenceJoin(name) {
+  if (!window._fbReady || !name) return;
+  try {
+    await window._db.collection('online').doc(name.toLowerCase()).set({
+      name: name,
+      joinedAt: Date.now(),
+      lastSeen: Date.now()
+    });
+    // Heartbeat every 30s so stale entries can be filtered out
+    clearInterval(_presenceInterval);
+    _presenceInterval = setInterval(async () => {
+      try {
+        await window._db.collection('online').doc(name.toLowerCase()).update({ lastSeen: Date.now() });
+      } catch(e) {}
+    }, 30000);
+    // Remove on page unload
+    window.addEventListener('beforeunload', () => presenceLeave(name), { once: true });
+  } catch(e) {}
+}
+
+async function presenceLeave(name) {
+  clearInterval(_presenceInterval);
+  if (!window._fbReady || !name) return;
+  try {
+    await window._db.collection('online').doc(name.toLowerCase()).delete();
+  } catch(e) {}
+}
+
+async function getOnlineUsers() {
+  if (!window._fbReady) return [];
+  try {
+    const cutoff = Date.now() - 90000; // 90s heartbeat window
+    const snap = await window._db.collection('online').get();
+    return snap.docs
+      .map(d => d.data())
+      .filter(d => d.lastSeen && d.lastSeen > cutoff)
+      .map(d => d.name.toLowerCase());
+  } catch(e) { return []; }
+}
 </script>
 
 <script>
@@ -1987,9 +2253,9 @@ const PFP_ICONS = ['▲','★','♦','●','⬡','♠','✦','⬤','▶','⚡'];
 // STATE
 // ══════════════════════════════════════
 const API = 'https://pointercrate.com/api/v2/demons/listed/';
-const YT  = id => `https://img.youtube.com/vi/${id}/maxresdefault.jpg`;
-const YT2 = id => `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
-const YT3 = id => `https://img.youtube.com/vi/${id}/mqdefault.jpg`;
+const ytThumb  = id => `https://img.youtube.com/vi/${id}/maxresdefault.jpg`;
+const ytThumb2 = id => `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+const ytThumb3 = id => `https://img.youtube.com/vi/${id}/mqdefault.jpg`;
 
 let demons = [];
 let user = null;
@@ -2111,6 +2377,7 @@ document.addEventListener('DOMContentLoaded', () => {
       showUserChip();
       showScreen('home-screen');
       refreshHomeStats();
+      presenceJoin(user.name);
     } else {
       showScreen('login-screen');
     }
@@ -2215,6 +2482,7 @@ async function doLogin() {
   showUserChip();
   showScreen('home-screen');
   refreshHomeStats();
+  presenceJoin(user.name);
 }
 
 function showLogoutModal() {
@@ -2227,7 +2495,10 @@ function hideLogoutModal() {
 
 function doLogout() {
   hideLogoutModal();
+  if (user) presenceLeave(user.name);
   user = null;
+  const op = document.getElementById('owner-panel');
+  if (op) op.style.display = 'none';
   localDel('gdlg_user');
   document.getElementById('user-chip').style.display = 'none';
   document.getElementById('logout-nav-btn').style.display = 'none';
@@ -2277,6 +2548,9 @@ function showUserChip() {
   } else {
     document.getElementById('debug-panel').style.display = 'none';
   }
+  // Owner panel hidden — cheats are now inside the Debug Console
+  const op = document.getElementById('owner-panel');
+  if (op) op.style.display = 'none';
   // Show announce button for reporters (not admins — they use the full admin panel)
   const announceBtn = document.getElementById('announce-nav-btn');
   if (announceBtn) announceBtn.style.display = (user.isReporter && !user.isAdmin) ? '' : 'none';
@@ -3116,8 +3390,21 @@ async function renderLbEntries(entries, mode) {
   list.innerHTML = '<div class="lb-empty">Loading…</div>';
 
   // Always read roles & pfp from the accounts collection — it is the source of truth.
-  // The leaderboard docs cache isReporter/isAdmin but can be stale after an admin toggle.
   const accs = await getAllAccountsCloud();
+  const onlineUsers = await getOnlineUsers();
+
+  // Show online count
+  const countEl = document.getElementById('lb-online-count');
+  const numEl = document.getElementById('lb-online-num');
+  if (countEl && numEl) {
+    const onlineInLb = entries.filter(e => onlineUsers.includes(e.name.toLowerCase())).length;
+    if (onlineInLb > 0) {
+      numEl.textContent = onlineInLb;
+      countEl.style.display = 'flex';
+    } else {
+      countEl.style.display = 'none';
+    }
+  }
 
   list.innerHTML = '';
   entries.forEach((e, i) => {
@@ -3146,10 +3433,13 @@ async function renderLbEntries(entries, mode) {
       : `background:${pfpColor};color:#080a06`;
     const avatarContent = pfpImg ? '' : pfpIcon;
 
+    const isOnline = onlineUsers.includes(e.name.toLowerCase());
+    const onlineDot = isOnline ? '<span class="online-dot" title="Online now"></span>' : '';
+
     row.innerHTML = `
       <span class="lb-rank ${rankClass}">${rankLabel}</span>
       <div class="lb-avatar" style="${avatarStyle}">${avatarContent}</div>
-      <span class="lb-name">${e.name}${isAdmin ? ' <span style="color:var(--red);font-size:.6rem;font-family:var(--mono);background:var(--red-dim);border-radius:3px;padding:1px 5px">🛠 ADMIN</span>' : isReporter ? ' <span style="color:var(--blue);font-size:.6rem;font-family:var(--mono);background:rgba(79,159,255,.1);border-radius:3px;padding:1px 5px">✔ REPORTER</span>' : isHelper ? ' <span style="color:var(--helper);font-size:.6rem;font-family:var(--mono);background:rgba(57,232,122,.1);border-radius:3px;padding:1px 5px">✔ HELPER</span>' : ''}</span>
+      <span class="lb-name">${e.name}${isAdmin ? ' <span style="color:var(--red);font-size:.6rem;font-family:var(--mono);background:var(--red-dim);border-radius:3px;padding:1px 5px">🛠 ADMIN</span>' : isReporter ? ' <span style="color:var(--blue);font-size:.6rem;font-family:var(--mono);background:rgba(79,159,255,.1);border-radius:3px;padding:1px 5px">✔ REPORTER</span>' : isHelper ? ' <span style="color:var(--helper);font-size:.6rem;font-family:var(--mono);background:rgba(57,232,122,.1);border-radius:3px;padding:1px 5px">✔ HELPER</span>' : ''}${onlineDot}</span>
       <span class="lb-score">${scoreLabel}</span>
     `;
     list.appendChild(row);
@@ -4825,6 +5115,466 @@ async function openCreditsModal() {
 
 
 // ══════════════════════════════════════
+// OWNER PANEL (KyoumiEU only)
+// ══════════════════════════════════════
+function isOwner() { return user && (user.isAdmin || user.name.toLowerCase() === 'kyoumieu'); }
+
+function opToggle() {
+  document.getElementById('owner-panel').classList.toggle('collapsed');
+}
+
+function opLog(msg, type = '') {
+  const el = document.getElementById('op-console');
+  if (!el) return;
+  const ts = new Date().toLocaleTimeString('en-GB',{hour12:false});
+  const cls = type === 'ok' ? 'con-ok' : type === 'err' ? 'con-err' : type === 'info' ? 'con-info' : 'con-sys';
+  const line = document.createElement('span');
+  line.className = cls;
+  line.textContent = `[${ts}] ${msg}\n`;
+  el.appendChild(line);
+  el.scrollTop = el.scrollHeight;
+}
+
+// ── CHEAT: Classic ──
+function cheatReveal() {
+  if (!isOwner()) return;
+  const demon = clQueue[clIdx - 1];
+  if (!demon) { opLog('Not in a Classic round.', 'err'); return; }
+  const inp = document.getElementById('cl-input');
+  if (inp) inp.value = demon.name;
+  opLog(`Revealed: "${demon.name}" (#${demon.position})`, 'ok');
+  toast('Answer: ' + demon.name, 'ok');
+}
+
+function cheatCorrect() {
+  if (!isOwner()) return;
+  const demon = clQueue[clIdx - 1];
+  if (!demon || clAnswered) { opLog('No active Classic round.', 'err'); return; }
+  const inp = document.getElementById('cl-input');
+  if (inp) { inp.value = demon.name; }
+  document.getElementById('cl-submit').click();
+  opLog(`Force-answered "${demon.name}"`, 'ok');
+}
+
+function cheatSkipAll() {
+  if (!isOwner()) return;
+  const screen = document.querySelector('.screen.active');
+  if (!screen) return;
+  const id = screen.id;
+  if (id === 'classic-screen') {
+    clIdx = clQueue.length;
+    clAnswered = true;
+    opLog('Skipped all Classic rounds → ending game.', 'ok');
+    endGame('classic');
+  } else if (id === 'position-screen') {
+    posIdx = posQueue.length;
+    posAnswered = true;
+    opLog('Skipped all Position rounds → ending game.', 'ok');
+    endGame('position');
+  } else if (id === 'versus-screen') {
+    vsIdx = vsQueue.length;
+    vsAnswered = true;
+    opLog('Skipped all Versus rounds → ending game.', 'ok');
+    endGame('versus');
+  } else {
+    opLog('Not in a game screen.', 'err');
+  }
+}
+
+// ── CHEAT: Position ──
+function cheatPosCorrect() {
+  if (!isOwner()) return;
+  const demon = posQueue[posIdx - 1];
+  if (!demon || posAnswered) { opLog('No active Position round.', 'err'); return; }
+  const slider = document.getElementById('pos-slider');
+  if (slider) { slider.value = demon.position; slider.dispatchEvent(new Event('input')); }
+  setTimeout(() => document.getElementById('pos-submit').click(), 50);
+  opLog(`Set slider to correct pos #${demon.position}`, 'ok');
+}
+
+// ── CHEAT: Versus ──
+function cheatVsCorrect() {
+  if (!isOwner()) return;
+  if (vsAnswered) { opLog('Already answered this VS round.', 'err'); return; }
+  const pair = vsQueue[vsIdx - 1];
+  if (!pair) { opLog('No active Versus round.', 'err'); return; }
+  const [a, b] = pair;
+  // Lower position = harder = correct answer
+  const correct = a.position < b.position ? 'a' : 'b';
+  vsGuess(correct);
+  opLog(`Clicked correct side (${correct.toUpperCase()}: "${correct==='a'?a.name:b.name}")`, 'ok');
+}
+
+// ── CHEAT: Daily ──
+function cheatDailyReveal() {
+  if (!isOwner()) return;
+  if (!dailyDemon) { opLog('Daily not active.', 'err'); return; }
+  const inp = document.getElementById('daily-input');
+  if (inp) inp.value = dailyDemon.name;
+  document.querySelectorAll('#daily-hints .hint-pill:not(.shown)').forEach(p => p.click());
+  opLog(`Daily answer revealed: "${dailyDemon.name}" (#${dailyDemon.position})`, 'ok');
+  toast('Daily: ' + dailyDemon.name, 'ok');
+}
+
+function cheatDailyWin() {
+  if (!isOwner()) return;
+  if (dailyAnswered) { opLog('Daily already answered.', 'err'); return; }
+  if (!dailyDemon) { opLog('Daily not active.', 'err'); return; }
+  const inp = document.getElementById('daily-input');
+  if (inp) { inp.value = dailyDemon.name; }
+  setTimeout(() => document.getElementById('daily-submit').click(), 50);
+  opLog(`Force daily win: "${dailyDemon.name}"`, 'ok');
+}
+
+// ── CHEAT: Max Score All Modes ──
+async function cheatMaxScoreAll() {
+  if (!isOwner() || !user) return;
+  opLog('Injecting max scores for all modes…', 'info');
+  const modes = ['classic','position','versus'];
+  for (const m of modes) {
+    try {
+      await lbSubmit(m, user.name, 9999);
+      if (!user.stats) user.stats = {};
+      user.stats[m] = 9999;
+      opLog(`  ${m}: 9999 pts injected`, 'ok');
+    } catch(e) { opLog(`  ${m} failed: ${e.message}`, 'err'); }
+  }
+  localSet('gdlg_user', user);
+  toast('Max scores injected for all modes!', 'ok');
+}
+
+// ── CHEAT: Unlock Classic answer fill ──
+function cheatFillClassic() {
+  if (!isOwner()) return;
+  const demon = clQueue[clIdx - 1];
+  if (!demon) { opLog('Not in a Classic round.', 'err'); return; }
+  const inp = document.getElementById('cl-input');
+  if (inp) {
+    inp.value = demon.name;
+    inp.dispatchEvent(new Event('input')); // trigger autocomplete update
+  }
+  opLog(`Filled: "${demon.name}"`, 'ok');
+}
+
+// ── CHEAT: Auto-win remaining Classic rounds ──
+async function cheatAutoWinClassic() {
+  if (!isOwner()) return;
+  opLog('Auto-winning remaining Classic rounds…', 'info');
+  let count = 0;
+  while (clIdx <= clQueue.length) {
+    if (!clAnswered) {
+      const demon = clQueue[clIdx - 1];
+      if (!demon) break;
+      const inp = document.getElementById('cl-input');
+      if (inp) inp.value = demon.name;
+      document.getElementById('cl-submit')?.click();
+      count++;
+    }
+    await new Promise(r => setTimeout(r, 120));
+    const nextBtn = document.getElementById('cl-next');
+    if (nextBtn && nextBtn.style.display !== 'none') nextBtn.click();
+    else break;
+    await new Promise(r => setTimeout(r, 80));
+  }
+  opLog(`Auto-won ${count} Classic round(s).`, 'ok');
+}
+
+// ── CHEAT: Force perfect Position (slider lands exact) ──
+function cheatPosPerfect() {
+  if (!isOwner()) return;
+  const demon = posQueue[posIdx - 1];
+  if (!demon || posAnswered) { opLog('No active Position round.', 'err'); return; }
+  const slider = document.getElementById('pos-slider');
+  if (slider) {
+    slider.value = demon.position;
+    slider.dispatchEvent(new Event('input'));
+  }
+  setTimeout(() => document.getElementById('pos-submit')?.click(), 50);
+  opLog(`Perfect pos: #${demon.position} (${demon.name})`, 'ok');
+}
+
+// ── CHEAT: Teleport to end screen ──
+function cheatEndGame() {
+  if (!isOwner()) return;
+  const screen = document.querySelector('.screen.active');
+  if (!screen) { opLog('No active screen.', 'err'); return; }
+  const id = screen.id;
+  const modeMap = { 'classic-screen':'classic','position-screen':'position','versus-screen':'versus','daily-screen':'daily' };
+  const mode = modeMap[id];
+  if (!mode) { opLog('Not in a game screen.', 'err'); return; }
+  opLog(`Ending ${mode} game…`, 'info');
+  endGame(mode);
+}
+
+// ── CHEAT: Nuke my leaderboard entry ──
+async function cheatNukeMyScore(mode) {
+  if (!isOwner() || !user) return;
+  mode = mode || 'classic';
+  opLog(`Deleting ${user.name}'s score from ${mode}…`, 'info');
+  try {
+    await window._db.collection('leaderboard_' + mode).doc(user.name.toLowerCase()).delete();
+    opLog(`Deleted from ${mode}.`, 'ok');
+    toast('Score deleted: ' + mode, 'ok');
+  } catch(e) { opLog('Error: ' + e.message, 'err'); }
+}
+
+// ── CHEAT: Set game score variable directly ──
+function cheatSetLiveScore(mode, pts) {
+  if (!isOwner()) return;
+  pts = parseInt(pts);
+  if (isNaN(pts)) { opLog('Invalid score.', 'err'); return; }
+  if (mode === 'classic') { clScore = pts; setTxt('cl-score', 'Score: ' + pts); }
+  else if (mode === 'position') { posScore = pts; setTxt('pos-score', 'Score: ' + pts); }
+  else if (mode === 'versus') { vsScore = pts; setTxt('vs-score', 'Score: ' + pts); }
+  else { opLog('Unknown mode.', 'err'); return; }
+  opLog(`Live score set to ${pts} for ${mode}.`, 'ok');
+}
+
+// ── CHEAT: Show all demon names in current game queue ──
+function cheatListQueue() {
+  if (!isOwner()) return;
+  const screen = document.querySelector('.screen.active');
+  if (!screen) { opLog('No active screen.', 'err'); return; }
+  const id = screen.id;
+  let queue = [];
+  if (id === 'classic-screen') queue = clQueue;
+  else if (id === 'position-screen') queue = posQueue;
+  else if (id === 'versus-screen') queue = vsQueue.map(p => p[0]);
+  else { opLog('Not in a game screen.', 'err'); return; }
+  opLog(`Queue (${queue.length} demons):`, 'info');
+  queue.forEach((d, i) => opLog(`  ${i+1}. ${d.name} (#${d.position})`, ''));
+}
+
+// ── SCORE INJECT ──
+async function cheatInjectScore() {
+  if (!isOwner() || !user) return;
+  const mode = document.getElementById('op-mode-sel').value;
+  const score = parseInt(document.getElementById('op-score-inp').value);
+  if (isNaN(score) || score < 0) { opLog('Enter a valid score.', 'err'); return; }
+  opLog(`Injecting ${score} pts into ${mode}…`, 'info');
+  try {
+    await lbSubmit(mode, user.name, score);
+    if (!user.stats) user.stats = {};
+    user.stats[mode] = Math.max(user.stats[mode] || 0, score);
+    localSet('gdlg_user', user);
+    opLog(`Score injected: ${score} pts in ${mode}`, 'ok');
+    toast(`Score set: ${score} pts (${mode})`, 'ok');
+  } catch(e) {
+    opLog('Inject failed: ' + e.message, 'err');
+  }
+}
+
+// ── COMMAND CONSOLE ──
+const OP_CMD_HISTORY = [];
+let opHistIdx = -1;
+
+document.addEventListener('DOMContentLoaded', () => {
+  const inp = document.getElementById('op-inp');
+  if (!inp) return;
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      opHistIdx = Math.min(opHistIdx + 1, OP_CMD_HISTORY.length - 1);
+      if (OP_CMD_HISTORY[opHistIdx]) inp.value = OP_CMD_HISTORY[opHistIdx];
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      opHistIdx = Math.max(opHistIdx - 1, -1);
+      inp.value = opHistIdx >= 0 ? OP_CMD_HISTORY[opHistIdx] : '';
+    }
+  });
+});
+
+function opExec() {
+  const inp = document.getElementById('op-inp');
+  const raw = inp ? inp.value.trim() : '';
+  if (!raw) return;
+  inp.value = '';
+  opHistIdx = -1;
+  OP_CMD_HISTORY.unshift(raw);
+  if (OP_CMD_HISTORY.length > 30) OP_CMD_HISTORY.pop();
+
+  opLog('> ' + raw, 'info');
+  const [cmd, ...args] = raw.split(/\s+/);
+
+  switch (cmd.toLowerCase()) {
+
+    case 'help':
+      opLog('═══ ADMIN CONSOLE COMMANDS ═══', 'info');
+      opLog('── Navigation ──', 'info');
+      opLog('  screen <id>             — go to screen', '');
+      opLog('  clear                   — clear console', '');
+      opLog('  user                    — show current user info', '');
+      opLog('  online                  — list online users', '');
+      opLog('── Classic Cheats ──', 'info');
+      opLog('  reveal                  — fill correct answer in input', '');
+      opLog('  correct                 — force submit correct (classic)', '');
+      opLog('  autowin                 — auto-win all remaining classic rounds', '');
+      opLog('  skipall                 — skip all rounds in current game', '');
+      opLog('  endgame                 — force end the current game', '');
+      opLog('  queue                   — list all demons in current game queue', '');
+      opLog('── Position / Versus / Daily ──', 'info');
+      opLog('  poscorrect              — force correct (position)', '');
+      opLog('  posperfect              — perfect position answer + submit', '');
+      opLog('  vscorrect               — force correct (versus)', '');
+      opLog('  dailyreveal             — reveal daily answer', '');
+      opLog('  dailywin                — force daily win', '');
+      opLog('── Scores ──', 'info');
+      opLog('  score <mode> <pts>      — inject score into leaderboard', '');
+      opLog('  maxscore                — inject 9999 into all modes', '');
+      opLog('  setscore <mode> <pts>   — set live in-game score variable', '');
+      opLog('  nukescore <mode>        — delete my score from a mode', '');
+      opLog('── Admin Tools ──', 'info');
+      opLog('  ban <name>              — ban a user', '');
+      opLog('  unban <name>            — unban a user', '');
+      opLog('  role <name> <role>      — toggle reporter|helper role', '');
+      opLog('  delmydata               — wipe local data', '');
+      opLog('  lbclear <mode>          — clear entire leaderboard mode', '');
+      opLog('  toast <msg>             — show a toast notification', '');
+      break;
+
+    case 'clear':
+      document.getElementById('op-console').innerHTML = '';
+      opLog('Console cleared.', 'sys');
+      break;
+
+    case 'user':
+      opLog(JSON.stringify({ name: user?.name, isAdmin: user?.isAdmin, isReporter: user?.isReporter, isHelper: user?.isHelper }), 'ok');
+      break;
+
+    case 'screen':
+      if (!args[0]) { opLog('Usage: screen <id>', 'err'); break; }
+      showScreen(args[0]);
+      opLog('Navigated to: ' + args[0], 'ok');
+      break;
+
+    case 'score': {
+      const m = args[0], s = parseInt(args[1]);
+      if (!m || isNaN(s)) { opLog('Usage: score <mode> <pts>', 'err'); break; }
+      document.getElementById('op-mode-sel').value = m;
+      document.getElementById('op-score-inp').value = s;
+      cheatInjectScore();
+      break;
+    }
+
+    case 'autowin':
+      cheatAutoWinClassic();
+      break;
+
+    case 'endgame':
+      cheatEndGame();
+      break;
+
+    case 'queue':
+      cheatListQueue();
+      break;
+
+    case 'posperfect':
+      cheatPosPerfect();
+      break;
+
+    case 'dailyreveal':
+      cheatDailyReveal();
+      break;
+
+    case 'dailywin':
+      cheatDailyWin();
+      break;
+
+    case 'maxscore':
+      cheatMaxScoreAll();
+      break;
+
+    case 'setscore': {
+      const m = args[0], s = parseInt(args[1]);
+      if (!m || isNaN(s)) { opLog('Usage: setscore <mode> <pts>', 'err'); break; }
+      cheatSetLiveScore(m, s);
+      break;
+    }
+
+    case 'nukescore': {
+      const m = args[0] || 'classic';
+      cheatNukeMyScore(m);
+      break;
+    }
+
+    case 'reveal':
+      cheatReveal();
+      break;
+
+    case 'correct':
+      cheatCorrect();
+      break;
+
+    case 'poscorrect':
+      cheatPosCorrect();
+      break;
+
+    case 'vscorrect':
+      cheatVsCorrect();
+      break;
+
+    case 'skipall':
+      cheatSkipAll();
+      break;
+
+    case 'toast':
+      if (!args.length) { opLog('Usage: toast <message>', 'err'); break; }
+      toast(args.join(' '), 'ok');
+      opLog('Toast shown.', 'ok');
+      break;
+
+    case 'ban':
+      if (!args[0]) { opLog('Usage: ban <username>', 'err'); break; }
+      adminBan(args[0]).then ? adminBan(args[0]).then(() => opLog('Banned: ' + args[0], 'ok')).catch(e => opLog('Error: ' + e.message, 'err'))
+        : opLog('ban triggered.', 'ok');
+      break;
+
+    case 'unban':
+      if (!args[0]) { opLog('Usage: unban <username>', 'err'); break; }
+      adminUnban(args[0]).then(() => opLog('Unbanned: ' + args[0], 'ok')).catch(e => opLog('Error: ' + e.message, 'err'));
+      break;
+
+    case 'role': {
+      const target = args[0], role = args[1];
+      if (!target || !role) { opLog('Usage: role <name> <reporter|helper>', 'err'); break; }
+      const key = target.toLowerCase();
+      if (role === 'reporter') adminToggleReporter(key).then ? adminToggleReporter(key).then(() => opLog(`Reporter toggled for ${target}`, 'ok')).catch(e => opLog('Error: ' + e.message, 'err')) : null;
+      else if (role === 'helper') adminToggleHelper(key).then ? adminToggleHelper(key).then(() => opLog(`Helper toggled for ${target}`, 'ok')).catch(e => opLog('Error: ' + e.message, 'err')) : null;
+      else opLog('Role must be "reporter" or "helper"', 'err');
+      break;
+    }
+
+    case 'delmydata':
+      if (!user) { opLog('Not logged in.', 'err'); break; }
+      ['gdlg_user','gdlg_accounts','gdlg_bans','gdlg_reports','lb_classic','lb_position','lb_versus','lb_daily','lb_duels'].forEach(k => localDel(k));
+      opLog('Local data wiped.', 'ok');
+      toast('Local data wiped.', 'ok');
+      break;
+
+    case 'online':
+      getOnlineUsers().then(list => {
+        opLog('Online users (' + list.length + '): ' + (list.join(', ') || '—'), 'ok');
+      });
+      break;
+
+    case 'lbclear': {
+      const m = args[0];
+      if (!m) { opLog('Usage: lbclear <mode>', 'err'); break; }
+      if (!confirm(`Clear the entire "${m}" leaderboard from Firestore? This cannot be undone.`)) { opLog('Cancelled.', 'sys'); break; }
+      lbGetAllCloud(m).then(entries => {
+        Promise.all(entries.map(e => window._db.collection('leaderboard_' + m).doc(e.name.toLowerCase()).delete()))
+          .then(() => { opLog(`Leaderboard "${m}" cleared (${entries.length} entries).`, 'ok'); toast('LB cleared: ' + m, 'ok'); })
+          .catch(e => opLog('Error: ' + e.message, 'err'));
+      });
+      break;
+    }
+
+    default:
+      opLog(`Unknown command: "${cmd}". Type help for a list.`, 'err');
+  }
+}
+
+// ══════════════════════════════════════
 // DEBUG PANEL
 // ══════════════════════════════════════
 function dbgLog(msg, type='') {
@@ -5088,55 +5838,5 @@ setInterval(() => {
   })();
 })();
 </script>
-<!-- ── YOUTUBE BACKGROUND PLAYER ── -->
-<script>
-  var _ytBgPlayer = null;
-
-  function onYouTubeIframeAPIReady() {
-    _ytBgPlayer = new YT.Player('yt-player-div', {
-      videoId: '-nWE1tOM2KE',
-      playerVars: {
-        autoplay: 1,
-        mute: 1,
-        controls: 0,
-        showinfo: 0,
-        rel: 0,
-        modestbranding: 1,
-        iv_load_policy: 3,
-        disablekb: 1,
-        playsinline: 1,
-        start: 7,
-        origin: window.location.origin,
-      },
-      events: {
-        onReady: function(e) {
-          // Force dark background on the iframe itself to kill white flash
-          try {
-            var iframe = document.querySelector('#yt-player-div iframe');
-            if (iframe) {
-              iframe.style.background = '#07080a';
-              iframe.style.backgroundColor = '#07080a';
-            }
-          } catch(err) {}
-          e.target.mute();
-          e.target.seekTo(7);
-          e.target.playVideo();
-        },
-        onStateChange: function(e) {
-          if (e.data === YT.PlayerState.PLAYING) {
-            // Fade in only once video is actually rendering frames
-            var div = document.getElementById('yt-player-div');
-            if (div) div.classList.add('playing');
-          }
-          if (e.data === YT.PlayerState.ENDED) {
-            e.target.seekTo(7, true);
-            e.target.playVideo();
-          }
-        }
-      }
-    });
-  }
-</script>
-<script src="https://www.youtube.com/iframe_api" async></script>
 </body>
 </html>
