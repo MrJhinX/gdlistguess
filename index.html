@@ -274,7 +274,7 @@ header{
 .logout-btn:hover{border-color:var(--red);color:var(--red)}
 
 /* ── MAIN ── */
-main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 16px}
+main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 16px 32px}
 
 /* ── SCREENS ── */
 .screen{width:100%;max-width:700px;display:none;flex-direction:column;align-items:center;gap:28px;animation:fadeUp .3s ease}
@@ -894,8 +894,10 @@ input[type=range]::-webkit-slider-thumb:hover{box-shadow:0 0 0 6px var(--accent-
 .lb-tab.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
 .lb-list{
   width:100%;display:flex;flex-direction:column;gap:6px;
-  max-height:calc(100vh - 260px);
+  /* 8 rows × 50px + 7 gaps × 6px = 442px */
+  max-height:442px;
   overflow-y:auto;
+  overflow-x:hidden;
   scrollbar-width:thin;scrollbar-color:var(--border2) transparent;
   padding-right:4px;
 }
@@ -1880,6 +1882,7 @@ footer a:hover{color:var(--text)}
     <button class="nav-btn" id="report-nav-btn" onclick="openReportModal()" style="display:none;border-color:rgba(79,159,255,.4);color:var(--blue)">⚑ Report</button>
     <button class="nav-btn" id="inspect-nav-btn" onclick="openInspectModal()" style="display:none;border-color:rgba(200,255,87,.35);color:var(--accent)">Inspections</button>
     <button class="nav-btn" onclick="openTosModal()">TOS</button>
+    <button class="nav-btn" onclick="openPatchesModal()">Patches</button>
     <button class="nav-btn" onclick="openCreditsModal()">Credits</button>
     <button class="nav-btn" id="lb-nav-btn" onclick="showLeaderboard()">Leaderboard</button>
     <div class="user-chip" id="user-chip" onclick="openProfileModal()" style="display:none" title="View Profile">
@@ -1899,28 +1902,7 @@ footer a:hover{color:var(--text)}
       <span>PAGE</span>
     </div>
     <p class="login-sub">Hello, welcome to GDList Guess, made with love by Pancake Team. Create an account or sign in to compete on the GDList Guess leaderboard.</p>
-    <div class="login-features">
-      <div class="login-feat">
-        <span class="feat-icon">Classic</span>
-        <div class="feat-name">Screenshot Guess</div>
-        <div class="feat-desc">See a blurred thumbnail, name the demon.</div>
-      </div>
-      <div class="login-feat">
-        <span class="feat-icon">Rank Guess</span>
-        <div class="feat-name">What's the Rank?</div>
-        <div class="feat-desc">Guess a level's position on the list.</div>
-      </div>
-      <div class="login-feat">
-        <span class="feat-icon">Versus</span>
-        <div class="feat-name">Which is Harder?</div>
-        <div class="feat-desc">Two demons — pick the harder one.</div>
-      </div>
-      <div class="login-feat">
-        <span class="feat-icon" style="color:var(--blue)">Duels</span>
-        <div class="feat-name">Live 1v1 Duels</div>
-        <div class="feat-desc">Challenge a real player. Random mode, highest score wins.</div>
-      </div>
-    </div>
+
     <input class="input-field" id="username-input" placeholder="Username (3–18 chars)" maxlength="18" autocomplete="off"/>
     <input class="input-field" id="password-input" type="password" placeholder="Password (min 4 chars)" autocomplete="off"/>
     <div class="err-box" id="login-err" style="display:none"></div>
@@ -2569,6 +2551,9 @@ footer a:hover{color:var(--text)}
       </div>
       <div class="info-panel-footer" style="margin-top:6px">
         <span id="credits-footer-text">for any further information... well you don't need it.</span>
+      </div>
+      <div style="text-align:center;margin-top:14px;padding:10px 0 4px;border-top:1px solid var(--border)">
+        <span style="font-family:var(--cond);font-size:1rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)">By the Pancake Team!</span>
       </div>
       <!-- KyoumiEU self-credit in credits modal -->
       <div class="kyoumi-card" style="margin-top:16px">
@@ -3280,6 +3265,29 @@ footer a:hover{color:var(--text)}
   </div>
 </div>
 
+<!-- PATCHES MODAL -->
+<div class="modal-overlay" id="patches-modal" onclick="if(event.target===this)closePatchesModal()">
+  <div class="modal-box" style="width:min(620px,calc(100vw - 24px));max-height:min(92vh,780px);overflow:hidden;display:flex;flex-direction:column;padding:0;gap:0">
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:#131518;padding:20px 28px 14px;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-family:var(--cond);font-size:1.15rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase">Patch Notes</div>
+        <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);margin-top:3px;letter-spacing:.08em">GDListGuess · Pancake Team</div>
+      </div>
+      <button onclick="closePatchesModal()" style="background:var(--s1);border:1px solid var(--border2);color:var(--text);cursor:pointer;font-size:1rem;padding:6px 12px;border-radius:8px;transition:all .15s;min-width:36px;min-height:36px;display:flex;align-items:center;justify-content:center" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text)'">✕</button>
+    </div>
+    <!-- Tab bar -->
+    <div style="display:flex;gap:0;border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto" id="patches-tab-bar">
+      <button class="tos-tab active" onclick="switchPatchTab('latest')"  id="patch-tab-latest">Latest</button>
+      <button class="tos-tab"        onclick="switchPatchTab('archive')" id="patch-tab-archive">Archive</button>
+    </div>
+    <!-- Content area -->
+    <div style="overflow-y:auto;flex:1;padding:24px 28px 28px" id="patches-content-area">
+      <!-- filled by switchPatchTab() -->
+    </div>
+  </div>
+</div>
+
 <!-- LOGOUT MODAL -->
 <div id="logout-overlay" class="modal-overlay">
   <div class="modal-box">
@@ -3643,6 +3651,121 @@ function openTosModal() {
 
 function closeTosModal() {
   document.getElementById('tos-modal').classList.remove('show');
+}
+
+/* ── PATCHES MODAL ── */
+const PATCH_NOTES = {
+  latest: {
+    version: 'v1.0 — Latest',
+    date: '2025',
+    entries: [
+      { tag: 'NEW',  text: 'Profiles — view stats, bio, and leaderboard standings for any player.' },
+      { tag: 'NEW',  text: 'Live 1v1 Duels mode added.' },
+      { tag: 'NEW',  text: 'Leaderboard now supports scrolling with 8-row cap.' },
+      { tag: 'FIX',  text: 'Login page game-mode cards removed for a cleaner look.' },
+      { tag: 'FIX',  text: 'Scrollbar styling improved across all panels.' },
+    ]
+  },
+  archive: {
+    version: 'Archive',
+    date: '',
+    entries: [
+      { tag: 'OLD',  text: 'Initial release of GDListGuess with Classic and Rank Guess modes.' },
+      { tag: 'OLD',  text: 'Versus mode launched — pick the harder demon.' },
+      { tag: 'OLD',  text: 'Creator (Audio) mode added.' },
+    ]
+  }
+};
+
+let _patchTab = 'latest';
+
+// Convert plain text entries (one per line: "TAG: text") to JSON array
+function patchTextToEntries(text) {
+  if (!text || !text.trim()) return [];
+  return text.split('\n').map(line => line.trim()).filter(Boolean).map(line => {
+    const m = line.match(/^(NEW|FIX|OLD|REMOVE)\s*:\s*(.+)$/i);
+    if (m) return { tag: m[1].toUpperCase(), text: m[2].trim() };
+    return { tag: 'OLD', text: line };
+  });
+}
+
+// Convert JSON array of entries to plain text (one per line: "TAG: text")
+function patchEntriesToText(entries) {
+  if (!Array.isArray(entries) || !entries.length) return '';
+  return entries.map(e => (e.tag || 'OLD') + ': ' + (e.text || '')).join('\n');
+}
+
+// Given a stored value (plain text or legacy JSON), return plain text
+function patchNormToText(value) {
+  if (!value) return '';
+  // If it looks like JSON, parse and convert
+  if (value.trim().startsWith('[')) {
+    try {
+      const arr = JSON.parse(value);
+      return patchEntriesToText(arr);
+    } catch(e) {}
+  }
+  return value;
+}
+
+// Given a stored value (plain text or legacy JSON), return entries array
+function patchNormToEntries(value) {
+  if (!value) return [];
+  if (value.trim().startsWith('[')) {
+    try { return JSON.parse(value); } catch(e) {}
+  }
+  return patchTextToEntries(value);
+}
+
+function openPatchesModal() {
+  // Apply any saved overrides to PATCH_NOTES before rendering
+  const overrides = localGet('gdlg_text_overrides') || {};
+  const tabMap = { latest: 'patch_latest', archive: 'patch_archive' };
+  ['latest','archive'].forEach(tab => {
+    const pfx = tabMap[tab];
+    if (overrides[pfx + '_version']) PATCH_NOTES[tab].version = overrides[pfx + '_version'];
+    if (overrides[pfx + '_date'])    PATCH_NOTES[tab].date    = overrides[pfx + '_date'];
+    if (overrides[pfx + '_entries']) {
+      PATCH_NOTES[tab].entries = patchNormToEntries(overrides[pfx + '_entries']);
+    }
+  });
+  switchPatchTab('latest');
+  document.getElementById('patches-modal').classList.add('show');
+}
+
+function closePatchesModal() {
+  document.getElementById('patches-modal').classList.remove('show');
+}
+
+function switchPatchTab(tab) {
+  _patchTab = tab;
+  // Update tab active state
+  ['latest','archive'].forEach(t => {
+    const el = document.getElementById('patch-tab-' + t);
+    if (el) el.classList.toggle('active', t === tab);
+  });
+  const data = PATCH_NOTES[tab];
+  if (!data) return;
+  const area = document.getElementById('patches-content-area');
+  const tagColors = {
+    NEW: { bg: 'rgba(200,255,87,.1)', color: 'var(--accent)', border: 'rgba(200,255,87,.25)' },
+    FIX: { bg: 'rgba(79,159,255,.1)', color: 'var(--blue)',   border: 'rgba(79,159,255,.25)' },
+    OLD: { bg: 'rgba(90,92,100,.15)', color: 'var(--muted)',  border: 'rgba(90,92,100,.3)'   },
+    REMOVE: { bg: 'rgba(255,79,79,.1)', color: 'var(--red)', border: 'rgba(255,79,79,.25)' },
+  };
+  area.innerHTML = `
+    <div style="font-family:var(--cond);font-size:1.1rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text);margin-bottom:${data.date ? '4px' : '12px'}">${data.version}</div>
+    ${data.date ? `<div style="font-family:var(--mono);font-size:.62rem;color:var(--muted);letter-spacing:.08em;margin-bottom:18px">${data.date}</div>` : ''}
+    <div style="display:flex;flex-direction:column;gap:10px">
+      ${(data.entries || []).map(e => {
+        const c = tagColors[e.tag] || tagColors.OLD;
+        return `<div style="display:flex;align-items:flex-start;gap:12px;background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px">
+          <span style="flex-shrink:0;font-family:var(--mono);font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:100px;background:${c.bg};color:${c.color};border:1px solid ${c.border};margin-top:1px">${e.tag}</span>
+          <span style="font-family:var(--mono);font-size:.76rem;color:var(--text);line-height:1.6">${e.text}</span>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
 }
 
 function switchTosTab(tab, overrides) {
@@ -8167,63 +8290,70 @@ async function dbgEnterAs() {
 // ══════════════════════════════════════
 // All editable text fields. key = Firestore field name, label = display label,
 // selector = DOM selector(s), attr = 'text' or an attribute name.
+// section = grouping label, color = accent color for the section header.
 const TEXT_FIELDS = [
-  // ── Home screen ──
-  { key:'home_sub',        label:'Home sub-text (default)',    selector:'#home-sub-text',                 attr:'text' },
-  { key:'login_eyebrow',   label:'Login eyebrow',              selector:'.login-eyebrow',                 attr:'text' },
-  { key:'login_sub',       label:'Login description',          selector:'.login-sub',                     attr:'text' },
-  { key:'login_btn',       label:'Login button text',          selector:'#login-btn',                     attr:'text' },
+  // ── Login / Home ──
+  { key:'login_eyebrow',   label:'Eyebrow tag',          desc:'Small label above the title on the login screen.',        section:'Login & Home', color:'#c8ff57', selector:'.login-eyebrow',   attr:'text' },
+  { key:'login_sub',       label:'Description',          desc:'Paragraph below the title on the login screen.',          section:'Login & Home', color:'#c8ff57', selector:'.login-sub',       attr:'text' },
+  { key:'login_btn',       label:'Sign-in button text',  desc:'Text on the big green login / register button.',          section:'Login & Home', color:'#c8ff57', selector:'#login-btn',       attr:'text' },
+  { key:'home_sub',        label:'Home sub-text',        desc:'Small line beneath the greeting on the home dashboard.',  section:'Login & Home', color:'#c8ff57', selector:'#home-sub-text',   attr:'text' },
 
-  // ── Mode cards ──
-  { key:'mode_classic_name', label:'Classic — card title',     selector:'.mode-card:nth-child(1) .mode-name', attr:'text' },
-  { key:'mode_classic_desc', label:'Classic — card desc',      selector:'.mode-card:nth-child(1) .mode-desc', attr:'text' },
-  { key:'mode_rank_name',    label:'Rank Guess — card title',  selector:'.mode-card:nth-child(2) .mode-name', attr:'text' },
-  { key:'mode_rank_desc',    label:'Rank Guess — card desc',   selector:'.mode-card:nth-child(2) .mode-desc', attr:'text' },
-  { key:'mode_versus_name',  label:'Versus — card title',      selector:'.mode-card:nth-child(3) .mode-name', attr:'text' },
-  { key:'mode_versus_desc',  label:'Versus — card desc',       selector:'.mode-card:nth-child(3) .mode-desc', attr:'text' },
-  { key:'mode_duels_name',   label:'Duels — card title',       selector:'.mode-card:nth-child(4) .mode-name', attr:'text' },
-  { key:'mode_duels_desc',   label:'Duels — card desc',        selector:'.mode-card:nth-child(4) .mode-desc', attr:'text' },
+  // ── Mode Cards ──
+  { key:'mode_classic_name', label:'Classic — title',      desc:'Title on the Classic mode card.',      section:'Mode Cards', color:'#39e87a', selector:'.mode-card:nth-child(1) .mode-name', attr:'text' },
+  { key:'mode_classic_desc', label:'Classic — desc',       desc:'Description on the Classic mode card.',section:'Mode Cards', color:'#39e87a', selector:'.mode-card:nth-child(1) .mode-desc', attr:'text' },
+  { key:'mode_rank_name',    label:'Rank Guess — title',   desc:'Title on the Rank Guess card.',        section:'Mode Cards', color:'#39e87a', selector:'.mode-card:nth-child(2) .mode-name', attr:'text' },
+  { key:'mode_rank_desc',    label:'Rank Guess — desc',    desc:'Description on the Rank Guess card.',  section:'Mode Cards', color:'#39e87a', selector:'.mode-card:nth-child(2) .mode-desc', attr:'text' },
+  { key:'mode_versus_name',  label:'Versus — title',       desc:'Title on the Versus mode card.',       section:'Mode Cards', color:'#39e87a', selector:'.mode-card:nth-child(3) .mode-name', attr:'text' },
+  { key:'mode_versus_desc',  label:'Versus — desc',        desc:'Description on the Versus mode card.', section:'Mode Cards', color:'#39e87a', selector:'.mode-card:nth-child(3) .mode-desc', attr:'text' },
+  { key:'mode_duels_name',   label:'Duels — title',        desc:'Title on the Duels mode card.',        section:'Mode Cards', color:'#39e87a', selector:'.mode-card:nth-child(4) .mode-name', attr:'text' },
+  { key:'mode_duels_desc',   label:'Duels — desc',         desc:'Description on the Duels mode card.',  section:'Mode Cards', color:'#39e87a', selector:'.mode-card:nth-child(4) .mode-desc', attr:'text' },
 
-  // ── How to play ──
-  { key:'how1_title', label:'How to Play 01 — title',  selector:'.how-card:nth-child(1) .how-title', attr:'text' },
-  { key:'how1_text',  label:'How to Play 01 — body',   selector:'.how-card:nth-child(1) .how-text',  attr:'text' },
-  { key:'how2_title', label:'How to Play 02 — title',  selector:'.how-card:nth-child(2) .how-title', attr:'text' },
-  { key:'how2_text',  label:'How to Play 02 — body',   selector:'.how-card:nth-child(2) .how-text',  attr:'text' },
-  { key:'how3_title', label:'How to Play 03 — title',  selector:'.how-card:nth-child(3) .how-title', attr:'text' },
-  { key:'how3_text',  label:'How to Play 03 — body',   selector:'.how-card:nth-child(3) .how-text',  attr:'text' },
+  // ── How to Play ──
+  { key:'how1_title', label:'Step 1 — title', desc:'Title of how-to-play card #1.', section:'How to Play', color:'#4f9fff', selector:'.how-card:nth-child(1) .how-title', attr:'text' },
+  { key:'how1_text',  label:'Step 1 — body',  desc:'Body of how-to-play card #1.',  section:'How to Play', color:'#4f9fff', selector:'.how-card:nth-child(1) .how-text',  attr:'text' },
+  { key:'how2_title', label:'Step 2 — title', desc:'Title of how-to-play card #2.', section:'How to Play', color:'#4f9fff', selector:'.how-card:nth-child(2) .how-title', attr:'text' },
+  { key:'how2_text',  label:'Step 2 — body',  desc:'Body of how-to-play card #2.',  section:'How to Play', color:'#4f9fff', selector:'.how-card:nth-child(2) .how-text',  attr:'text' },
+  { key:'how3_title', label:'Step 3 — title', desc:'Title of how-to-play card #3.', section:'How to Play', color:'#4f9fff', selector:'.how-card:nth-child(3) .how-title', attr:'text' },
+  { key:'how3_text',  label:'Step 3 — body',  desc:'Body of how-to-play card #3.',  section:'How to Play', color:'#4f9fff', selector:'.how-card:nth-child(3) .how-text',  attr:'text' },
 
-  // ── Footer ──
-  { key:'footer_text', label:'Footer text', selector:'footer .footer-text, .footer-inner', attr:'text' },
+  // ── Duels Lobby ──
+  { key:'duels_lobby_title', label:'Lobby title',    desc:'Big heading in the Duels lobby screen.',    section:'Duels Lobby', color:'#4f9fff', selector:'.duels-lobby-title', attr:'text' },
+  { key:'duels_lobby_sub',   label:'Lobby sub-text', desc:'Smaller line beneath the Duels lobby title.',section:'Duels Lobby', color:'#4f9fff', selector:'.duels-lobby-sub',   attr:'text' },
 
-  // ── Admin panel ──
-  { key:'admin_sub',   label:'Admin Panel sub-text', selector:'.admin-sub',   attr:'text' },
+  // ── Credits ──
+  { key:'credits_footer', label:'Footer note', desc:'Small line at the bottom of the Credits modal.', section:'Credits', color:'#ffc657', selector:'#credits-footer-text', attr:'text' },
 
-  // ── Login page feature tiles ──
-  { key:'feat_classic_name', label:'Feature tile — Classic name',   selector:'.login-feat:nth-child(1) .feat-name',  attr:'text' },
-  { key:'feat_classic_desc', label:'Feature tile — Classic desc',   selector:'.login-feat:nth-child(1) .feat-desc',  attr:'text' },
-  { key:'feat_rank_name',    label:'Feature tile — Rank name',      selector:'.login-feat:nth-child(2) .feat-name',  attr:'text' },
-  { key:'feat_rank_desc',    label:'Feature tile — Rank desc',      selector:'.login-feat:nth-child(2) .feat-desc',  attr:'text' },
-  { key:'feat_versus_name',  label:'Feature tile — Versus name',    selector:'.login-feat:nth-child(3) .feat-name',  attr:'text' },
-  { key:'feat_versus_desc',  label:'Feature tile — Versus desc',    selector:'.login-feat:nth-child(3) .feat-desc',  attr:'text' },
-  { key:'feat_duels_name',   label:'Feature tile — Duels name',     selector:'.login-feat:nth-child(4) .feat-name',  attr:'text' },
-  { key:'feat_duels_desc',   label:'Feature tile — Duels desc',     selector:'.login-feat:nth-child(4) .feat-desc',  attr:'text' },
+  // ── TOS ──
+  { key:'tos_rules_title',    label:'Site Rules — title',         desc:'Section heading for Site Rules.',           section:'TOS', color:'#ff4f4f', selector:'', attr:'tos' },
+  { key:'tos_rules_body',     label:'Site Rules — body',          desc:'Full body text for Site Rules.',            section:'TOS', color:'#ff4f4f', selector:'', attr:'tos' },
+  { key:'tos_data_title',     label:'Data & Security — title',    desc:'Section heading for Data & Security.',      section:'TOS', color:'#ff4f4f', selector:'', attr:'tos' },
+  { key:'tos_data_body',      label:'Data & Security — body',     desc:'Full body text for Data & Security.',       section:'TOS', color:'#ff4f4f', selector:'', attr:'tos' },
+  { key:'tos_accounts_title', label:'Account Services — title',   desc:'Section heading for Account Services.',     section:'TOS', color:'#ff4f4f', selector:'', attr:'tos' },
+  { key:'tos_accounts_body',  label:'Account Services — body',    desc:'Full body text for Account Services.',      section:'TOS', color:'#ff4f4f', selector:'', attr:'tos' },
+  { key:'tos_team_title',     label:'Our Team — title',           desc:'Section heading for Our Team tab.',         section:'TOS', color:'#ff4f4f', selector:'', attr:'tos' },
+  { key:'tos_team_body',      label:'Our Team — body',            desc:'Full body text for the Our Team tab.',      section:'TOS', color:'#ff4f4f', selector:'', attr:'tos' },
 
-  // ── Credits footer note ──
-  { key:'credits_footer', label:'Credits — footer note', selector:'#credits-footer-text', attr:'text' },
+  // ── Patch Notes ──
+  { key:'patch_latest_version', label:'Latest — version label', desc:'Version string shown at the top of the Latest tab (e.g. "v1.1 — Latest").', section:'Patch Notes', color:'#c8ff57', selector:'', attr:'patch' },
+  { key:'patch_latest_date',    label:'Latest — date / year',   desc:'Date or year shown under the version label.',                                  section:'Patch Notes', color:'#c8ff57', selector:'', attr:'patch' },
+  { key:'patch_latest_entries', label:'Latest — entries',desc:'One entry per line. Start each line with a tag: NEW, FIX, OLD, or REMOVE, followed by a colon and the text. Example:\nNEW: Added profiles\nFIX: Fixed scrollbar', section:'Patch Notes', color:'#c8ff57', selector:'', attr:'patch' },
+  { key:'patch_archive_version',label:'Archive — version label',desc:'Version string for the Archive tab.',                                          section:'Patch Notes', color:'#c8ff57', selector:'', attr:'patch' },
+  { key:'patch_archive_date',   label:'Archive — date / year',  desc:'Date or year for the Archive tab.',                                            section:'Patch Notes', color:'#c8ff57', selector:'', attr:'patch' },
+  { key:'patch_archive_entries',label:'Archive — entries',desc:'One entry per line. Start each line with a tag: NEW, FIX, OLD, or REMOVE, followed by a colon and the text. Example:\nOLD: Initial release\nOLD: Versus mode added', section:'Patch Notes', color:'#c8ff57', selector:'', attr:'patch' },
 
-  // ── TOS sections ──
-  { key:'tos_rules_title',    label:'TOS — Site Rules title',            selector:'', attr:'tos' },
-  { key:'tos_rules_body',     label:'TOS — Site Rules body',             selector:'', attr:'tos' },
-  { key:'tos_data_title',     label:'TOS — Data & Security title',       selector:'', attr:'tos' },
-  { key:'tos_data_body',      label:'TOS — Data & Security body',        selector:'', attr:'tos' },
-  { key:'tos_accounts_title', label:'TOS — Account Services title',      selector:'', attr:'tos' },
-  { key:'tos_accounts_body',  label:'TOS — Account Services body',       selector:'', attr:'tos' },
-  { key:'tos_team_title',     label:'TOS — Our Team title',              selector:'', attr:'tos' },
-  { key:'tos_team_body',      label:'TOS — Our Team body',               selector:'', attr:'tos' },
+  // ── Admin Panel ──
+  { key:'admin_sub',    label:'Admin sub-text', desc:'Small descriptive line inside the Admin panel header.',  section:'Admin Panel', color:'#ff4f4f', selector:'.admin-sub', attr:'text' },
+  { key:'footer_text',  label:'Footer text',    desc:'Footer text at the very bottom of the page.',           section:'Admin Panel', color:'#ff4f4f', selector:'footer .footer-text, .footer-inner', attr:'text' },
 
-  // ── Duels lobby ──
-  { key:'duels_lobby_title', label:'Duels lobby — title',    selector:'.duels-lobby-title', attr:'text' },
-  { key:'duels_lobby_sub',   label:'Duels lobby — sub-text', selector:'.duels-lobby-sub',   attr:'text' },
+  // ── Legacy feature tiles (kept for backward compat) ──
+  { key:'feat_classic_name', label:'Classic name',  desc:'Legacy login-page feature tile (Classic).',  section:'Legacy', color:'#5a5c64', selector:'.login-feat:nth-child(1) .feat-name', attr:'text' },
+  { key:'feat_classic_desc', label:'Classic desc',  desc:'Legacy login-page feature tile desc.',       section:'Legacy', color:'#5a5c64', selector:'.login-feat:nth-child(1) .feat-desc', attr:'text' },
+  { key:'feat_rank_name',    label:'Rank name',     desc:'Legacy login-page feature tile (Rank).',     section:'Legacy', color:'#5a5c64', selector:'.login-feat:nth-child(2) .feat-name', attr:'text' },
+  { key:'feat_rank_desc',    label:'Rank desc',     desc:'Legacy login-page feature tile desc.',       section:'Legacy', color:'#5a5c64', selector:'.login-feat:nth-child(2) .feat-desc', attr:'text' },
+  { key:'feat_versus_name',  label:'Versus name',   desc:'Legacy login-page feature tile (Versus).',   section:'Legacy', color:'#5a5c64', selector:'.login-feat:nth-child(3) .feat-name', attr:'text' },
+  { key:'feat_versus_desc',  label:'Versus desc',   desc:'Legacy login-page feature tile desc.',       section:'Legacy', color:'#5a5c64', selector:'.login-feat:nth-child(3) .feat-desc', attr:'text' },
+  { key:'feat_duels_name',   label:'Duels name',    desc:'Legacy login-page feature tile (Duels).',    section:'Legacy', color:'#5a5c64', selector:'.login-feat:nth-child(4) .feat-name', attr:'text' },
+  { key:'feat_duels_desc',   label:'Duels desc',    desc:'Legacy login-page feature tile desc.',       section:'Legacy', color:'#5a5c64', selector:'.login-feat:nth-child(4) .feat-desc', attr:'text' },
 ];
 
 // Apply a single text override to the DOM
@@ -8232,6 +8362,21 @@ function teApply(key, value) {
   if (!field || !value) return;
   // TOS fields have no direct DOM selector — they render on modal open
   if (field.attr === 'tos') return;
+  // Patch Notes fields update the PATCH_NOTES object, re-render if open
+  if (field.attr === 'patch') {
+    const tab  = key.startsWith('patch_latest_') ? 'latest' : 'archive';
+    const pfx  = tab === 'latest' ? 'patch_latest_' : 'patch_archive_';
+    const prop = key.slice(pfx.length); // 'version' | 'date' | 'entries'
+    if (prop === 'entries') {
+      PATCH_NOTES[tab].entries = patchNormToEntries(value);
+    } else {
+      PATCH_NOTES[tab][prop] = value;
+    }
+    if (document.getElementById('patches-modal').classList.contains('show')) {
+      switchPatchTab(_patchTab);
+    }
+    return;
+  }
   document.querySelectorAll(field.selector).forEach(el => {
     if (field.attr === 'text') el.textContent = value;
     else el.setAttribute(field.attr, value);
@@ -8305,97 +8450,170 @@ async function loadAdminTextEditor() {
 
   list.innerHTML = '';
 
-  // Header note
-  const note = document.createElement('div');
-  note.style.cssText = 'width:100%;font-family:var(--mono);font-size:.62rem;color:var(--muted);padding:4px 0 10px;border-bottom:1px solid var(--border);margin-bottom:8px;line-height:1.6';
-  note.textContent = 'Changes apply live for all users. Leave a field blank to keep the original text. Click Reset to restore an individual field.';
-  list.appendChild(note);
+  // ── Top bar ──
+  const topBar = document.createElement('div');
+  topBar.style.cssText = 'width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 0 12px;border-bottom:1px solid var(--border);margin-bottom:4px';
+  topBar.innerHTML = `
+    <span style="font-family:var(--mono);font-size:.62rem;color:var(--muted);line-height:1.6;flex:1">
+      Changes apply live for all users. Leave blank to keep the original.
+    </span>
+    <button id="te-save-all-btn" class="btn-primary" style="padding:8px 16px;font-size:.72rem;width:auto;flex-shrink:0">💾 Save All</button>
+  `;
+  list.appendChild(topBar);
 
-  // Group fields by section (split on first ' — ')
+  // ── Section icon map ──
+  const SECTION_META = {
+    'Login & Home':  { icon:'🏠', color:'#c8ff57' },
+    'Mode Cards':    { icon:'🎮', color:'#39e87a' },
+    'How to Play':   { icon:'📖', color:'#4f9fff' },
+    'Duels Lobby':   { icon:'⚔️',  color:'#4f9fff' },
+    'Credits':       { icon:'🏆', color:'#ffc657' },
+    'TOS':           { icon:'📋', color:'#ff4f4f' },
+    'Patch Notes':   { icon:'📝', color:'#c8ff57' },
+    'Admin Panel':   { icon:'⚙️',  color:'#ff4f4f' },
+    'Legacy':        { icon:'🗂️',  color:'#5a5c64' },
+  };
+
+  // ── Group fields by section ──
   const sections = {};
   TEXT_FIELDS.forEach(f => {
-    const sect = f.label.includes('\u2014') ? f.label.split('\u2014')[0].trim() : f.label.split(' ')[0];
-    if (!sections[sect]) sections[sect] = [];
-    sections[sect].push(f);
+    const s = f.section || 'Other';
+    if (!sections[s]) sections[s] = [];
+    sections[s].push(f);
   });
 
-  TEXT_FIELDS.forEach(field => {
-    const current = overrides[field.key] || '';
+  Object.entries(sections).forEach(([sectionName, fields]) => {
+    const meta = SECTION_META[sectionName] || { icon:'✏️', color:'var(--muted)' };
 
-    const wrap = document.createElement('div');
-    wrap.style.cssText = 'width:100%;display:flex;flex-direction:column;gap:5px;padding:9px 0;border-bottom:1px solid var(--border)';
+    // Section header
+    const sHdr = document.createElement('div');
+    sHdr.style.cssText = `
+      width:100%;display:flex;align-items:center;gap:10px;
+      padding:10px 12px;margin-top:14px;margin-bottom:6px;
+      background:rgba(0,0,0,.25);border-radius:8px;
+      border-left:3px solid ${meta.color};cursor:pointer;
+      user-select:none;
+    `;
+    sHdr.innerHTML = `
+      <span style="font-size:1rem">${meta.icon}</span>
+      <span style="font-family:var(--cond);font-size:.95rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:${meta.color};flex:1">${sectionName}</span>
+      <span style="font-family:var(--mono);font-size:.6rem;color:var(--muted)">${fields.length} field${fields.length !== 1 ? 's' : ''}</span>
+      <span class="te-chevron" style="font-size:.7rem;color:var(--muted);margin-left:4px">▼</span>
+    `;
+    list.appendChild(sHdr);
 
-    const labelRow = document.createElement('div');
-    labelRow.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:8px';
+    // Section body (collapsible)
+    const sBody = document.createElement('div');
+    sBody.style.cssText = 'width:100%;display:flex;flex-direction:column;gap:0';
+    list.appendChild(sBody);
 
-    const lbl = document.createElement('span');
-    lbl.style.cssText = 'font-family:var(--mono);font-size:.62rem;color:var(--accent);text-transform:uppercase;letter-spacing:.06em';
-    lbl.textContent = field.label;
-
-    const resetBtn = document.createElement('button');
-    resetBtn.className = 'btn-admin-edit';
-    resetBtn.style.cssText = 'padding:3px 10px;font-size:.62rem;opacity:.7';
-    resetBtn.textContent = 'Reset';
-    resetBtn.title = 'Clear this override and restore original text';
-    resetBtn.addEventListener('click', () => teResetField(field.key));
-
-    labelRow.appendChild(lbl);
-    labelRow.appendChild(resetBtn);
-
-    const inputRow = document.createElement('div');
-    inputRow.style.cssText = 'display:flex;gap:6px;align-items:flex-start';
-
-    const isLong = field.key.includes('desc') || field.key.includes('sub') || field.key.includes('text') || field.key.includes('body');
-    let inp;
-    if (isLong) {
-      inp = document.createElement('textarea');
-      inp.rows = field.key.includes('body') ? 8 : 2;
-      inp.style.cssText = 'resize:vertical;min-height:44px';
-    } else {
-      inp = document.createElement('input');
-    }
-    inp.className = 'input-field';
-    inp.style.cssText = (inp.style.cssText || '') + ';flex:1;font-size:.78rem;padding:8px 12px';
-    inp.value = current;
-    inp.placeholder = 'Leave blank to use default text…';
-    inp.dataset.key = field.key;
-
-    const saveBtn = document.createElement('button');
-    saveBtn.className = 'btn-primary';
-    saveBtn.style.cssText = 'padding:8px 14px;font-size:.72rem;width:auto;flex-shrink:0';
-    saveBtn.textContent = 'Save';
-    saveBtn.addEventListener('click', async () => {
-      const val = inp.value.trim();
-      saveBtn.disabled = true;
-      saveBtn.textContent = '…';
-      await teSaveField(field.key, val);
-      saveBtn.disabled = false;
-      saveBtn.textContent = '✓';
-      setTimeout(() => { saveBtn.textContent = 'Save'; }, 1500);
-      toast('Text saved!', 'ok');
+    // Toggle collapse on section header click
+    let collapsed = false;
+    sHdr.addEventListener('click', () => {
+      collapsed = !collapsed;
+      sBody.style.display = collapsed ? 'none' : '';
+      sHdr.querySelector('.te-chevron').textContent = collapsed ? '▶' : '▼';
     });
 
-    inputRow.appendChild(inp);
-    inputRow.appendChild(saveBtn);
+    fields.forEach((field, fi) => {
+      const current = overrides[field.key] || '';
+      const isLast = fi === fields.length - 1;
 
-    wrap.appendChild(labelRow);
-    wrap.appendChild(inputRow);
-    list.appendChild(wrap);
+      const wrap = document.createElement('div');
+      wrap.style.cssText = `
+        width:100%;display:flex;flex-direction:column;gap:6px;
+        padding:12px 14px;
+        background:rgba(13,15,18,.6);
+        border:1px solid var(--border);
+        border-radius:8px;
+        margin-bottom:${isLast ? '0' : '6px'};
+        position:relative;
+      `;
+
+      // Colored left stripe per section
+      wrap.style.borderLeft = `3px solid ${meta.color}40`;
+
+      // Overridden indicator
+      const isOverridden = !!current;
+
+      wrap.innerHTML = `
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+          <div style="display:flex;flex-direction:column;gap:3px;flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <span style="font-family:var(--cond);font-size:.85rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:${meta.color}">${field.label}</span>
+              ${isOverridden ? `<span style="font-family:var(--mono);font-size:.55rem;font-weight:700;padding:1px 7px;border-radius:100px;background:rgba(200,255,87,.12);color:var(--accent);border:1px solid rgba(200,255,87,.25);letter-spacing:.06em;text-transform:uppercase">OVERRIDDEN</span>` : ''}
+            </div>
+            <span style="font-family:var(--mono);font-size:.64rem;color:var(--muted);line-height:1.5">${field.desc || ''}</span>
+          </div>
+          <button class="te-reset-btn" data-key="${field.key}" style="flex-shrink:0;background:none;border:1px solid var(--border2);color:var(--muted);padding:3px 10px;border-radius:6px;font-family:var(--mono);font-size:.6rem;cursor:pointer;transition:all .15s;white-space:nowrap" title="Clear override and restore original">↺ Reset</button>
+        </div>
+        <div style="display:flex;gap:6px;align-items:flex-start" class="te-input-row">
+        </div>
+      `;
+
+      // Reset button hover style
+      const resetBtn = wrap.querySelector('.te-reset-btn');
+      resetBtn.addEventListener('mouseover', () => { resetBtn.style.borderColor = 'var(--red)'; resetBtn.style.color = 'var(--red)'; });
+      resetBtn.addEventListener('mouseout',  () => { resetBtn.style.borderColor = 'var(--border2)'; resetBtn.style.color = 'var(--muted)'; });
+      resetBtn.addEventListener('click', () => teResetField(field.key));
+
+      // Input
+      const inputRow = wrap.querySelector('.te-input-row');
+      const isLongText = field.key.includes('desc') || field.key.includes('sub') || field.key.includes('text') || field.key.includes('body') || field.key.includes('entries');
+      let inp;
+      if (isLongText) {
+        inp = document.createElement('textarea');
+        inp.rows = field.key.includes('entries') ? 8 : (field.key.includes('body') ? 6 : 2);
+        inp.style.resize = 'vertical';
+      } else {
+        inp = document.createElement('input');
+        inp.type = 'text';
+      }
+      inp.className = 'input-field';
+      inp.style.cssText = 'flex:1;font-size:.77rem;padding:9px 12px;font-family:var(--mono)';
+      // For entries fields, show plain text format instead of raw JSON
+      const displayValue = field.key.endsWith('_entries') ? patchNormToText(current) : current;
+      inp.value = displayValue;
+      inp.placeholder = field.key.endsWith('_entries')
+        ? 'NEW: Your new feature\nFIX: Something fixed\nOLD: Old note'
+        : 'Leave blank to use the default…';
+      inp.dataset.key = field.key;
+
+      const saveBtn = document.createElement('button');
+      saveBtn.className = 'btn-primary';
+      saveBtn.style.cssText = 'padding:9px 16px;font-size:.72rem;width:auto;flex-shrink:0';
+      saveBtn.textContent = 'Save';
+      saveBtn.addEventListener('click', async () => {
+        const val = inp.value.trim();
+        saveBtn.disabled = true; saveBtn.textContent = '…';
+        await teSaveField(field.key, val);
+        saveBtn.disabled = false; saveBtn.textContent = '✓ Saved';
+        setTimeout(() => { saveBtn.textContent = 'Save'; }, 1800);
+        toast('Text saved!', 'ok');
+        // Update overridden badge
+        const badge = wrap.querySelector('[data-badge]');
+        if (val && !badge) {
+          const b = document.createElement('span');
+          b.dataset.badge = '1';
+          b.style.cssText = 'font-family:var(--mono);font-size:.55rem;font-weight:700;padding:1px 7px;border-radius:100px;background:rgba(200,255,87,.12);color:var(--accent);border:1px solid rgba(200,255,87,.25);letter-spacing:.06em;text-transform:uppercase';
+          b.textContent = 'OVERRIDDEN';
+          wrap.querySelector('.te-label-row')?.appendChild(b);
+        }
+      });
+
+      inputRow.appendChild(inp);
+      inputRow.appendChild(saveBtn);
+      sBody.appendChild(wrap);
+    });
   });
 
-  // Save All button
-  const saveAll = document.createElement('button');
-  saveAll.className = 'btn-primary';
-  saveAll.style.cssText = 'margin-top:12px;padding:12px';
-  saveAll.textContent = '💾 Save All Changes';
-  saveAll.addEventListener('click', async () => {
-    saveAll.disabled = true;
-    saveAll.textContent = 'Saving…';
+  // ── Save All button at the bottom ──
+  const saveAllBtn = topBar.querySelector('#te-save-all-btn');
+  saveAllBtn.addEventListener('click', async () => {
+    saveAllBtn.disabled = true; saveAllBtn.textContent = 'Saving…';
     const rows = list.querySelectorAll('[data-key]');
     const updates = {};
-    rows.forEach(inp => {
-      if (inp.value.trim()) updates[inp.dataset.key] = inp.value.trim();
-    });
+    rows.forEach(inp => { if (inp.value.trim()) updates[inp.dataset.key] = inp.value.trim(); });
     try {
       if (window._fbReady) {
         await window._db.collection('config').doc('text_overrides').set(updates, { merge: true });
@@ -8406,10 +8624,8 @@ async function loadAdminTextEditor() {
       }
       toast('All text saved!', 'ok');
     } catch(e) { toast('Save failed: ' + e.message, 'err'); }
-    saveAll.disabled = false;
-    saveAll.textContent = '💾 Save All Changes';
+    saveAllBtn.disabled = false; saveAllBtn.textContent = '💾 Save All';
   });
-  list.appendChild(saveAll);
 }
 
 // Auto-refresh stats every 3s when panel is open
@@ -9221,7 +9437,12 @@ async function _loadProfileLbScores(key, displayName) {
   const totalPts = results
     .filter(r => ['classic','position','versus','video'].includes(r.mode) && r.score != null)
     .reduce((s, r) => s + r.score, 0);
-  document.getElementById('pm-total-pts').textContent = totalPts > 0 ? totalPts.toLocaleString() : '0';
+  // KyoumiEU's total pts is always shown as NULL
+  if (key && key.toLowerCase() === 'kyoumiEU'.toLowerCase()) {
+    document.getElementById('pm-total-pts').textContent = 'NULL';
+  } else {
+    document.getElementById('pm-total-pts').textContent = totalPts > 0 ? totalPts.toLocaleString() : '0';
+  }
 
   rowsEl.innerHTML = '';
   const hasAny = results.some(r => r.score != null);
