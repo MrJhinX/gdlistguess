@@ -9,13 +9,13 @@
 <meta property="og:type" content="website"/>
 <meta property="og:title" content="GDListGuess"/>
 <meta property="og:description" content="Whats good yall, official link for GDListGuess. Made by KyoumiEU, teesen and play-tested by Skyght."/>
-<meta property="og:image" content="https://raw.githubusercontent.com/MrJhinX/gdlistguess/main/gdlistguess_embed.png"/>
+<meta property="og:image" content="https://img.youtube.com/vi/nHhsHwTN-Ek/maxresdefault.jpg"/>
 <meta property="og:color" content="#c8ff57"/>
 <meta name="theme-color" content="#c8ff57"/>
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:title" content="GDListGuess"/>
 <meta name="twitter:description" content="Whats good yall, official link for GDListGuess. Made by KyoumiEU, teesen and play-tested by Skyght."/>
-<meta name="twitter:image" content="https://raw.githubusercontent.com/MrJhinX/gdlistguess/main/gdlistguess_embed.png"/>
+<meta name="twitter:image" content="https://img.youtube.com/vi/nHhsHwTN-Ek/maxresdefault.jpg"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800;900&family=Barlow:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
@@ -1274,8 +1274,10 @@ footer a:hover{color:var(--text)}
 
 <!-- ── VIDEO BACKGROUND ── -->
 <div id="video-bg-wrap">
-  <video id="yt-bg-iframe" autoplay muted loop playsinline
-    onerror="this.style.display='none';document.getElementById('yt-bg-fallback').style.display='block'">
+  <video id="yt-bg-iframe" autoplay muted playsinline
+    onerror="this.style.display='none';document.getElementById('yt-bg-fallback').style.display='block'"
+    oncanplay="if(this.currentTime<7){this.currentTime=7;}"
+    ontimeupdate="if(this.duration&&this.currentTime>=this.duration-0.3){this.currentTime=7;}">
     <source src="videoplayback.mp4" type="video/mp4">
   </video>
   <iframe id="yt-bg-fallback"
@@ -1708,6 +1710,7 @@ footer a:hover{color:var(--text)}
           </div>
         </div>
       </div>
+
     </div>
     <button class="btn-ghost" onclick="goHome()">← Back</button>
   </div>
@@ -1837,6 +1840,24 @@ footer a:hover{color:var(--text)}
         <div class="kyoumi-links">
           <a href="https://www.youtube.com/@KyoumiEU" target="_blank" rel="noopener" class="kyoumi-link yt">YouTube</a>
           <a href="#" onclick="navigator.clipboard&&navigator.clipboard.writeText('kyoumiv');window.event&&window.event.preventDefault();var btn=this;var orig=btn.textContent;btn.textContent='Copied!';setTimeout(()=>{btn.textContent=orig;},1500);return false;" class="kyoumi-link dc">Discord</a>
+        </div>
+      </div>
+
+      <!-- GDBGC Special Thanks -->
+      <div class="kyoumi-card" style="margin-top:2px;border:2px solid rgba(114,137,218,.4);background:rgba(114,137,218,.04);border-radius:12px;padding:14px;">
+        <div class="lb-side-role-label" style="background:rgba(114,137,218,.12);color:#7289da;border:1px solid rgba(114,137,218,.4);margin-bottom:10px;">Special Thanks</div>
+        <div class="kyoumi-header">
+          <img src="data:image/png;base64,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" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid rgba(114,137,218,.4);flex-shrink:0;" alt="GDBGC"/>
+          <div class="kyoumi-info">
+            <span class="kyoumi-name">GDBGC</span>
+            <div class="kyoumi-roles">
+              <span class="kyoumi-role-tag" style="background:rgba(114,137,218,.12);color:#7289da;border:1px solid rgba(114,137,218,.4)">Supporter</span>
+            </div>
+          </div>
+        </div>
+        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);line-height:1.5;margin:10px 0 12px;">Thanks for the support GD bulgarian community.</div>
+        <div class="kyoumi-links">
+          <a href="https://discord.gg/d5wSgk3xph" target="_blank" rel="noopener" class="kyoumi-link dc">Discord</a>
         </div>
       </div>
     </div>
@@ -5803,14 +5824,14 @@ setInterval(() => {
   const loader  = document.getElementById('glitch-loader');
   const bar     = document.getElementById('gl-bar');
   const status  = document.getElementById('gl-status');
-  const DURATION = 1000; // ms
+  const DURATION = 400; // ms
 
   const steps = [
-    { at: 0,   pct: 0,   msg: 'CONNECTING TO DATABASE_' },
-    { at: 150, pct: 22,  msg: 'LOADING DEMON LIST_' },
-    { at: 330, pct: 48,  msg: 'FETCHING LEADERBOARDS_' },
-    { at: 560, pct: 72,  msg: 'CALIBRATING LEVELS_' },
-    { at: 780, pct: 92,  msg: 'ENTERING GAME_' },
+    { at: 0,   pct: 0,   msg: "CONNECTING TO DATABASE_" },
+    { at: 80,  pct: 35,  msg: "LOADING DEMON LIST_" },
+    { at: 160, pct: 65,  msg: "FETCHING LEADERBOARDS_" },
+    
+    { at: 260, pct: 85,  msg: "ENTERING GAME_" },
   ];
 
   steps.forEach(s => {
