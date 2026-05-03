@@ -1777,6 +1777,12 @@ footer a:hover{color:var(--text)}
   font-size:.9rem;color:var(--accent);opacity:0;transition:opacity .15s;
 }
 .profile-big-avatar:hover::after{opacity:1}
+.profile-modal.viewing-other .profile-big-avatar{cursor:default}
+.profile-modal.viewing-other .profile-big-avatar:hover{transform:none;border-color:var(--border2)}
+.profile-modal.viewing-other .profile-big-avatar::after{display:none}
+.profile-modal.viewing-other.admin-viewing .profile-big-avatar{cursor:pointer}
+.profile-modal.viewing-other.admin-viewing .profile-big-avatar:hover{transform:scale(1.06);border-color:var(--accent)}
+.profile-modal.viewing-other.admin-viewing .profile-big-avatar::after{display:flex}
 
 .profile-hero-info{flex:1;min-width:0}
 .profile-username{
@@ -6208,6 +6214,7 @@ async function loadAdminUsers() {
         ${!acc.isAdmin ? `<button class="btn-admin-ban" onclick="adminIpBan('${acc.name}')" style="background:rgba(255,79,79,.15);border-color:rgba(255,79,79,.5)" title="IP Ban — blocks this user's IP address">IP Ban</button>` : ''}
         ${acc.ipBanned ? `<button class="btn-admin-edit" onclick="adminRemoveIpBan('${acc.name}')" style="background:rgba(255,153,0,.08);border-color:rgba(255,153,0,.3);color:#ff9900">Remove IP Ban</button>` : ''}
         ${!acc.isAdmin ? `<button class="btn-admin-ban" onclick="adminBan('${acc.name}')">Ban</button>` : ''}
+        <button class="btn-admin-edit" onclick="adminOpenEditProfile('${k}','${acc.name}')" style="background:rgba(200,255,87,.06);border-color:rgba(200,255,87,.2);color:var(--accent)" title="Edit pfp &amp; bio">✎ Profile</button>
       </div>
     `;
     list.appendChild(row);
@@ -9487,6 +9494,7 @@ async function openProfileModal(targetName) {
 
   const box = document.getElementById('profile-modal-box');
   box.classList.toggle('viewing-other', !viewSelf);
+  box.classList.toggle('admin-viewing', !viewSelf && !!(user && user.isAdmin));
 
   // Edit section visibility
   document.getElementById('pm-edit-section').style.display = viewSelf ? '' : 'none';
@@ -9856,9 +9864,14 @@ function closeProfileModal() {
 }
 
 function profileAvatarClick() {
-  if (!user || _profileTarget !== user.name) return;
-  closeProfileModal();
-  openPfpModal();
+  if (!user) return;
+  if (_profileTarget === user.name) {
+    closeProfileModal();
+    openPfpModal();
+  } else if (user.isAdmin && _profileTarget) {
+    const key = _profileTarget.toLowerCase();
+    adminOpenEditProfile(key, _profileTarget);
+  }
 }
 
 async function profileSaveBio() {
@@ -9954,6 +9967,206 @@ async function profileSavePassword() {
   }
   btn.disabled = false; btn.textContent = 'Update Password';
 }
+
+// ══════════════════════════════════════
+// ADMIN EDIT PROFILE (pfp + bio)
+// ══════════════════════════════════════
+let _adminEditTarget = null;
+let _adminEditPendingImg = null;
+
+async function adminOpenEditProfile(key, name) {
+  if (!user || !user.isAdmin) { toast('Admin only.', 'err'); return; }
+  _adminEditTarget = key;
+  _adminEditPendingImg = null;
+
+  // Show modal immediately in loading state
+  document.getElementById('aep-username').textContent = name;
+  document.getElementById('aep-bio-input').value = '';
+  document.getElementById('aep-bio-count').textContent = '0/40';
+  const prev = document.getElementById('aep-pfp-preview');
+  prev.style.backgroundImage = 'none';
+  prev.style.background = 'var(--muted2)';
+  prev.textContent = '…';
+  prev.style.color = 'var(--muted)';
+  prev.style.fontSize = '1rem';
+  prev.style.fontWeight = '400';
+  document.getElementById('aep-upload-name').style.display = 'none';
+  document.getElementById('aep-err').style.display = 'none';
+  document.getElementById('aep-ok').style.display = 'none';
+  const btn = document.getElementById('aep-save-btn');
+  btn.textContent = 'Loading…'; btn.disabled = true;
+  document.getElementById('admin-edit-profile-overlay').classList.add('show');
+
+  // Fetch fresh from Firestore so bio/pfp are always current
+  let acc = {};
+  try { acc = await getAccountCloud(key) || {}; } catch(e) {}
+
+  // Populate bio
+  document.getElementById('aep-bio-input').value = acc.bio || '';
+  document.getElementById('aep-bio-count').textContent = (acc.bio || '').length + '/40';
+
+  // Populate pfp preview
+  const pfp = acc.pfp || null;
+  if (pfp && pfp.img) {
+    prev.style.backgroundImage = 'url(' + pfp.img + ')';
+    prev.style.backgroundSize = 'cover';
+    prev.style.backgroundPosition = 'center';
+    prev.style.background = 'none';
+    prev.textContent = '';
+  } else {
+    prev.style.backgroundImage = 'none';
+    prev.style.background = 'var(--accent)';
+    prev.textContent = name[0].toUpperCase();
+    prev.style.color = '#080a06';
+    prev.style.fontSize = '1.4rem';
+    prev.style.fontWeight = '800';
+  }
+
+  btn.textContent = 'Save Changes'; btn.disabled = false;
+}
+
+function adminCloseEditProfile() {
+  document.getElementById('admin-edit-profile-overlay').classList.remove('show');
+  _adminEditTarget = null;
+  _adminEditPendingImg = null;
+}
+
+function aepHandleFile(file) {
+  if (!file || !file.type.startsWith('image/')) { toast('Please select an image file.', 'err'); return; }
+  if (file.size > 2 * 1024 * 1024) { toast('Image must be under 2MB.', 'err'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    _adminEditPendingImg = e.target.result;
+    document.getElementById('aep-upload-name').textContent = '✓ ' + file.name;
+    document.getElementById('aep-upload-name').style.display = 'block';
+    const prev = document.getElementById('aep-pfp-preview');
+    prev.style.backgroundImage = `url(${_adminEditPendingImg})`;
+    prev.style.backgroundSize = 'cover';
+    prev.style.backgroundPosition = 'center';
+    prev.style.background = 'none';
+    prev.textContent = '';
+  };
+  reader.readAsDataURL(file);
+}
+
+function aepClearPfp() {
+  _adminEditPendingImg = '__clear__';
+  document.getElementById('aep-upload-name').textContent = '✓ Cleared (will remove pfp)';
+  document.getElementById('aep-upload-name').style.display = 'block';
+  const prev = document.getElementById('aep-pfp-preview');
+  prev.style.backgroundImage = 'none';
+  prev.style.background = 'var(--muted2)';
+  prev.textContent = '✕';
+  prev.style.color = 'var(--muted)';
+}
+
+async function adminSaveEditProfile() {
+  if (!user || !user.isAdmin) { toast('Admin only.', 'err'); return; }
+  if (!_adminEditTarget) return;
+  const key = _adminEditTarget;
+  const bio = document.getElementById('aep-bio-input').value.trim().slice(0, 40);
+  const errEl = document.getElementById('aep-err');
+  const okEl  = document.getElementById('aep-ok');
+  errEl.style.display = 'none'; okEl.style.display = 'none';
+
+  const btn = document.getElementById('aep-save-btn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  try {
+    const accData = await getAccountCloud(key);
+    if (!accData) { errEl.textContent = 'Account not found in database.'; errEl.style.display = 'block'; btn.disabled = false; btn.textContent = 'Save Changes'; return; }
+
+    // Apply bio
+    accData.bio = bio;
+
+    // Apply pfp
+    if (_adminEditPendingImg === '__clear__') {
+      accData.pfp = null;
+    } else if (_adminEditPendingImg) {
+      accData.pfp = { img: _adminEditPendingImg };
+    }
+    // If null, leave pfp unchanged
+
+    await saveAccountCloud(key, accData);
+    const accs = getAccounts(); accs[key] = accData; saveAccounts(accs);
+
+    // If editing the currently logged-in user, sync their session
+    if (user && user.name.toLowerCase() === key) {
+      user.bio = accData.bio;
+      if (_adminEditPendingImg === '__clear__') user.pfp = null;
+      else if (_adminEditPendingImg) user.pfp = accData.pfp;
+      localSet('gdlg_user', user);
+      showUserChip();
+    }
+
+    okEl.textContent = '✓ Profile updated!'; okEl.style.display = 'block';
+    setTimeout(() => { okEl.style.display = 'none'; }, 3000);
+    toast(`Profile for ${accData.name} updated!`, 'ok');
+    btn.disabled = false; btn.textContent = 'Save Changes';
+  } catch(e) {
+    errEl.textContent = 'Error saving. Try again.'; errEl.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Save Changes';
+  }
+}
+
+// bio counter handled via oninput on the element
 </script>
+
+<!-- ADMIN EDIT PROFILE MODAL -->
+<style>
+#admin-edit-profile-overlay{display:none}
+#admin-edit-profile-overlay.show{display:flex}
+</style>
+<div id="admin-edit-profile-overlay" style="position:fixed;inset:0;z-index:10500;background:rgba(7,8,10,.85);backdrop-filter:blur(18px);align-items:center;justify-content:center;padding:20px">
+  <div style="width:100%;max-width:420px;background:rgba(13,15,18,.97);border:1px solid var(--border2);border-radius:18px;overflow:hidden;box-shadow:0 0 0 1px rgba(200,255,87,.06),0 40px 80px rgba(0,0,0,.7)">
+    <!-- Header -->
+    <div style="padding:20px 24px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,rgba(255,79,79,.04) 0%,transparent 60%)">
+      <div>
+        <div style="font-family:var(--mono);font-size:.6rem;color:var(--red);text-transform:uppercase;letter-spacing:.2em;margin-bottom:4px">Admin · Edit Profile</div>
+        <div style="font-family:var(--cond);font-size:1.3rem;font-weight:900;letter-spacing:.05em;text-transform:uppercase">
+          Editing: <span id="aep-username" style="color:var(--accent)"></span>
+        </div>
+      </div>
+      <button onclick="adminCloseEditProfile()" style="background:none;border:1px solid var(--border);color:var(--muted);width:34px;height:34px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all .15s;flex-shrink:0" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">✕</button>
+    </div>
+    <!-- Body -->
+    <div style="padding:22px 24px 26px;display:flex;flex-direction:column;gap:20px">
+
+      <!-- PFP section -->
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="font-family:var(--mono);font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em">Profile Picture</div>
+        <div style="display:flex;align-items:center;gap:16px">
+          <!-- Preview circle -->
+          <div id="aep-pfp-preview" style="width:64px;height:64px;border-radius:50%;background:var(--accent);color:#080a06;display:flex;align-items:center;justify-content:center;font-family:var(--cond);font-size:1.4rem;font-weight:800;flex-shrink:0;border:2px solid var(--border2);overflow:hidden"></div>
+          <div style="display:flex;flex-direction:column;gap:8px;flex:1">
+            <label style="display:flex;align-items:center;gap:8px;background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:9px 12px;cursor:pointer;transition:border-color .15s;font-family:var(--mono);font-size:.74rem;color:var(--muted)" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
+              <span>↑ Upload Image</span>
+              <input type="file" accept="image/*" style="display:none" onchange="aepHandleFile(this.files[0])"/>
+            </label>
+            <button onclick="aepClearPfp()" style="background:none;border:1px solid var(--border);color:var(--muted);padding:8px 12px;border-radius:var(--r);font-family:var(--mono);font-size:.7rem;cursor:pointer;transition:all .15s;text-align:left" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">✕ Remove pfp</button>
+          </div>
+        </div>
+        <div id="aep-upload-name" style="font-family:var(--mono);font-size:.68rem;color:var(--accent);display:none"></div>
+      </div>
+
+      <!-- Bio section -->
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="font-family:var(--mono);font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em">Bio</div>
+          <div id="aep-bio-count" style="font-family:var(--mono);font-size:.6rem;color:var(--muted2)">0/40</div>
+        </div>
+        <input id="aep-bio-input" type="text" maxlength="40" placeholder="User bio (max 40 chars)" class="input-field" style="font-size:.82rem" oninput="document.getElementById('aep-bio-count').textContent=Math.min(this.value.length,40)+'/40'"/>
+      </div>
+
+      <!-- Status messages -->
+      <div id="aep-err" style="font-family:var(--mono);font-size:.74rem;color:var(--red);display:none;padding:8px 12px;background:var(--red-dim);border-radius:var(--r);border:1px solid rgba(255,79,79,.2)"></div>
+      <div id="aep-ok" style="font-family:var(--mono);font-size:.74rem;color:var(--helper);display:none;padding:8px 12px;background:var(--helper-dim);border-radius:var(--r);border:1px solid rgba(57,232,122,.2)"></div>
+
+      <!-- Save button -->
+      <button id="aep-save-btn" onclick="adminSaveEditProfile()" class="btn-primary">Save Changes</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
