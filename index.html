@@ -1422,7 +1422,7 @@ footer a:hover{color:var(--text)}
       GDLIST<em>GUESS</em>
       <span>PAGE</span>
     </div>
-    <p class="login-sub">How well do you know the Geometry Dash Demon List? Create an account or sign in to compete on the global leaderboard.</p>
+    <p class="login-sub">Hello, welcome to GDList Guess, made with love by Pancake Team. Create an account or sign in to compete on the GDList Guess leaderboard.</p>
     <div class="login-features">
       <div class="login-feat">
         <span class="feat-icon">Classic</span>
@@ -1869,11 +1869,12 @@ footer a:hover{color:var(--text)}
 
   <!-- CREDITS MODAL — lives outside any .screen so it shows from any tab -->
   <div class="modal-overlay" id="credits-modal" onclick="if(event.target===this)this.classList.remove('show')">
-    <div class="modal-box" style="width:min(360px,calc(100vw - 24px));max-height:min(90vh,700px);overflow-y:auto;overflow-x:hidden">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;position:sticky;top:0;background:var(--s2);z-index:2;padding-bottom:8px">
+    <div class="modal-box" style="width:min(360px,calc(100vw - 24px));max-height:min(90vh,700px);overflow:hidden;display:flex;flex-direction:column;padding:0;gap:0">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:#131518;z-index:2;padding:20px 28px 14px;border-bottom:1px solid var(--border)">
         <span style="font-family:var(--cond);font-size:1.1rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase">Credits</span>
         <button onclick="document.getElementById('credits-modal').classList.remove('show')" style="background:var(--s1);border:1px solid var(--border2);color:var(--text);cursor:pointer;font-size:1rem;line-height:1;padding:6px 12px;border-radius:8px;transition:all .15s;min-width:36px;min-height:36px;display:flex;align-items:center;justify-content:center" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text)'">✕</button>
       </div>
+      <div style="overflow-y:auto;overflow-x:hidden;flex:1;padding:16px 28px 24px">
       <div class="credits-row" id="credits-dynamic-rows">
         <!-- Admin row -->
         <div class="credit-item" id="credits-admin-row">
@@ -1885,18 +1886,6 @@ footer a:hover{color:var(--text)}
         <div class="credit-item" style="flex-direction:column;align-items:flex-start;gap:6px" id="credits-reporters-row">
           <span class="credit-role reporter">✔ Reporters</span>
           <div id="credits-reporters-container" style="display:flex;flex-direction:column;gap:4px;width:100%;padding-left:4px">
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <span class="credit-name">icaka</span><span class="credit-names">Reporter</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <span class="credit-name">Skyght</span><span class="credit-names">Playtester &amp; Reporter</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <span class="credit-name">teesen</span><span class="credit-names">Reporter</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <span class="credit-name">kostya</span><span class="credit-names">Reporter</span>
-            </div>
           </div>
         </div>
         <!-- Devs row (hidden until populated) -->
@@ -1916,7 +1905,7 @@ footer a:hover{color:var(--text)}
         <span id="credits-footer-text">for any further information... well you don't need it.</span>
       </div>
       <!-- KyoumiEU self-credit in credits modal -->
-      <div class="kyoumi-card" style="margin-top:2px">
+      <div class="kyoumi-card" style="margin-top:16px">
         <div class="lb-side-role-label" style="background:var(--accent-dim);color:var(--accent);border:1px solid rgba(200,255,87,.2)">Site Owner</div>
         <div class="kyoumi-header">
           <div class="kyoumi-avatar">K</div>
@@ -1935,7 +1924,7 @@ footer a:hover{color:var(--text)}
       </div>
 
       <!-- GDBGC Special Thanks -->
-      <div class="kyoumi-card" style="margin-top:2px;border:2px solid rgba(114,137,218,.4);background:rgba(114,137,218,.04);border-radius:12px;padding:14px;">
+      <div class="kyoumi-card" style="margin-top:16px;border:2px solid rgba(114,137,218,.4);background:rgba(114,137,218,.04);border-radius:12px;padding:14px;">
         <div class="lb-side-role-label" style="background:rgba(114,137,218,.12);color:#7289da;border:1px solid rgba(114,137,218,.4);margin-bottom:10px;">Special Thanks</div>
         <div class="kyoumi-header">
           <img src="data:image/png;base64,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" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid rgba(114,137,218,.4);flex-shrink:0;" alt="GDBGC"/>
@@ -1950,6 +1939,7 @@ footer a:hover{color:var(--text)}
         <div class="kyoumi-links">
           <a href="https://discord.gg/d5wSgk3xph" target="_blank" rel="noopener" class="kyoumi-link dc">Discord</a>
         </div>
+      </div>
       </div>
     </div>
   </div>
@@ -2218,16 +2208,21 @@ async function presenceLeave(name) {
   } catch(e) {}
 }
 
+const ALWAYS_ONLINE = ['svinqtaTTT','sayodevicer1234','MAXNARKOMAN','sagcheto11','bratmiTeseen']
+  .map(n => n.toLowerCase());
+
 async function getOnlineUsers() {
-  if (!window._fbReady) return [];
+  if (!window._fbReady) return ALWAYS_ONLINE;
   try {
     const cutoff = Date.now() - 90000; // 90s heartbeat window
     const snap = await window._db.collection('online').get();
-    return snap.docs
+    const live = snap.docs
       .map(d => d.data())
       .filter(d => d.lastSeen && d.lastSeen > cutoff)
       .map(d => d.name.toLowerCase());
-  } catch(e) { return []; }
+    // Merge always-online alts with real live users (deduplicated)
+    return [...new Set([...ALWAYS_ONLINE, ...live])];
+  } catch(e) { return ALWAYS_ONLINE; }
 }
 </script>
 
@@ -2244,7 +2239,7 @@ function lbSave(mode, entries) { localSet('lb_' + mode, entries); }
 
 // ── FIREBASE LEADERBOARD ──
 async function lbSubmitCloud(mode, name, score) {
-  if (!window._fbReady || isBanned(name)) return score;
+  if (!window._fbReady) return score;
   try {
     const db = window._db;
     const ref = db.collection('leaderboard_' + mode).doc(name.toLowerCase());
@@ -2252,11 +2247,31 @@ async function lbSubmitCloud(mode, name, score) {
     // Read current Firestore state
     const snap = await ref.get();
     const existing = snap.exists ? snap.data() : null;
-    const cloudScore = existing ? (existing.score ?? 0) : 0;
 
-    // Best score = whichever is higher: what's already in Firestore or the new game score
-    // Admin edits score directly via confirmEditScore, so no floor logic needed here
-    const bestScore = Math.max(cloudScore, score);
+    // earnedScore = best score the player achieved through actual gameplay (never admin-set)
+    // adminScore  = bonus score set by admin — tracked separately so player progress is independent
+    // IMPORTANT: never fall back to `score` for earnedScore — old docs have admin-set scores there
+    const earnedScore = existing ? (existing.earnedScore ?? 0) : 0;
+    const adminScore  = existing ? (existing.adminScore ?? 0) : 0;
+
+    let newEarned, bestScore;
+    if (mode === 'duels') {
+      // Duels: cumulative win count — add 1 per win (score=1), skip on loss (score=0)
+      newEarned = earnedScore + (score > 0 ? 1 : 0);
+      bestScore = Math.max(newEarned, adminScore);
+    } else if (mode === 'daily') {
+      // Daily: score is 1 (won) or 0 (lost) — just track the flag as-is
+      newEarned = score;
+      bestScore = score;
+    } else {
+      // Classic / Position / Versus: best score wins
+      // earnedScore here is already capped to adminScore (see confirmEditScore),
+      // so Math.max gives the correct result: player can only go up from here.
+      newEarned = Math.max(earnedScore, score);
+      // Once player has played, their earned progress stands on its own.
+      // adminScore only applies as a floor before the player has beaten it.
+      bestScore = Math.max(newEarned, adminScore);
+    }
 
     // Fetch fresh account data for badges
     const accData = await getAccountCloud(name.toLowerCase()) || {};
@@ -2264,6 +2279,8 @@ async function lbSubmitCloud(mode, name, score) {
     await ref.set({
       name: name,
       score: bestScore,
+      earnedScore: newEarned,
+      adminScore: adminScore,
       isAdmin: !!accData.isAdmin,
       isReporter: !!accData.isReporter,
       isHelper: !!accData.isHelper,
@@ -2280,7 +2297,7 @@ async function lbSubmitCloud(mode, name, score) {
     if (entries.length > 50) entries = entries.slice(0, 50);
     lbSave(mode, entries);
 
-    return bestScore;
+    return newEarned; // return the player's actual earned score (not inflated by admin)
   } catch(e) { console.error('Cloud LB submit failed:', e); }
   return score;
 }
@@ -2312,11 +2329,11 @@ async function lbGetAllCloud(mode) {
 }
 
 async function lbSubmit(mode, name, score) {
-  if (isBanned(name)) return score;
-  // Submit to cloud — lbSubmitCloud handles the max logic and syncs localStorage
-  // Use ?? instead of || so that a legitimate score of 0 is not discarded
-  const trueBest = await lbSubmitCloud(mode, name, score);
-  return trueBest ?? score;
+  // Use cloud ban check so freshly-banned users can't submit while local cache is stale
+  const banned = await isBannedCloud(name).catch(() => isBanned(name));
+  if (banned) return score;
+  const earned = await lbSubmitCloud(mode, name, score);
+  return earned ?? score;
 }
 
 // ── ACCOUNTS (Firebase) ──
@@ -2499,6 +2516,9 @@ document.addEventListener('DOMContentLoaded', () => {
         user.isAdmin = !!freshData.isAdmin;
         user.isReporter = !!freshData.isReporter;
         user.pfp = freshData.pfp || user.pfp;
+        // Sync games/streak from cloud so they show correctly on any device
+        if (freshData.games !== undefined) localSet('gdlg_games_' + user.name, freshData.games);
+        if (freshData.bestStreak !== undefined) localSet('gdlg_streak_' + user.name, freshData.bestStreak);
         localSet('gdlg_user', user);
       }
       const banned = await isBannedCloud(user.name);
@@ -2698,16 +2718,77 @@ function showUserChip() {
 function saveStats() {
   if (!user) return;
   localSet('gdlg_stats_' + user.name, user.stats);
+  // Also persist games/streak counters to Firestore so they sync across devices
+  if (window._fbReady) {
+    const key = user.name.toLowerCase();
+    const games = localGet('gdlg_games_' + user.name) || 0;
+    const streak = localGet('gdlg_streak_' + user.name) || 0;
+    window._db.collection('accounts').doc(key).set(
+      { games, bestStreak: streak },
+      { merge: true }
+    ).catch(() => {});
+  }
 }
 
-function refreshHomeStats() {
+async function refreshHomeStats() {
   if (!user) return;
   showAnnouncementBanner();
-  const s = user.stats;
-  const games = localGet('gdlg_games_' + user.name) || 0;
+
+  // Pull authoritative stats from Firestore (best scores + games + streak)
+  let games = localGet('gdlg_games_' + user.name) || 0;
+  let streak = localGet('gdlg_streak_' + user.name) || 0;
+  let classicBest = user.stats?.classic || 0;
+  let positionBest = user.stats?.position || 0;
+  let versusBest = user.stats?.versus || 0;
+
+  if (window._fbReady) {
+    try {
+      const key = user.name.toLowerCase();
+      // Fetch account doc for games/streak
+      const accSnap = await window._db.collection('accounts').doc(key).get();
+      if (accSnap.exists) {
+        const acc = accSnap.data();
+        if (acc.games !== undefined) {
+          games = acc.games;
+          localSet('gdlg_games_' + user.name, games);
+        }
+        if (acc.bestStreak !== undefined) {
+          streak = acc.bestStreak;
+          localSet('gdlg_streak_' + user.name, streak);
+        }
+      }
+      // Fetch best scores from leaderboard docs (the source of truth)
+      const [clSnap, posSnap, vsSnap] = await Promise.all([
+        window._db.collection('leaderboard_classic').doc(key).get(),
+        window._db.collection('leaderboard_position').doc(key).get(),
+        window._db.collection('leaderboard_versus').doc(key).get(),
+      ]);
+      // earnedScore = real gameplay progress (used as baseline for future lbSubmit calls)
+      // score       = display score shown on leaderboard (max of earned + adminScore)
+      // We store earnedScore in user.stats so subsequent lbSubmitCloud uses the right
+      // baseline, but display the full leaderboard `score` on the home stat card.
+      let classicDisplay  = classicBest;
+      let positionDisplay = positionBest;
+      let versusDisplay   = versusBest;
+      if (clSnap.exists)  { classicBest  = clSnap.data().earnedScore  ?? clSnap.data().score  ?? 0; classicDisplay  = clSnap.data().score  ?? classicBest; }
+      if (posSnap.exists) { positionBest = posSnap.data().earnedScore  ?? posSnap.data().score ?? 0; positionDisplay = posSnap.data().score ?? positionBest; }
+      if (vsSnap.exists)  { versusBest   = vsSnap.data().earnedScore   ?? vsSnap.data().score  ?? 0; versusDisplay   = vsSnap.data().score  ?? versusBest; }
+      // Sync back into user object and localStorage (earned only — not inflated)
+      if (!user.stats) user.stats = {};
+      user.stats.classic  = classicBest;
+      user.stats.position = positionBest;
+      user.stats.versus   = versusBest;
+      localSet('gdlg_user', user);
+      // Override the display variables used for the home card so it shows full LB score
+      classicBest  = classicDisplay;
+      positionBest = positionDisplay;
+      versusBest   = versusDisplay;
+    } catch(e) { /* use cached values if offline */ }
+  }
+
   document.getElementById('hs-games').textContent = games;
-  document.getElementById('hs-score').textContent = Math.max(s.classic || 0, s.position || 0, s.versus || 0);
-  document.getElementById('hs-streak').textContent = localGet('gdlg_streak_' + user.name) || 0;
+  document.getElementById('hs-score').textContent = Math.max(classicBest, positionBest, versusBest);
+  document.getElementById('hs-streak').textContent = streak;
 
   const sub = document.getElementById('home-sub-text');
   if (games === 0) sub.textContent = 'Choose a mode and start guessing.';
@@ -2735,7 +2816,7 @@ async function goHome() {
     }
   } catch(e) { /* silent — use cached roles if Firebase unreachable */ }
   showScreen('home-screen');
-  refreshHomeStats();
+  await refreshHomeStats();
 }
 
 function showLeaderboard() {
@@ -3459,20 +3540,30 @@ async function endGame(mode) {
   }
 
   const gamesKey = 'gdlg_games_' + user.name;
-  localSet(gamesKey, (localGet(gamesKey) || 0) + 1);
+  const newGames = (localGet(gamesKey) || 0) + 1;
+  localSet(gamesKey, newGames);
 
   const streakKey = 'gdlg_streak_' + user.name;
   const prevStreak = localGet(streakKey) || 0;
+  const newStreak = Math.max(streak, prevStreak);
   if (streak > prevStreak) localSet(streakKey, streak);
 
-  // Submit to cloud — returns the true best (max of Firestore admin-set + game score)
-  const trueBest = await lbSubmit(mode, user.name, score);
+  // Submit to cloud — returns the player's actual earned best (never admin-inflated)
+  const earnedBest = await lbSubmit(mode, user.name, score);
 
-  // Update user.stats with the authoritative value from Firestore
+  // user.stats tracks the player's genuinely earned best, not admin-gifted values
   if (!user.stats) user.stats = {};
-  user.stats[mode] = trueBest;
+  user.stats[mode] = earnedBest;
   saveStats();
   localSet('gdlg_user', user);
+
+  // Sync games/streak to Firestore account doc so they load cross-device
+  if (window._fbReady) {
+    window._db.collection('accounts').doc(user.name.toLowerCase()).set(
+      { games: newGames, bestStreak: newStreak },
+      { merge: true }
+    ).catch(() => {});
+  }
 
   const titles = { classic: 'Classic Done', position: 'Rank Guess Done', versus: 'Versus Done' };
   setTxt('end-title', titles[mode] || 'Game Over');
@@ -4005,15 +4096,32 @@ async function confirmEditScore() {
   const { mode, name } = editScoreTarget;
   const key = name.toLowerCase();
 
+  // Hoist these so they are in scope for the localStorage sync below
+  let displayScore = newScore;
+  let earnedScore = 0;
+
   try {
     const accData = await getAccountCloud(key) || {};
     const ref = window._db.collection('leaderboard_' + mode).doc(key);
 
-    // Directly overwrite the score to exactly what admin set.
-    // No floor logic — admin has full control to set any value, including lower.
+    // Read existing doc so preserve earnedScore (player's genuine gameplay progress)
+    const snap = await ref.get();
+    const existing = snap.exists ? snap.data() : null;
+
+    // If earnedScore was corrupted by a previous bug (old display score written into it),
+    // cap it to newScore so the admin edit is always respected.
+    // If the player later beats newScore through real gameplay, earnedScore rises naturally.
+    const rawEarned = existing ? (existing.earnedScore ?? 0) : 0;
+    earnedScore = Math.min(rawEarned, newScore);
+
+    // displayScore is exactly what the admin set — no more inflating via old earnedScore
+    displayScore = newScore;
+
     await ref.set({
       name: name,
-      score: newScore,
+      score: displayScore,
+      earnedScore: earnedScore,
+      adminScore: newScore,
       isAdmin: !!accData.isAdmin,
       isReporter: !!accData.isReporter,
       isHelper: !!accData.isHelper,
@@ -4026,18 +4134,16 @@ async function confirmEditScore() {
   // Sync localStorage LB cache to match
   let entries = lbGetAll(mode);
   const idx = entries.findIndex(e => e.name === name);
-  if (idx >= 0) { entries[idx].score = newScore; }
-  else { entries.push({ name, score: newScore }); }
+  if (idx >= 0) { entries[idx].score = displayScore; }
+  else { entries.push({ name, score: displayScore }); }
   entries.sort((a, b) => b.score - a.score);
   lbSave(mode, entries);
 
-  // Sync in-memory user stats if editing the logged-in user
-  if (user && user.name.toLowerCase() === key) {
-    if (!user.stats) user.stats = {};
-    user.stats[mode] = newScore;
-    saveStats();
-    localSet('gdlg_user', user);
-  }
+  // NOTE: We intentionally do NOT sync user.stats here.
+  // user.stats must only reflect earnedScore (genuine gameplay) so that
+  // subsequent lbSubmitCloud calls use the real earned baseline, not an
+  // admin-gifted value.  The home screen calls refreshHomeStats on next
+  // visit which reads earnedScore from Firestore correctly.
 
   toast(`Score updated to ${newScore}.`, 'ok');
   closeEditScore();
