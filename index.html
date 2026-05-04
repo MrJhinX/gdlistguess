@@ -941,7 +941,11 @@ input[type=range]::-webkit-slider-thumb:hover{box-shadow:0 0 0 6px var(--accent-
 .lb-side-panel{
   width:220px;flex-shrink:0;background:var(--s1);border:1px solid var(--border);
   border-radius:var(--r2);padding:16px 14px;display:flex;flex-direction:column;gap:14px;
-  position:sticky;top:72px;
+  position:sticky;top:72px;max-height:calc(100vh - 100px);
+}
+#lb-side-content{
+  overflow-y:auto;overflow-x:hidden;
+  scrollbar-width:thin;scrollbar-color:var(--border2) transparent;
 }
 .lb-side-title{
   font-family:var(--cond);font-size:.95rem;font-weight:800;letter-spacing:.1em;
@@ -4669,13 +4673,21 @@ async function fetchDemons() {
   // STRICTLY filter to position <= 150
   return all
     .filter(d => d.video && d.position <= 150)
-    .map(d => ({
-      name: d.name,
-      position: d.position,
-      publisher: d.publisher?.name || '—',
-      ytId: extractYtId(d.video),
-      video: d.video,
-    }))
+    .map(d => {
+      const rawPub = d.publisher?.name || '—';
+      // Strip clan prefix: patterns like "Clan | Name", "Clan- Name", "Clan: Name"
+      // Keep the part after the separator as the creator name
+      const clanMatch = rawPub.match(/^.{1,30}[\|:\-–]\s*(.+)$/);
+      const creatorName = clanMatch ? clanMatch[1].trim() : rawPub;
+      return {
+        name: d.name,
+        position: d.position,
+        publisher: creatorName,      // clean creator name (no clan)
+        publisherFull: rawPub,       // original string for display if needed
+        ytId: extractYtId(d.video),
+        video: d.video,
+      };
+    })
     .filter(d => d.ytId);
 }
 
@@ -6472,11 +6484,61 @@ function vsTimedOut() {
 }
 
 function startVersus() {
-  const pool = shuffle([...demons]);
-  vsQueue = [];
-  for (let i = 0; i + 1 < pool.length && vsQueue.length < VS_ROUNDS; i += 2) {
-    vsQueue.push([pool[i], pool[i + 1]]);
+  // Sort demons by position so we can work with rank order
+  const sorted = [...demons].sort((a, b) => a.position - b.position);
+
+  // ── TIER-BALANCED PAIR GENERATION ──
+  // Split the list into tiers so every rank range is equally represented.
+  // Without this, the sequential neighbour search over-samples ranks 1-50
+  // because those have the most "close neighbours" available.
+  const tierSize = Math.ceil(sorted.length / 5); // ~30 demons per tier across 150
+  const tiers = [];
+  for (let t = 0; t < 5; t++) {
+    tiers.push(sorted.slice(t * tierSize, (t + 1) * tierSize));
   }
+
+  // How many pairs to generate per tier (roughly equal, with a slight boost to
+  // tiers 2-4 so mid/upper-list demons don't get squeezed out by the fallback)
+  const pairsPerTier = Math.max(2, Math.ceil((VS_ROUNDS * 2) / tiers.length));
+
+  const used = new Set(); // track used *positions* (demon.position) across all tiers
+  const pairs = [];
+
+  // Within each tier, try to pick pairs with a rank diff of 3-25.
+  // Smaller diff range than before (was 5-40) so both options in a pair
+  // are genuinely hard to distinguish, which is more fun.
+  tiers.forEach(tier => {
+    const shuffled = shuffle([...tier]);
+    let tierPairs = 0;
+    for (let i = 0; i < shuffled.length && tierPairs < pairsPerTier; i++) {
+      const a = shuffled[i];
+      if (used.has(a.position)) continue;
+      for (let j = i + 1; j < shuffled.length; j++) {
+        const b = shuffled[j];
+        if (used.has(b.position)) continue;
+        const diff = Math.abs(a.position - b.position);
+        if (diff >= 3 && diff <= 25) {
+          pairs.push([a, b]);
+          used.add(a.position);
+          used.add(b.position);
+          tierPairs++;
+          break;
+        }
+      }
+    }
+  });
+
+  // Shuffle all collected pairs, then take VS_ROUNDS worth
+  vsQueue = shuffle(pairs).slice(0, VS_ROUNDS);
+
+  // Fallback: pad with any remaining unused demons if we're short
+  if (vsQueue.length < VS_ROUNDS) {
+    const remaining = shuffle(sorted.filter(d => !used.has(d.position)));
+    for (let i = 0; i + 1 < remaining.length && vsQueue.length < VS_ROUNDS; i += 2) {
+      vsQueue.push([remaining[i], remaining[i + 1]]);
+    }
+  }
+
   vsIdx = 0; vsScore = 0; vsStreak = 0; vsBestStreak = 0; vsCorrect = 0; vsHistory = [];
   showScreen('versus-screen');
   nextVersus();
@@ -8098,7 +8160,10 @@ function acUpdateVg(val) {
   if (!val || val.length < 1) { box.style.display = 'none'; return; }
   const norm = val.toLowerCase();
   const creators = vgGetCreators();
-  const hits = creators.filter(c => c.toLowerCase().startsWith(norm)).slice(0, 8);
+  // Match: starts-with first, then contains, deduplicated
+  const starts = creators.filter(c => c.toLowerCase().startsWith(norm));
+  const contains = creators.filter(c => !c.toLowerCase().startsWith(norm) && c.toLowerCase().includes(norm));
+  const hits = [...starts, ...contains].slice(0, 8);
   if (!hits.length) { box.style.display = 'none'; return; }
   box.innerHTML = hits.map(c => `<div class="ac-item">${c}</div>`).join('');
   box.style.display = 'block';
@@ -8522,7 +8587,7 @@ document.addEventListener('DOMContentLoaded', () => {
 //                            round, status:'active'|'finished', createdAt }
 
 const DUEL_ROUNDS = 5;
-const DUEL_MODES = ['classic', 'position', 'versus'];
+const DUEL_MODES = ['classic', 'position', 'versus', 'video'];
 
 let duelRoom = null;
 let duelRoomId = null;
@@ -8729,12 +8794,14 @@ function duelNextRound(roomData) {
   const demon = duelRoundDemons[round - 1];
 
   document.getElementById('duels-round-tag').textContent = `Round ${round}/${DUEL_ROUNDS}`;
-  document.getElementById('duels-mode-tag').textContent = mode === 'classic' ? 'Classic' : mode === 'position' ? 'Rank Guess' : 'Versus';
+  const modeLabels = { classic: 'Classic', position: 'Rank Guess', versus: 'Versus', video: 'Creator Guess' };
+  document.getElementById('duels-mode-tag').textContent = modeLabels[mode] || mode;
   document.getElementById('duels-waiting-opp').style.display = 'none';
 
   if (mode === 'classic') duelRenderClassic(demon);
   else if (mode === 'position') duelRenderPosition(demon);
   else if (mode === 'versus') duelRenderVersus(round);
+  else if (mode === 'video') duelRenderVideo(demon);
 }
 
 // ── DUEL CLASSIC ──
@@ -8899,9 +8966,19 @@ function duelPositionSkip(demon) {
 
 // ── DUEL VERSUS ──
 function duelRenderVersus(round) {
+  // Pick a balanced pair (rank diff 5-40) using the seeded RNG
   const rng = seededRng(duelRoom.seed + round * 1000);
-  const pool = duelShuffleSeeded(demons, rng);
-  const dA = pool[0], dB = pool[1];
+  const sorted = [...demons].sort((a, b) => a.position - b.position);
+  // Shuffle the sorted list deterministically, then find first close pair
+  const pool = duelShuffleSeeded(sorted, seededRng(duelRoom.seed + round * 777));
+  let dA = pool[0], dB = pool[1]; // fallback
+  for (let i = 0; i < pool.length; i++) {
+    for (let j = i + 1; j < pool.length && j <= i + 30; j++) {
+      const diff = Math.abs(pool[i].position - pool[j].position);
+      if (diff >= 5 && diff <= 40) { dA = pool[i]; dB = pool[j]; break; }
+    }
+    if (Math.abs(dA.position - dB.position) >= 5) break;
+  }
   const area = document.getElementById('duels-game-area');
   area.innerHTML = `
     <div style="font-family:var(--mono);font-size:.68rem;color:var(--muted);text-align:center;letter-spacing:.06em;text-transform:uppercase">Which ranks harder on the list?</div>
@@ -8947,6 +9024,93 @@ function duelVersusSkip(posA, posB) {
   const rb = document.getElementById('duel-vs-result');
   rb.style.display = 'flex'; rb.className = 'result-box no';
   rb.innerHTML = `<span class="verdict">Skipped</span><span class="detail">Harder: #${Math.min(posA,posB)}</span>`;
+  duelSubmitRoundScore(0);
+}
+
+// ── DUEL CREATOR GUESS (video mode) ──
+function duelRenderVideo(demon) {
+  if (!demon || !(demon.publisher || '').trim()) {
+    // Demon has no creator — skip this round automatically
+    duelSubmitRoundScore(0);
+    return;
+  }
+  const area = document.getElementById('duels-game-area');
+  area.innerHTML = `
+    <div class="thumb-wrap">
+      <div class="thumb-loading" id="duel-vg-loading">Loading…</div>
+      <img id="duel-vg-img" class="clear" alt="" style="display:none"/>
+      <div class="thumb-overlay"></div>
+    </div>
+    <div class="result-box" id="duel-vg-result" style="display:none"></div>
+    <div class="guess-row" id="duel-vg-row">
+      <input class="guess-input" id="duel-vg-input" placeholder="Type creator name…" autocomplete="off"/>
+      <div class="ac-box" id="duel-vg-ac"></div>
+      <button class="guess-btn" id="duel-vg-btn">Guess</button>
+    </div>
+    <div class="action-row">
+      <button class="btn-ghost" id="duel-vg-skip">Skip</button>
+    </div>
+  `;
+  loadThumb('duel-vg-img', 'duel-vg-loading', demon.ytId, false);
+
+  const inp = document.getElementById('duel-vg-input');
+  inp.addEventListener('input', e => {
+    const q = e.target.value.toLowerCase();
+    const box = document.getElementById('duel-vg-ac');
+    if (!q) { box.style.display = 'none'; return; }
+    const creators = vgGetCreators();
+    const starts = creators.filter(c => c.toLowerCase().startsWith(q));
+    const contains = creators.filter(c => !c.toLowerCase().startsWith(q) && c.toLowerCase().includes(q));
+    const hits = [...starts, ...contains].slice(0, 8);
+    if (!hits.length) { box.style.display = 'none'; return; }
+    box.style.display = 'block'; box.innerHTML = '';
+    hits.forEach(c => {
+      const it = document.createElement('div'); it.className = 'ac-item'; it.textContent = c;
+      it.addEventListener('mousedown', ev => { ev.preventDefault(); inp.value = c; box.style.display = 'none'; });
+      box.appendChild(it);
+    });
+  });
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') duelVideoSubmit(demon); });
+  document.getElementById('duel-vg-btn').addEventListener('click', () => duelVideoSubmit(demon));
+  document.getElementById('duel-vg-skip').addEventListener('click', () => duelVideoSkip(demon));
+  inp.focus();
+}
+
+function duelVideoSubmit(demon) {
+  if (duelRoundAnswered) return;
+  const val = document.getElementById('duel-vg-input').value.trim();
+  if (!val) { toast('Type a creator name!', 'err'); return; }
+  duelRoundAnswered = true;
+  document.getElementById('duel-vg-input').disabled = true;
+  document.getElementById('duel-vg-btn').disabled = true;
+  document.getElementById('duel-vg-skip').disabled = true;
+  document.getElementById('duel-vg-ac').style.display = 'none';
+  const correct = normalize(val) === normalize(demon.publisher || '');
+  const rb = document.getElementById('duel-vg-result');
+  rb.style.display = 'flex';
+  let pts = 0;
+  if (correct) {
+    pts = 100;
+    rb.className = 'result-box ok';
+    rb.innerHTML = `<span class="verdict">Correct! +${pts} pts</span><span class="detail">Creator: <b>${demon.publisher}</b> · ${demon.name}</span>`;
+    toast(`Correct! +${pts}`, 'ok');
+  } else {
+    rb.className = 'result-box no';
+    rb.innerHTML = `<span class="verdict">Wrong!</span><span class="detail">Creator: <b>${demon.publisher}</b> · ${demon.name}</span>`;
+  }
+  duelSubmitRoundScore(pts);
+}
+
+function duelVideoSkip(demon) {
+  if (duelRoundAnswered) return;
+  duelRoundAnswered = true;
+  document.getElementById('duel-vg-input').disabled = true;
+  document.getElementById('duel-vg-btn').disabled = true;
+  document.getElementById('duel-vg-skip').disabled = true;
+  document.getElementById('duel-vg-ac').style.display = 'none';
+  const rb = document.getElementById('duel-vg-result');
+  rb.style.display = 'flex'; rb.className = 'result-box no';
+  rb.innerHTML = `<span class="verdict">Skipped</span><span class="detail">Creator: <b>${demon.publisher}</b> · ${demon.name}</span>`;
   duelSubmitRoundScore(0);
 }
 
@@ -9405,7 +9569,7 @@ const _CREDITS_DEFAULTS = {
     { name: 'KyoumiEU', role: 'admin',    roleLabel: 'Creator & Developer' },
     { name: 'icaka',    role: 'reporter',  roleLabel: 'Reporter' },
     { name: 'Skyght',   role: 'reporter',  roleLabel: 'Playtester & Reporter' },
-    { name: 'teesen',   role: 'reporter',  roleLabel: 'Reporter' },
+    { name: 'teesen',   role: 'reporter',  roleLabel: 'Developer, Mod, Reporter' },
     { name: 'kostya',   role: 'reporter',  roleLabel: 'Reporter' },
   ],
   footer: "for any further information... well you don't need it.",
@@ -9421,15 +9585,22 @@ async function loadCreditsFromCloud() {
         applyCreditsToModal({ ..._CREDITS_DEFAULTS, ...data });
       } else {
         // Ensure teesen appears as reporter if missing from cloud members
-        const hasteesen = data.members.some(m => m.name && m.name.toLowerCase() === 'teesen');
-        if (!hasteesen) {
+        const teesenIdx = data.members.findIndex(m => m.name && m.name.toLowerCase() === 'teesen');
+        if (teesenIdx === -1) {
+          // teesen missing entirely — insert after admin
           const adminIdx = data.members.findIndex(m => m.role === 'admin');
           const inserted = [...data.members];
           const insertAt = adminIdx >= 0 ? adminIdx + 1 : inserted.length;
-          inserted.splice(insertAt, 0, { name: 'teesen', role: 'reporter', roleLabel: 'Reporter' });
+          inserted.splice(insertAt, 0, { name: 'teesen', role: 'reporter', roleLabel: 'Developer, Mod, Reporter' });
           applyCreditsToModal({ ...data, members: inserted });
         } else {
-          applyCreditsToModal(data);
+          // teesen present — make sure role is reporter (not dev)
+          const corrected = data.members.map((m, i) =>
+            i === teesenIdx && m.role !== 'reporter'
+              ? { ...m, role: 'reporter', roleLabel: m.roleLabel || 'Developer, Mod, Reporter' }
+              : m
+          );
+          applyCreditsToModal({ ...data, members: corrected });
         }
       }
     } else {
