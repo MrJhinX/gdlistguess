@@ -1113,8 +1113,8 @@ input[type=range]::-webkit-slider-thumb:hover{box-shadow:0 0 0 6px var(--accent-
 /* Console */
 .op-console{
   background:var(--bg);border:1px solid var(--border2);border-radius:6px;
-  padding:6px 9px;font-size:.6rem;color:var(--muted);
-  height:100px;overflow-y:auto;line-height:1.7;
+  padding:9px 12px;font-size:.82rem;color:var(--muted);
+  height:100px;overflow-y:auto;line-height:1.8;
   white-space:pre-wrap;word-break:break-all;
   scroll-behavior:smooth;
 }
@@ -1494,8 +1494,8 @@ footer a:hover{color:var(--text)}
 
 /* ── DEBUG PANEL ── */
 #debug-panel{
-  position:fixed;top:62px;right:24px;z-index:9990;
-  width:370px;
+  position:fixed;top:62px;left:24px;z-index:9990;
+  width:460px;
   max-height:92vh;
   background:#08090a;
   border:1.5px solid rgba(200,255,87,.5);
@@ -1506,17 +1506,17 @@ footer a:hover{color:var(--text)}
   display:flex;flex-direction:column;
 }
 #debug-panel.collapsed #debug-body{display:none}
-#debug-body{padding:12px 14px;display:flex;flex-direction:column;gap:9px;overflow-y:auto;max-height:85vh}
+#debug-body{padding:14px 16px;display:flex;flex-direction:column;gap:11px;overflow-y:auto;max-height:85vh}
 #debug-panel-header{
   display:flex;align-items:center;justify-content:space-between;
   background:rgba(200,255,87,.07);
   border-bottom:1px solid rgba(200,255,87,.18);
-  padding:9px 14px;cursor:pointer;
+  padding:10px 16px;cursor:pointer;
   user-select:none;
 }
 #debug-panel-header:hover{background:rgba(200,255,87,.12)}
 .dbg-title{
-  font-size:.65rem;font-weight:700;letter-spacing:.16em;
+  font-size:.75rem;font-weight:700;letter-spacing:.16em;
   text-transform:uppercase;color:var(--accent);
   display:flex;align-items:center;gap:7px;
 }
@@ -1530,13 +1530,13 @@ footer a:hover{color:var(--text)}
 .dbg-toggle-icon{color:var(--accent);font-size:.8rem;transition:transform .22s}
 #debug-panel.collapsed .dbg-toggle-icon{transform:rotate(180deg)}
 .dbg-section{
-  font-size:.56rem;color:rgba(200,255,87,.55);text-transform:uppercase;letter-spacing:.14em;
-  padding-bottom:4px;border-bottom:1px solid rgba(200,255,87,.1);
+  font-size:.68rem;color:rgba(200,255,87,.65);text-transform:uppercase;letter-spacing:.14em;
+  padding-bottom:5px;border-bottom:1px solid rgba(200,255,87,.1);
 }
-.dbg-row{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.dbg-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .dbg-btn{
-  font-family:var(--mono);font-size:.62rem;font-weight:600;
-  padding:4px 10px;border-radius:5px;cursor:pointer;
+  font-family:var(--mono);font-size:.72rem;font-weight:600;
+  padding:5px 12px;border-radius:5px;cursor:pointer;
   border:1px solid rgba(200,255,87,.28);
   background:rgba(200,255,87,.06);color:var(--accent);
   transition:all .15s;letter-spacing:.04em;white-space:nowrap;
@@ -1548,23 +1548,23 @@ footer a:hover{color:var(--text)}
 .dbg-btn.blue:hover{background:rgba(79,159,255,.18);border-color:var(--blue)}
 .dbg-log{
   background:var(--bg);border:1px solid var(--border);border-radius:6px;
-  padding:6px 9px;font-size:.6rem;color:var(--muted);
-  max-height:90px;overflow-y:auto;line-height:1.7;
+  padding:9px 12px;font-size:.8rem;color:var(--muted);
+  max-height:140px;overflow-y:auto;line-height:1.8;
   white-space:pre-wrap;word-break:break-all;
 }
 .dbg-log .lg-ok{color:var(--accent)}
 .dbg-log .lg-err{color:var(--red)}
 .dbg-log .lg-info{color:var(--blue)}
-.dbg-input-row{display:flex;gap:5px;align-items:center}
+.dbg-input-row{display:flex;gap:6px;align-items:center}
 .dbg-input{
   flex:1;background:var(--bg);border:1px solid var(--border);border-radius:5px;
-  padding:4px 8px;color:var(--text);font-family:var(--mono);font-size:.7rem;
+  padding:6px 10px;color:var(--text);font-family:var(--mono);font-size:.82rem;
   outline:none;transition:border-color .15s;min-width:0;
 }
 .dbg-input:focus{border-color:var(--accent)}
 .dbg-stat-row{
   display:flex;justify-content:space-between;align-items:center;
-  font-size:.63rem;
+  font-size:.75rem;
 }
 .dbg-stat-k{color:var(--muted)}
 .dbg-stat-v{color:var(--accent);font-weight:600}
@@ -1620,7 +1620,7 @@ footer a:hover{color:var(--text)}
   /* Debug panel */
   #debug-panel{
     width:calc(100vw - 20px);
-    right:10px;top:62px;bottom:auto;
+    left:10px;right:auto;top:62px;bottom:auto;
     max-height:75vh;
   }
 
@@ -2063,6 +2063,11 @@ footer a:hover{color:var(--text)}
 
   <!-- HOME -->
   <div class="screen" id="home-screen">
+    <div id="dbg-impersonate-banner" style="display:none;width:100%;background:linear-gradient(90deg,rgba(255,79,79,.1),rgba(255,79,79,.05));border:1px solid rgba(255,79,79,.3);border-radius:var(--r);padding:10px 16px;align-items:center;gap:10px">
+      <span style="font-family:var(--mono);font-size:.65rem;color:var(--red);text-transform:uppercase;letter-spacing:.08em;white-space:nowrap">🔧 DEBUG</span>
+      <span id="dbg-impersonate-banner-text" style="font-family:var(--mono);font-size:.74rem;color:var(--text);flex:1"></span>
+      <button onclick="dbgBackToKyoumi()" style="background:rgba(255,79,79,.15);border:1px solid rgba(255,79,79,.4);color:var(--red);cursor:pointer;font-family:var(--mono);font-size:.7rem;padding:5px 12px;border-radius:var(--r);transition:all .15s;white-space:nowrap" onmouseover="this.style.background='rgba(255,79,79,.28)'" onmouseout="this.style.background='rgba(255,79,79,.15)'">← Back to Main Profile</button>
+    </div>
     <div id="announcement-banner" style="display:none;width:100%;background:linear-gradient(90deg,rgba(200,255,87,.08),rgba(200,255,87,.04));border:1px solid rgba(200,255,87,.2);border-radius:var(--r);padding:10px 16px;align-items:center;gap:10px">
       <span style="font-family:var(--mono);font-size:.65rem;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;white-space:nowrap">📢 ADMIN</span>
       <span id="announcement-text" style="font-family:var(--mono);font-size:.74rem;color:var(--text);flex:1"></span>
@@ -3604,6 +3609,10 @@ footer a:hover{color:var(--text)}
       Loads account from Firestore and signs in locally. No password needed.
     </div>
 
+    <div class="dbg-row" style="margin-top:4px">
+      <button class="dbg-btn" style="background:rgba(200,255,87,.08);border-color:rgba(200,255,87,.3);color:var(--accent)" onclick="dbgBackToKyoumi()">&#8617; Back to KyoumiEU</button>
+    </div>
+
     <div class="dbg-section" style="color:var(--accent);border-color:rgba(200,255,87,.2)">Classic Debugs</div>
     <div class="dbg-row">
       <button class="dbg-btn" onclick="cheatReveal()" title="Fill correct answer into input">Fill Answer</button>
@@ -3648,10 +3657,10 @@ footer a:hover{color:var(--text)}
     </div>
 
     <div class="dbg-section" style="color:var(--accent);border-color:rgba(200,255,87,.2)">🖥 Admin Console</div>
-    <div class="op-console" id="op-console" style="height:90px">ADMIN CONSOLE v2.0 — type <span class="con-info">help</span> for commands
+    <div class="op-console" id="op-console" style="height:180px">ADMIN CONSOLE v2.0 — type <span class="con-info">help</span> for commands
 </div>
     <div style="display:flex;gap:5px">
-      <input class="dbg-input" id="op-inp" placeholder="> command..." autocomplete="off" style="flex:1;font-family:var(--mono);color:var(--accent)" onkeydown="if(event.key==='Enter')opExec()"/>
+      <input class="dbg-input" id="op-inp" placeholder="> command..." autocomplete="off" style="flex:1;font-family:var(--mono);color:var(--accent);font-size:.84rem" onkeydown="if(event.key==='Enter')opExec()"/>
       <button class="dbg-btn" onclick="opExec()">Run</button>
     </div>
 
@@ -8531,8 +8540,33 @@ async function dbgEnterAs() {
   dbgLog('Entered as: ' + user.name + roleTag, 'ok');
   toast('Entered as ' + user.name, 'ok');
   document.getElementById('dbg-impersonate-input').value = '';
+  // Show the "Back to Main Profile" banner
+  const banner = document.getElementById('dbg-impersonate-banner');
+  const bannerText = document.getElementById('dbg-impersonate-banner-text');
+  if (banner && bannerText) {
+    bannerText.textContent = 'Viewing as: ' + user.name + roleTag;
+    banner.style.display = 'flex';
+  }
 }
 
+async function dbgBackToKyoumi() {
+  const key = 'kyoumiEU'.toLowerCase();
+  dbgLog('Returning to KyoumiEU…', 'info');
+  let accData = null;
+  try { accData = await getAccountCloud(key); } catch(e) { dbgLog('Firestore error: ' + e.message, 'err'); return; }
+  if (!accData) { dbgLog('KyoumiEU account not found.', 'err'); toast('Account not found.', 'err'); return; }
+  user = { name: accData.name || 'KyoumiEU', isAdmin: !!accData.isAdmin, isReporter: !!accData.isReporter, isHelper: !!accData.isHelper, pfp: accData.pfp || null, stats: localGet('gdlg_stats_KyoumiEU') || { classic:0, position:0, versus:0 } };
+  localSet('gdlg_user', user);
+  showUserChip();
+  showScreen('home-screen');
+  refreshHomeStats();
+  dbgRefreshStats();
+  dbgLog('Back as KyoumiEU [ADMIN]', 'ok');
+  toast('Back to KyoumiEU', 'ok');
+  // Hide the "Back to Main Profile" banner
+  const banner = document.getElementById('dbg-impersonate-banner');
+  if (banner) banner.style.display = 'none';
+}
 
 // ══════════════════════════════════════
 // ADMIN TEXT EDITOR
