@@ -2069,7 +2069,7 @@ footer a:hover{color:var(--text)}
       <button onclick="dbgBackToKyoumi()" style="background:rgba(255,79,79,.15);border:1px solid rgba(255,79,79,.4);color:var(--red);cursor:pointer;font-family:var(--mono);font-size:.7rem;padding:5px 12px;border-radius:var(--r);transition:all .15s;white-space:nowrap" onmouseover="this.style.background='rgba(255,79,79,.28)'" onmouseout="this.style.background='rgba(255,79,79,.15)'">← Back to Main Profile</button>
     </div>
     <div id="announcement-banner" style="display:none;width:100%;background:linear-gradient(90deg,rgba(200,255,87,.08),rgba(200,255,87,.04));border:1px solid rgba(200,255,87,.2);border-radius:var(--r);padding:10px 16px;align-items:center;gap:10px">
-      <span style="font-family:var(--mono);font-size:.65rem;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;white-space:nowrap">📢 ADMIN</span>
+      <span style="font-size:1rem;white-space:nowrap">📢</span>
       <span id="announcement-text" style="font-family:var(--mono);font-size:.74rem;color:var(--text);flex:1"></span>
       <button onclick="document.getElementById('announcement-banner').style.display='none'" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.8rem;padding:2px 6px">✕</button>
     </div>
@@ -2817,7 +2817,7 @@ footer a:hover{color:var(--text)}
 
       <!-- Change Password — collapsible -->
       <div class="profile-pw-toggle" id="pm-pw-toggle" onclick="profileTogglePassword()">
-        <span>🔒 Change Password</span>
+        <span>Change Password</span>
         <span class="profile-pw-arrow" id="pm-pw-arrow">▸</span>
       </div>
       <div class="profile-pw-panel" id="pm-pw-panel">
@@ -3436,8 +3436,9 @@ footer a:hover{color:var(--text)}
     </div>
     <!-- Tab bar -->
     <div style="display:flex;gap:0;border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto" id="patches-tab-bar">
-      <button class="tos-tab active" onclick="switchPatchTab('latest')"  id="patch-tab-latest">Latest</button>
-      <button class="tos-tab"        onclick="switchPatchTab('archive')" id="patch-tab-archive">Archive</button>
+      <button class="tos-tab active" onclick="switchPatchTab('latest')"      id="patch-tab-latest">Latest</button>
+      <button class="tos-tab"        onclick="switchPatchTab('gamechanges')" id="patch-tab-gamechanges">Game Changes</button>
+      <button class="tos-tab"        onclick="switchPatchTab('archive')"     id="patch-tab-archive">Archive</button>
     </div>
     <!-- Content area -->
     <div style="overflow-y:auto;flex:1;padding:24px 28px 28px" id="patches-content-area">
@@ -3860,6 +3861,17 @@ const PATCH_NOTES = {
       { tag: 'FIX',  text: 'Scrollbar styling improved across all panels.' },
     ]
   },
+  gamechanges: {
+    version: 'Game Changes',
+    date: '2025',
+    entries: [
+      { tag: 'NEW',  text: 'Classic mode: demons are now sourced from the full Top 150 list.' },
+      { tag: 'NEW',  text: 'Rank Guess: answer range tightened — within ±5 now counts as a perfect score.' },
+      { tag: 'FIX',  text: 'Versus mode: tie-breaker logic corrected for equal-rank matchups.' },
+      { tag: 'FIX',  text: 'Audio mode: song clips trimmed to 10 s to reduce giveaways.' },
+      { tag: 'REMOVE', text: 'Removed the old "Easy mode" difficulty filter option.' },
+    ]
+  },
   archive: {
     version: 'Archive',
     date: '',
@@ -3914,8 +3926,8 @@ function patchNormToEntries(value) {
 function openPatchesModal() {
   // Apply any saved overrides to PATCH_NOTES before rendering
   const overrides = localGet('gdlg_text_overrides') || {};
-  const tabMap = { latest: 'patch_latest', archive: 'patch_archive' };
-  ['latest','archive'].forEach(tab => {
+  const tabMap = { latest: 'patch_latest', archive: 'patch_archive', gamechanges: 'patch_gamechanges' };
+  ['latest','archive','gamechanges'].forEach(tab => {
     const pfx = tabMap[tab];
     if (overrides[pfx + '_version']) PATCH_NOTES[tab].version = overrides[pfx + '_version'];
     if (overrides[pfx + '_date'])    PATCH_NOTES[tab].date    = overrides[pfx + '_date'];
@@ -3934,7 +3946,7 @@ function closePatchesModal() {
 function switchPatchTab(tab) {
   _patchTab = tab;
   // Update tab active state
-  ['latest','archive'].forEach(t => {
+  ['latest','archive','gamechanges'].forEach(t => {
     const el = document.getElementById('patch-tab-' + t);
     if (el) el.classList.toggle('active', t === tab);
   });
@@ -8620,6 +8632,9 @@ const TEXT_FIELDS = [
   { key:'patch_latest_version', label:'Latest — version label', desc:'Version string shown at the top of the Latest tab (e.g. "v1.1 — Latest").', section:'Patch Notes', color:'#c8ff57', selector:'', attr:'patch' },
   { key:'patch_latest_date',    label:'Latest — date / year',   desc:'Date or year shown under the version label.',                                  section:'Patch Notes', color:'#c8ff57', selector:'', attr:'patch' },
   { key:'patch_latest_entries', label:'Latest — entries',desc:'One entry per line. Start each line with a tag: NEW, FIX, OLD, or REMOVE, followed by a colon and the text. Example:\nNEW: Added profiles\nFIX: Fixed scrollbar', section:'Patch Notes', color:'#c8ff57', selector:'', attr:'patch' },
+  { key:'patch_gamechanges_version',label:'Game Changes — version label',desc:'Version string shown at the top of the Game Changes tab (e.g. "Game Changes").', section:'Patch Notes', color:'#c8ff57', selector:'', attr:'patch' },
+  { key:'patch_gamechanges_date',   label:'Game Changes — date / year',  desc:'Date or year shown under the Game Changes version label.',                        section:'Patch Notes', color:'#c8ff57', selector:'', attr:'patch' },
+  { key:'patch_gamechanges_entries',label:'Game Changes — entries',desc:'One entry per line. Start each line with a tag: NEW, FIX, OLD, or REMOVE, followed by a colon and the text. Example:\nNEW: Classic mode now uses full Top 150\nFIX: Versus tie-breaker corrected\nREMOVE: Removed Easy mode filter', section:'Patch Notes', color:'#c8ff57', selector:'', attr:'patch' },
   { key:'patch_archive_version',label:'Archive — version label',desc:'Version string for the Archive tab.',                                          section:'Patch Notes', color:'#c8ff57', selector:'', attr:'patch' },
   { key:'patch_archive_date',   label:'Archive — date / year',  desc:'Date or year for the Archive tab.',                                            section:'Patch Notes', color:'#c8ff57', selector:'', attr:'patch' },
   { key:'patch_archive_entries',label:'Archive — entries',desc:'One entry per line. Start each line with a tag: NEW, FIX, OLD, or REMOVE, followed by a colon and the text. Example:\nOLD: Initial release\nOLD: Versus mode added', section:'Patch Notes', color:'#c8ff57', selector:'', attr:'patch' },
@@ -8647,8 +8662,8 @@ function teApply(key, value) {
   if (field.attr === 'tos') return;
   // Patch Notes fields update the PATCH_NOTES object, re-render if open
   if (field.attr === 'patch') {
-    const tab  = key.startsWith('patch_latest_') ? 'latest' : 'archive';
-    const pfx  = tab === 'latest' ? 'patch_latest_' : 'patch_archive_';
+    const tab  = key.startsWith('patch_latest_') ? 'latest' : key.startsWith('patch_gamechanges_') ? 'gamechanges' : 'archive';
+    const pfx  = tab === 'latest' ? 'patch_latest_' : tab === 'gamechanges' ? 'patch_gamechanges_' : 'patch_archive_';
     const prop = key.slice(pfx.length); // 'version' | 'date' | 'entries'
     if (prop === 'entries') {
       PATCH_NOTES[tab].entries = patchNormToEntries(value);
@@ -8951,22 +8966,67 @@ document.addEventListener('keydown', (e) => {
   const hdr   = document.getElementById('debug-panel-header');
   if (!panel || !hdr) return;
 
-  let dragging = false, startX = 0, startY = 0, origR = 0, origB = 0;
+  let dragging = false, dragReady = false, startX = 0, startY = 0;
+  let holdTimer = null, holdStart = null, holdAnim = null;
 
-  hdr.style.cursor = 'grab';
+  const HOLD_MS = 500; // ms to hold before drag unlocks
 
-  hdr.addEventListener('mousedown', e => {
-    // Don't start drag if clicking the toggle area on mobile, but allow drag on desktop
+  // Inject hold-progress bar into header
+  const holdBar = document.createElement('div');
+  holdBar.style.cssText = 'position:absolute;bottom:0;left:0;height:2px;width:0%;background:var(--accent);border-radius:0 0 0 0;transition:none;pointer-events:none;opacity:0;';
+  hdr.style.position = 'relative';
+  hdr.style.overflow = 'hidden';
+  hdr.appendChild(holdBar);
+
+  function startHold(clientX, clientY) {
+    if (dragReady) return; // already unlocked, skip
+    holdStart = performance.now();
+    holdBar.style.opacity = '1';
+    holdBar.style.width = '0%';
+
+    function animate(now) {
+      const elapsed = now - holdStart;
+      const pct = Math.min(elapsed / HOLD_MS * 100, 100);
+      holdBar.style.width = pct + '%';
+      if (pct < 100) {
+        holdAnim = requestAnimationFrame(animate);
+      } else {
+        // Unlock drag
+        dragReady = true;
+        holdBar.style.background = 'var(--accent)';
+        hdr.style.cursor = 'grab';
+        // brief flash then fade
+        setTimeout(() => { holdBar.style.opacity = '0'; holdBar.style.width = '0%'; }, 300);
+      }
+    }
+    holdAnim = requestAnimationFrame(animate);
+  }
+
+  function cancelHold() {
+    cancelAnimationFrame(holdAnim);
+    holdBar.style.opacity = '0';
+    holdBar.style.width = '0%';
+  }
+
+  function beginDrag(clientX, clientY) {
     dragging = true;
-    startX = e.clientX;
-    startY = e.clientY;
+    startX = clientX;
+    startY = clientY;
     const rect = panel.getBoundingClientRect();
-    // Ensure we're in top/left mode for dragging
     panel.style.right = 'auto';
     panel.style.bottom = 'auto';
     panel.style.left = rect.left + 'px';
     panel.style.top  = rect.top  + 'px';
     hdr.style.cursor = 'grabbing';
+  }
+
+  hdr.style.cursor = 'default';
+
+  hdr.addEventListener('mousedown', e => {
+    startHold(e.clientX, e.clientY);
+    holdTimer = setTimeout(() => {
+      if (dragReady) beginDrag(e.clientX, e.clientY);
+    }, HOLD_MS);
     e.preventDefault();
   });
 
@@ -8984,18 +9044,26 @@ document.addEventListener('keydown', (e) => {
   });
 
   document.addEventListener('mouseup', () => {
+    clearTimeout(holdTimer);
+    if (!dragging) cancelHold();
     dragging = false;
-    hdr.style.cursor = 'grab';
+    dragReady = false;
+    hdr.style.cursor = 'default';
   });
 
   // Touch support
   hdr.addEventListener('touchstart', e => {
     const t = e.touches[0];
-    dragging = true;
-    startX = t.clientX; startY = t.clientY;
-    const rect = panel.getBoundingClientRect();
-    panel.style.right = 'auto'; panel.style.bottom = 'auto';
-    panel.style.left = rect.left + 'px'; panel.style.top = rect.top + 'px';
+    startHold(t.clientX, t.clientY);
+    holdTimer = setTimeout(() => {
+      if (dragReady) {
+        const rect = panel.getBoundingClientRect();
+        panel.style.right = 'auto'; panel.style.bottom = 'auto';
+        panel.style.left = rect.left + 'px'; panel.style.top = rect.top + 'px';
+        dragging = true;
+        startX = t.clientX; startY = t.clientY;
+      }
+    }, HOLD_MS);
     e.preventDefault();
   }, { passive: false });
 
@@ -9011,7 +9079,12 @@ document.addEventListener('keydown', (e) => {
     e.preventDefault();
   }, { passive: false });
 
-  document.addEventListener('touchend', () => { dragging = false; });
+  document.addEventListener('touchend', () => {
+    clearTimeout(holdTimer);
+    if (!dragging) cancelHold();
+    dragging = false;
+    dragReady = false;
+  });
 })();
 
 // ── GLITCH LOADER ──
